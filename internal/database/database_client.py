@@ -36,11 +36,43 @@ class DatabaseClient:
             vals.append(val)
         return vals
 
-    def get_user_leagues(self,player):
-        query = ("SELECT * FROM league_users WHERE player_id = '{}'".format(player))
+    def get_user_leagues(self,user_id):
+        query = ("SELECT * FROM user_league WHERE user_id = '{}'".format(user_id))
         cursor = self.con.cursor()
         cursor.execute(query)
         vals = []
         for val in cursor:
             vals.append(val)
         return vals
+
+    def get_league(self, league_id):
+        query = ("SELECT * FROM leagues WHERE league_id = '{}'".format(league_id))
+        cursor = self.con.cursor()
+        cursor.execute(query)
+        league = cursor.fetchone()
+        return league
+
+    def get_players_per_position(self, position):
+        query = ("SELECT * FROM players WHERE position = '{}'".format(position))
+        cursor = self.con.cursor()
+        cursor.execute(query)
+        vals = []
+        for val in cursor:
+            vals.append(val)
+        cursor.close()
+        return vals
+    
+    def get_user_league_team(self, user_id, league_id):
+        query = ("SELECT * FROM user_league WHERE user_id = '{}' AND league_id = '{}'".format(user_id, league_id))
+        cursor = self.con.cursor()
+        cursor.execute(query)
+        league_team = cursor.fetchone()
+        cursor.close()
+        return league_team
+
+    def update_team(self, goalkeepers, defenders, midfielders, forwards):
+        query = ("INSERT INTO user_league (goalkeeper, defenders, midfielders, forwards) VALUES (%s, %s, %s, %s)")
+        values = (goalkeepers, defenders, midfielders, forwards))
+
+    def close(self):
+        self.con.close()

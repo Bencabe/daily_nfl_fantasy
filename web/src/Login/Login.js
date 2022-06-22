@@ -1,7 +1,10 @@
 import React, {Component} from 'react'
 import styles from './Login.module.css'
 import nfl_logo from './nfl_logo.jpeg'
-import {getUser} from '../api_client/users'
+import {getUser} from '../middleware/users'
+import { useSelector, useDispatch } from 'react-redux'
+import { logIn, logOut, setUser } from './LoginReducer'
+import { connect } from 'react-redux'
 
 
 
@@ -12,14 +15,19 @@ class Login extends Component {
         password: '',
         first_name: '',
         last_name: '',
-        error_message: ''}
+        error_message: '',
+        value: false}
     }
-    
     updateEmail(event) {
         this.setState({ email: event.target.value });
     }
     updatePassword(event) {
         this.setState({ password: event.target.value });
+    }
+
+    saveUser = (user) => {
+        window.localStorage.setItem('user', JSON.stringify(user))
+        window.localStorage.setItem('loggedIn', true)
     }
 
     checkUser = (userEmail) => {
@@ -32,7 +40,9 @@ class Login extends Component {
                 this.setState({error_message:'Incorrect Password'})
             }
             else {
-                this.props.updateUserAuthentication()
+                this.props.setUser(user)
+                this.props.logIn()
+                // console.log(JSON.parse(window.localStorage.getItem('loggedIn')))
             }
         })
     }
@@ -82,4 +92,15 @@ class Login extends Component {
         );
     }
 }
-export default Login
+const mapStateToProps = state => ({
+    user: JSON.parse(window.localStorage.getItem('user')) || state.auth.user,
+    // loggedIn: state.loggedIn || JSON.parse(window.localStorage.getItem('loggedIn')),
+    loggedIn: JSON.parse(window.localStorage.getItem('loggedIn')) || state.auth.loggedIn,
+});
+const mapDispatchToProps = () => {
+    return { 
+        logIn, 
+        logOut,
+        setUser,
+};}
+export default connect(mapStateToProps,mapDispatchToProps())(Login);

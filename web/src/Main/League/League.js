@@ -1,18 +1,22 @@
 import React, {Component} from 'react'
 import CreateLeagueModal from './CreateLeagueModal'
+import {connect} from 'react-redux'
 
 const get_user_leagues = () => {
     let leagues = []
     return leagues
 }
 
-
 class League extends Component {
+    constructor(props) {
+        super(props)
+    }
     state = {
         showCreateLeagueModal: false
     }
 
     displayCreateLeagueModal = () => {
+        console.log(this.state)
         this.setState({showCreateLeagueModal: true})
     }
     hideCreateLeagueModal = () => {
@@ -20,6 +24,7 @@ class League extends Component {
     }
 
     render() {
+        console.log(this.props)
         return(
             <div>
                 <div>League</div>
@@ -31,4 +36,8 @@ class League extends Component {
     }
 }
 
-export default League
+const mapStateToProps = state => ({
+    state: JSON.parse(window.localStorage.getItem('state')) || state
+});
+
+export default connect(mapStateToProps)(League);

@@ -7,8 +7,7 @@ const getUser = async (userEmail) => {
         'Access-Control-Allow-Origin': 'http://localhost:3000'
       }
     });
-    const user = await response.json(); //extract JSON from the http response
-    // do something with myJson
+    const user = await response.json();
     return user
   }
 

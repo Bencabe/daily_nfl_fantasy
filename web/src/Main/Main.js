@@ -4,7 +4,7 @@ import {
     Routes,
     Route
   } from "react-router-dom";
-import Team from './Team.js'
+import Team from './Team/Team.js'
 import Fixtures from './Fixtures.js'
 import League  from './League/League.js'
 import Layout from './Layout.js';
