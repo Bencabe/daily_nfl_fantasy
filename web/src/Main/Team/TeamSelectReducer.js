@@ -13,8 +13,8 @@ export const addPlayerSlice = createSlice({
         allGoalkeepers: []
     },
     reducers: {
-        pickTeam: (state, team) => {
-            state.team = team.payload
+        pickTeam: (state, leagueId) => {
+            state.leagueId = leagueId.payload
         },
         addGoalkeeper: (state, goalkeeper) => {
             state.players.goalkeepers = [...state.players.goalkeepers, parseInt(goalkeeper.payload)]

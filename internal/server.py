@@ -86,7 +86,22 @@ def user_league_team():
             db_client.close()
             return league_team
         except Exception as e:
-            return json.dumps(f"Error getting user league team: {e}")
+            return json.dumps(f"Error getting user's team: {e}")
+    if request.method == 'POST':
+        try:
+            db_client = DatabaseClient()
+            print('hitting db client')
+            db_client.update_team(
+                request.headers.get('league_id'),
+                request.headers.get('user_id'),
+                json.loads(request.data).get('goalkeepers'), 
+                json.loads(request.data).get('defenders'), 
+                json.loads(request.data).get('midfielders'), 
+                json.loads(request.data).get('forwards'))
+            db_client.close()
+        except Exception as e:
+            return json.dumps(f"Error saving team: {e}")
+        return json.dumps("success")
 
         
 

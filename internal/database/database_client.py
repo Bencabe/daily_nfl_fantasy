@@ -70,9 +70,13 @@ class DatabaseClient:
         cursor.close()
         return league_team
 
-    def update_team(self, goalkeepers, defenders, midfielders, forwards):
-        query = ("INSERT INTO user_league (goalkeeper, defenders, midfielders, forwards) VALUES (%s, %s, %s, %s)")
-        values = (goalkeepers, defenders, midfielders, forwards))
+    def update_team(self, league_id, user_id, goalkeepers, defenders, midfielders, forwards):
+        query = ("UPDATE user_league SET goalkeepers=%s,defenders=%s,midfielders=%s,forwards=%s WHERE league_id=%s AND user_id=%s")
+        values = (str(goalkeepers), str(defenders), str(midfielders), str(forwards), league_id, user_id)
+        cursor = self.con.cursor()
+        cursor.execute(query, values)
+        self.con.commit()
+        cursor.close()
 
     def close(self):
         self.con.close()

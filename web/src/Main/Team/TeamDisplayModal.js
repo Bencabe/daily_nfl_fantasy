@@ -6,6 +6,7 @@ class TeamDisplayModal extends Component {
     constructor(props) {
         super(props)
         this.createPlayerOption = this.createPlayerOption.bind(this);
+        this.deletePlayer = this.deletePlayer.bind(this);
     }
     state = {
         error_message: null
@@ -16,9 +17,19 @@ class TeamDisplayModal extends Component {
         for (let i=0; i<this.props.team.allGoalkeepers.length; i++){
             if (this.props.team.allGoalkeepers[i][0] == playerId){
                 player = this.props.team.allGoalkeepers[i]
-                return <option key={player[0]} player-id={player[0]}>{player[2]} {player[3]}</option>
+                return <div><option key={player[0]} player-id={player[0]}>{player[2]} {player[3]}</option><button id={player[0]} value="goalkeeper" onClick={this.deletePlayer}>Delete</button></div>
             }
         }
+    }
+    deletePlayer(event) {
+        switch (event.currentTarget.value){
+            case ('goalkeeper'):
+                const indexOfGkToRemove = this.props.team.players.goalkeepers.indexOf(parseInt(event.currentTarget.id))
+                const tmpArray = [...this.props.team.players.goalkeepers]
+                tmpArray.splice(indexOfGkToRemove, 1)
+                this.props.addGoalkeepers(tmpArray)
+        }
+
     }
 
     render() {

@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import {getPlayersPerPosition} from '../../middleware/players'
 import {connect} from 'react-redux'
 import {addGoalkeeper, allGoalkeepers} from './TeamSelectReducer'
+import {saveUserLeagueTeam} from '../../middleware/teams'
 
 class TeamSelectModal extends Component {
     constructor(props) {
@@ -13,18 +14,18 @@ class TeamSelectModal extends Component {
             selectedGoalkeeper: null,
             goalkeeperErrorMessage: null
     }
-    parseGoalkeepers() {
-        const selectedLeague = this.props.state.selectedLeague
-        const goalkeepers = selectedLeague == null ? null : this.props.state.leaguePlayers[selectedLeague].goalkeepers
-        return goalkeepers
-    }
-
     componentDidMount() {
         getPlayersPerPosition('goalkeeper').then(
             (result) => {
                 this.props.allGoalkeepers(result)
             }
         )
+    }
+
+    parseGoalkeepers() {
+        const selectedLeague = this.props.state.selectedLeague
+        const goalkeepers = selectedLeague == null ? null : this.props.state.leaguePlayers[selectedLeague].goalkeepers
+        return goalkeepers
     }
     createPlayerOption(goalkeeperResult) {
         return <option key={goalkeeperResult[0]} player-id={goalkeeperResult[0]}>{goalkeeperResult[2]} {goalkeeperResult[3]}</option>
@@ -53,7 +54,7 @@ class TeamSelectModal extends Component {
     }
 
     saveTeam(){
-
+        saveUserLeagueTeam(this.props.team.leagueId, this.props.user.payload[0][0], this.props.team.players.goalkeepers, [], [], [])
     }
 
     render(){
