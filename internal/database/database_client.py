@@ -27,15 +27,6 @@ class DatabaseClient:
         cursor.execute(query,values)
         self.con.commit()
 
-    def get_players_per_position(self,position):
-        query = ("SELECT * FROM players WHERE position = '{}'".format(position))
-        cursor = self.con.cursor()
-        cursor.execute(query)
-        vals = []
-        for val in cursor:
-            vals.append(val)
-        return vals
-
     def get_user_leagues(self,user_id):
         query = ("SELECT * FROM user_league WHERE user_id = '{}'".format(user_id))
         cursor = self.con.cursor()
@@ -53,7 +44,7 @@ class DatabaseClient:
         return league
 
     def get_players_per_position(self, position):
-        query = ("SELECT * FROM players WHERE position = '{}'".format(position))
+        query = ("SELECT * FROM players WHERE position_category = '{}'".format(position))
         cursor = self.con.cursor()
         cursor.execute(query)
         vals = []

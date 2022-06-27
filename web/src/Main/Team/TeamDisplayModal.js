@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import {addGoalkeepers} from './TeamSelectReducer'
+import {addPlayers} from './TeamSelectReducer'
 
 class TeamDisplayModal extends Component {
     constructor(props) {
@@ -14,21 +14,24 @@ class TeamDisplayModal extends Component {
 
     createPlayerOption(playerId) {
         let player
-        for (let i=0; i<this.props.team.allGoalkeepers.length; i++){
-            if (this.props.team.allGoalkeepers[i][0] == playerId){
-                player = this.props.team.allGoalkeepers[i]
-                return <div><option key={player[0]} player-id={player[0]}>{player[2]} {player[3]}</option><button id={player[0]} value="goalkeeper" onClick={this.deletePlayer}>Delete</button></div>
+        const fullPlayerList = this.props.team.allPlayers.goalkeepers.concat(this.props.team.allPlayers.defenders,
+                                                                            this.props.team.allPlayers.midfielders,
+                                                                            this.props.team.allPlayers.forwards)
+        for (let i=0; i<fullPlayerList.length; i++){
+            if (fullPlayerList[i][0] == playerId){
+                player = fullPlayerList[i]
+                let playerPosition = player[6]
+                return <div><option key={player[0]} player-id={player[0]}>{player[2]} {player[3]}</option><button id={player[0]} value={playerPosition} onClick={this.deletePlayer}>Delete</button></div>
             }
         }
     }
     deletePlayer(event) {
-        switch (event.currentTarget.value){
-            case ('goalkeeper'):
-                const indexOfGkToRemove = this.props.team.players.goalkeepers.indexOf(parseInt(event.currentTarget.id))
-                const tmpArray = [...this.props.team.players.goalkeepers]
-                tmpArray.splice(indexOfGkToRemove, 1)
-                this.props.addGoalkeepers(tmpArray)
-        }
+        const position = event.currentTarget.value + 's'
+        const indexOfPlayerToRemove = this.props.team.teamPlayers[position].indexOf(parseInt(event.currentTarget.id))
+        const tmpArray = [...this.props.team.teamPlayers[position]]
+        tmpArray.splice(indexOfPlayerToRemove, 1)
+        const playersToRemovepayload = {players: tmpArray, position: position}
+        this.props.addPlayers(playersToRemovepayload)
 
     }
 
@@ -36,8 +39,22 @@ class TeamDisplayModal extends Component {
         return(
             <div>
                 <div>
-                    <div><b>Goalkeepers</b></div>
-                    {this.props.team.players.goalkeepers.map(this.createPlayerOption)}
+                    <div>
+                        <h4>Goalkeepers</h4>
+                        <div>{this.props.team.teamPlayers.goalkeepers.map(this.createPlayerOption)}</div>
+                    </div>
+                    <div>
+                        <h4>Defenders</h4>
+                        <div>{this.props.team.teamPlayers.defenders.map(this.createPlayerOption)}</div>
+                    </div>
+                    <div>
+                        <h4>Midfielders</h4>
+                        <div>{this.props.team.teamPlayers.midfielders.map(this.createPlayerOption)}</div>
+                    </div>
+                    <div>
+                        <h4>Forwards</h4>
+                        <div>{this.props.team.teamPlayers.forwards.map(this.createPlayerOption)}</div>
+                    </div>
                 </div>
 
             </div>
@@ -48,7 +65,7 @@ class TeamDisplayModal extends Component {
 
 const mapDispatchToProps = () => {
     return{
-        addGoalkeepers
+        addPlayers
     };
 }
 

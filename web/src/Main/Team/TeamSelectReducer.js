@@ -4,31 +4,37 @@ export const addPlayerSlice = createSlice({
     name: 'addPlayer',
     initialState: {
         team: null,
-        players: {
+        teamPlayers: {
             goalkeepers: [],
             defenders: [],
             midfielders: [],
             forwards: []
         },
-        allGoalkeepers: []
+        allPlayers: {
+            goalkeepers: [],
+            defenders: [],
+            midfielders: [],
+            forwards: []
+        }
     },
     reducers: {
         pickTeam: (state, leagueId) => {
             state.leagueId = leagueId.payload
         },
-        addGoalkeeper: (state, goalkeeper) => {
-            state.players.goalkeepers = [...state.players.goalkeepers, parseInt(goalkeeper.payload)]
+        addPlayer: (state, player) => {
+            state.teamPlayers[player.payload.position] = [...state.teamPlayers[player.payload.position], parseInt(player.payload.id)]
         },
-        addGoalkeepers: (state, goalkeepers) => {
-            state.players.goalkeepers = goalkeepers.payload
+        addPlayers: (state, players) => {
+            state.teamPlayers[players.payload.position] = players.payload.players
         },
-        allGoalkeepers: (state, goalkeepers) => {
-            state.allGoalkeepers = goalkeepers.payload
+        loadPlayers: (state, playersPerPosition) => {
+            const position = playersPerPosition.payload[0][6] + 's'
+            state.allPlayers[position] = playersPerPosition.payload
         }
     }
   })
   
   // Action creators are generated for each case reducer function
-  export const { pickTeam, addGoalkeeper, addGoalkeepers, allGoalkeepers } = addPlayerSlice.actions
+  export const { pickTeam, addPlayer, addPlayers, loadPlayers } = addPlayerSlice.actions
   
   export default addPlayerSlice.reducer

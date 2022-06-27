@@ -4,7 +4,7 @@ import {getUserLeagues, getLeague} from '../../middleware/leagues'
 import TeamSelectModal from './TeamSelectModal'
 import TeamDisplayModal from './TeamDisplayModal'
 import {pickTeam} from './TeamSelectReducer'
-import {addGoalkeepers} from './TeamSelectReducer'
+import {addPlayers} from './TeamSelectReducer'
 import {getUserLeagueTeam} from '../../middleware/teams'
 
 class Team extends Component {
@@ -23,6 +23,8 @@ class Team extends Component {
         getUserLeagues(userId).then(
             (result) => {
                 for (let i=0; i<result.length; i++){
+                    let leagueId = result[i][0]
+                    // console.log(leagueId)
                     getLeague(result[i]).then(
                         getLeagueresult => this.setState({
                             userLeagues: [...this.state.userLeagues, getLeagueresult],
@@ -34,24 +36,36 @@ class Team extends Component {
                                     midfielder: result[0][4],
                                     forwards: result[0][5],
                                 }
-                            }
+                            },
+                            selectedLeague: leagueId
                         }),
                     )
+                    if (this.props.team.leagueId == null){
+                        this.props.pickTeam(leagueId)
+                        this.loadTeam(userId, leagueId)
+                    }
                 }
             }
         )
     }
 
+
     handleLeagueSelect(event) {
         let selectedIndex = event.target.options.selectedIndex
         let team = event.target.options[selectedIndex].getAttribute('league-id')
-        this.props.pickTeam(team)
         const userId = this.props.user.payload[0][0]
+        this.props.pickTeam(team)
+        this.loadTeam(userId, team)
+    }
+
+    loadTeam(userId, team){
         getUserLeagueTeam(userId, team).then(
             (result) => {
                 if (result){
-                    const goalkeepers = JSON.parse(result[2])
-                    this.props.addGoalkeepers(goalkeepers)
+                    this.props.addPlayers({'players': JSON.parse(result[2]), position: 'goalkeepers'})
+                    this.props.addPlayers({'players': JSON.parse(result[3]), position: 'defenders'})
+                    this.props.addPlayers({'players': JSON.parse(result[4]), position: 'midfielders'})
+                    this.props.addPlayers({'players': JSON.parse(result[5]), position: 'forwards'})
                 }
             }
         )
@@ -66,10 +80,8 @@ class Team extends Component {
         return(
             <div>
                 <select 
-                onChange={this.handleLeagueSelect} 
-                key='leagueSelect'
-                placeholder='Select League'>
-                    <option>Select League</option>
+                onChange={this.handleLeagueSelect}
+                key='leagueSelect'>
                     {this.state.userLeagues.map(createLeagueOptions)}
                 </select>
                 <div>
@@ -81,14 +93,13 @@ class Team extends Component {
 }
 const mapStateToProps = state => ({
     user: JSON.parse(window.localStorage.getItem('user')) || state.auth.user,
-    // state: JSON.parse(window.localStorage.getItem('state')) || state,
     team: state.team
 });
 
 const mapDispatchtoPros = () => {
     return {
         pickTeam,
-        addGoalkeepers
+        addPlayers
     };
 }
 
