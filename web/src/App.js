@@ -1,8 +1,8 @@
 import logo from './logo.svg';
 import './App.css';
 import React, {Component} from 'react'
-import Login from './Login/Login'
-import Main from './Main/Main'
+import Login from './pages/Login/Login'
+import Main from './pages/Main'
 import {connect} from 'react-redux'
 
 class App extends Component {

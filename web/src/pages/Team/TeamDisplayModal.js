@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
 import {addPlayers} from './TeamSelectReducer'
+import styles from '../../styles/Team.module.css'
 
 class TeamDisplayModal extends Component {
     constructor(props) {
@@ -21,7 +22,10 @@ class TeamDisplayModal extends Component {
             if (fullPlayerList[i][0] == playerId){
                 player = fullPlayerList[i]
                 let playerPosition = player[6]
-                return <div><option key={player[0]} player-id={player[0]}>{player[2]} {player[3]}</option><button id={player[0]} value={playerPosition} onClick={this.deletePlayer}>Delete</button></div>
+                return <div class={styles.selectedPlayer}>
+                            <option class={styles.selectedPlayerName} key={player[0]} player-id={player[0]}>{player[2]} {player[3]}</option>
+                            <button class={styles.selectedPlayerDeleteButton} id={player[0]} value={playerPosition} onClick={this.deletePlayer}>Delete</button>
+                        </div>
             }
         }
     }

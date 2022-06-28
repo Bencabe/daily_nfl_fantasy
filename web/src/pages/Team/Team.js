@@ -6,6 +6,7 @@ import TeamDisplayModal from './TeamDisplayModal'
 import {pickTeam} from './TeamSelectReducer'
 import {addPlayers} from './TeamSelectReducer'
 import {getUserLeagueTeam} from '../../middleware/teams'
+import styles from '../../styles/Team.module.css'
 
 class Team extends Component {
     constructor(props) {
@@ -84,8 +85,9 @@ class Team extends Component {
                 key='leagueSelect'>
                     {this.state.userLeagues.map(createLeagueOptions)}
                 </select>
-                <div>
-                    <TeamSelectModal/><TeamDisplayModal/>
+                <div id={styles.body}>
+                    <div id={styles.selectModal}><TeamSelectModal/></div>
+                    <div id={styles.displayModal}><TeamDisplayModal/></div>
                 </div>
             </div>
         );

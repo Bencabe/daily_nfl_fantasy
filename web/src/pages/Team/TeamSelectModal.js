@@ -3,6 +3,7 @@ import {getPlayersPerPosition} from '../../middleware/players'
 import {connect} from 'react-redux'
 import {addPlayer, loadPlayers} from './TeamSelectReducer'
 import {saveUserLeagueTeam} from '../../middleware/teams'
+import styles from '../../styles/Team.module.css'
 
 class TeamSelectModal extends Component {
     constructor(props) {

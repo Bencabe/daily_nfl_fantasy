@@ -1,0 +1,27 @@
+#body{
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+
+#selectModal{
+    width: 50%;
+    margin-left: 5rem;
+}
+
+#displayModal{
+    width: 50%;
+    margin-right: 5rem;
+}
+
+.selectedPlayer{
+    display: flex;
+}
+
+.selectedPlayerName{
+    width: 80%;
+}
+
+.selectedPlayerDeleteButton{
+    width: 20%
+}

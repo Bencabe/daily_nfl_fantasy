@@ -37,7 +37,7 @@ class DatabaseClient:
         return vals
 
     def get_league(self, league_id):
-        query = ("SELECT * FROM leagues WHERE league_id = '{}'".format(league_id))
+        query = ("SELECT * FROM leagues WHERE id = '{}'".format(league_id))
         cursor = self.con.cursor()
         cursor.execute(query)
         league = cursor.fetchone()
