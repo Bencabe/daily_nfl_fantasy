@@ -11,27 +11,74 @@
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
   }
   
-  /* Modal Content/Box */
-  .leagueModalContent {
+.leagueModalContent {
     background-color: #fefefe;
-    margin: 15% auto; /* 15% from the top and centered */
+    margin: 15% auto; 
     padding: 20px;
     border: 1px solid #888;
     width: 30%; /* Could be more or less, depending on screen size */
     text-align: center;
     border-radius: 2%;
-  }
+}
   
-  /* The Close Button */
-  .closeButton {
+.closeButton {
     float: right;
     font-weight: bold;
     border-radius: 50%;
-  }
+}
   
-  .closeButton:hover,
-  .closeButton:focus {
+.closeButton:hover,
+.closeButton:focus {
     color: black;
     text-decoration: none;
     cursor: pointer;
-  }
+}
+
+#errorMessage{
+    color: red;
+}
+
+#leagueModals{
+    margin-left: auto;
+    order: 2;
+}
+
+#leagueMain{
+    display: flex;
+}
+
+.leagueModalButton{
+    width: 10vw;
+    height: 5vh;
+    border: none;
+    background-color: var(--silver-gray);
+}
+
+#joinLeagueButton{
+    border-radius: 0% 20% 20% 00%;
+}
+
+#createLeagueButton{
+    border-radius: 20% 0% 0% 20%;
+    
+}
+
+.leagueModalButton{
+    width: 10vw;
+    height: 5vh;
+    border-radius: 25%;
+    border: none;
+    background-color: var(--silver-gray);
+}
+
+.leagueModalButton:hover{
+    background-color: var(--grass-green);
+    color: white;
+    /* border: 1px solid black; */
+}
+
+#footer{
+    position: absolute;
+    bottom: 0;
+    font-size: small;
+}

@@ -54,15 +54,55 @@ def user_leagues():
 
 @app.route('/league', methods=['GET','POST'])
 def league():
+    try:
+        db_client = DatabaseClient()
+    except Exception as e:
+        return json.dumps(f"Error connecting to database: {e}")
     if request.method == 'GET':
         try:
-            db_client = DatabaseClient()
             league = db_client.get_league(request.headers.get('league_id'))
             result = json.dumps(league)
             db_client.close()
             return result
         except Exception as e:
             return json.dumps(f"Error getting league: {e}")
+    if request.method == 'POST':
+        try:
+            db_client.create_league(
+                request.headers.get('league_name'),
+                request.headers.get('league_password'),
+                request.headers.get('league_admin'),
+                request.headers.get('player_limit'),
+                request.headers.get('league_type'),
+                request.headers.get('private_league'),
+            )
+            user_created_leagues = db_client.get_user_created_leagues(request.headers.get('league_admin'))
+            print(user_created_leagues)
+            print(user_created_leagues[0])
+            for league in user_created_leagues:
+                print('hello')
+                print(league)
+                try:
+                    print(league)
+                    print(request.headers.get('league_admin'))
+                    print(request.headers.get('team_name'))
+                    db_client.join_league(league[0], request.headers.get('league_admin'), request.headers.get('team_name'))
+                except Exception as e:
+                    print(f"Error joining league: {e}")
+            db_client.close()
+            return json.dumps('League created successfully')
+        except Exception as e:
+            return json.dumps(f"Error creating league: {e}")
+
+@app.route('/join_league', methods=['POST'])
+def join_league():
+    try:
+        db_client = DatabaseClient()
+        db_client.join_league(request.headers.get('league_id'), request.headers.get('user_id'), request.headers.get('team_name'))
+        return json.dumps("Successfully joined league")
+    except Exception as e:
+        return json.dumps(f"Error joining league: {e}")
+
 
 @app.route('/players_per_position', methods=['GET'])
 def players_per_position():

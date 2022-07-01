@@ -5,9 +5,14 @@ const Layout = () => {
   return (
     <>
     <div id={styles.headerBanner}>
-        <img id={styles.logo} alt='logo'></img>
+        {/* <img id={styles.logo} alt='logo'></img> */}
+        <div id={styles.logo}>Finest Fantasy Sports</div>
         <div id={styles.hamburgerMenuContainer}>
-          <button id={styles.hamburgerMenuButton}>Menu</button>
+          <button id={styles.hamburgerMenuButton}>          
+            <span className={styles.line}></span>
+            <span className={styles.line}></span>
+            <span className={styles.line} id={styles.lastLine}></span>
+          </button>
           <nav id={styles.hamburgerMenu}>
             <ul>
               <li>
@@ -23,8 +28,11 @@ const Layout = () => {
           </nav>
         </div>
       </div>
-
-      <Outlet />
+      <div id={styles.currentPage}>
+        <div id={styles.currentPageContent}>
+          <Outlet />
+        </div>
+      </div>
     </>
   )
 };

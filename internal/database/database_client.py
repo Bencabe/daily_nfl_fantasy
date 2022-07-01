@@ -35,6 +35,17 @@ class DatabaseClient:
         for val in cursor:
             vals.append(val)
         return vals
+    
+    def get_user_created_leagues(self,user_id):
+        print('here')
+        query = ("SELECT * FROM leagues WHERE admin = '{}'".format(user_id))
+        cursor = self.con.cursor()
+        cursor.execute(query)
+        vals = []
+        for val in cursor:
+            vals.append(val)
+        print(vals)
+        return vals
 
     def get_league(self, league_id):
         query = ("SELECT * FROM leagues WHERE id = '{}'".format(league_id))
@@ -42,6 +53,22 @@ class DatabaseClient:
         cursor.execute(query)
         league = cursor.fetchone()
         return league
+
+    def create_league(self, league_name, league_password, league_admin, player_limit, league_type, private_league):
+        # create the league
+        query = ("INSERT INTO leagues"
+               "(name, password, admin, player_limit, type, private) "
+               "VALUES (%s, %s, %s, %s, %s, %s)")
+        values = (league_name, league_password, league_admin, player_limit, league_type, private_league)
+        if not player_limit:
+            query = ("INSERT INTO leagues"
+               "(name, password, admin, type, private) "
+               "VALUES (%s, %s, %s, %s, %s)")
+            values = (league_name, league_password, league_admin, league_type, private_league)
+        cursor = self.con.cursor()
+        cursor.execute(query, values)
+        self.con.commit()
+        cursor.close()
 
     def get_players_per_position(self, position):
         query = ("SELECT * FROM players WHERE position_category = '{}'".format(position))
@@ -68,6 +95,17 @@ class DatabaseClient:
         cursor.execute(query, values)
         self.con.commit()
         cursor.close()
+
+    def join_league(self, league_id, user_id, team_name):
+        query = ("INSERT INTO user_league"
+               "(league_id, user_id, goalkeepers, defenders, midfielders, forwards, team_name) "
+               "VALUES (%s, %s, %s, %s, %s, %s, %s)")
+        values = (league_id, user_id, '[]', '[]', '[]', '[]', team_name)
+        cursor = self.con.cursor()
+        cursor.execute(query, values)
+        self.con.commit()
+        cursor.close()
+
 
     def close(self):
         self.con.close()

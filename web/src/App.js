@@ -23,11 +23,7 @@ class App extends Component {
 }
 const mapStateToProps = (state) => ({
   user: JSON.parse(window.localStorage.getItem('user')) || state.auth.user,
-  // loggedIn: state.loggedIn || JSON.parse(window.localStorage.getItem('loggedIn')),
   loggedIn: JSON.parse(window.localStorage.getItem('loggedIn')) || state.auth.loggedIn,
-  // items: state.App.Items.List,
-  // filters: state.App.Items.Filters,
-  //the State.App & state.App.Items.List/Filters are reducers used as an example.
 })
 
 export default connect(mapStateToProps)(App);

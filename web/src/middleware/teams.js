@@ -9,7 +9,7 @@ const getUserLeagues = async (userId) => {
     });
     const userLeagues = await response.json();
     return userLeagues
-  }
+}
 
 const getUserLeagueTeam = async (userId, leagueId) => {
   const response = await fetch('http://localhost:5000/user_league_team', {
