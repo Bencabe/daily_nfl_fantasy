@@ -42,7 +42,6 @@ class Login extends Component {
             else {
                 this.props.setUser(user)
                 this.props.logIn()
-                // console.log(JSON.parse(window.localStorage.getItem('loggedIn')))
             }
         })
     }

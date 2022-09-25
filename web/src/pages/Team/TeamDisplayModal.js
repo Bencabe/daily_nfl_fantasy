@@ -1,16 +1,24 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import {addPlayers} from './TeamSelectReducer'
+import {setPlayers} from './TeamSelectReducer'
 import styles from '../../styles/Team.module.css'
+import {getPlayerScore, getTeamScore} from '../../middleware/scoring'
+import PlayerPointsModal from './PlayerPointsModal'
 
 class TeamDisplayModal extends Component {
     constructor(props) {
         super(props)
         this.createPlayerOption = this.createPlayerOption.bind(this);
+        this.createStartingPlayerOption = this.createStartingPlayerOption.bind(this);
         this.deletePlayer = this.deletePlayer.bind(this);
+        this.togglePointsModal = this.togglePointsModal.bind(this);
     }
     state = {
-        error_message: null
+        errorMessage: null,
+        displayPointsModal: false,
+        statsPlayer: null, 
+        statsPlayerPosition: null,
+        gameweekScore: 0
     }
 
     createPlayerOption(playerId) {
@@ -19,48 +27,78 @@ class TeamDisplayModal extends Component {
                                                                             this.props.team.allPlayers.midfielders,
                                                                             this.props.team.allPlayers.forwards)
         for (let i=0; i<fullPlayerList.length; i++){
-            if (fullPlayerList[i][0] == playerId){
+            if (fullPlayerList[i][1] == playerId){
                 player = fullPlayerList[i]
                 let playerPosition = player[6]
-                return <div class={styles.selectedPlayer}>
-                            <option class={styles.selectedPlayerName} key={player[0]} player-id={player[0]}>{player[2]} {player[3]}</option>
-                            <button class={styles.selectedPlayerDeleteButton} id={player[0]} value={playerPosition} onClick={this.deletePlayer}>Delete</button>
+                const playerScore = getPlayerScore(this.props.team.playerStats[player[1]], playerPosition).toFixed(1)
+                return <div key={player[1]} className={styles.selectedPlayer}>
+                            <option className={styles.selectedPlayerName} player-id={player[1]}>{player[8].split(' ')[1]}</option>
+                            <button className={styles.playerScore } value={[playerPosition]} onClick={this.togglePointsModal} id={player[1]}>{playerScore}</button>
+                            <button className={styles.selectedPlayerDeleteButton} id={player[1]} value={playerPosition} onClick={this.deletePlayer}>x</button>
                         </div>
             }
         }
     }
+
+    createStartingPlayerOption(playerId) {
+        if (!this.props.team.teamPlayers.subs.includes(playerId)){
+            return this.createPlayerOption(playerId)
+        }
+    }
+
+    getListOfPlayersPerPositionForDelete(event, position) {
+        const indexOfPlayerToRemove = this.props.team.teamPlayers[position].indexOf(parseInt(event.currentTarget.id))
+        const playersArray = [...this.props.team.teamPlayers[position]]
+        playersArray.splice(indexOfPlayerToRemove, 1)
+        return playersArray 
+    }
+
     deletePlayer(event) {
         const position = event.currentTarget.value + 's'
-        const indexOfPlayerToRemove = this.props.team.teamPlayers[position].indexOf(parseInt(event.currentTarget.id))
-        const tmpArray = [...this.props.team.teamPlayers[position]]
-        tmpArray.splice(indexOfPlayerToRemove, 1)
-        const playersToRemovepayload = {players: tmpArray, position: position}
-        this.props.addPlayers(playersToRemovepayload)
-
+        const startingPlayersArray = this.getListOfPlayersPerPositionForDelete(event, position)
+        const playersToRemovePayload = {players: startingPlayersArray, position: position}
+        this.props.setPlayers(playersToRemovePayload)
+        if (this.props.team.teamPlayers.subs.includes(parseInt(event.currentTarget.id))) {
+            const subsArray = this.getListOfPlayersPerPositionForDelete(event, 'subs')
+            const subsToRemovePayload = {players: subsArray, position: 'subs'}
+            this.props.setPlayers(subsToRemovePayload)
+        }
     }
+
+    togglePointsModal(event) {
+        this.setState({statsPlayer: event.currentTarget.id, statsPlayerPosition: event.currentTarget.value})
+        this.setState({displayPointsModal: this.state.displayPointsModal ? false : true})
+    }
+
 
     render() {
         return(
             <div>
-                <div>
-                    <div>
-                        <h4>Goalkeepers</h4>
-                        <div>{this.props.team.teamPlayers.goalkeepers.map(this.createPlayerOption)}</div>
+            { this.state.displayPointsModal ? <PlayerPointsModal handleClose={() => this.togglePointsModal({currentTarget: {id: this.state.statsPlayer}})} 
+                                                    playerStats={this.props.team.playerStats[this.state.statsPlayer]}
+                                                    playerPosition={this.state.statsPlayerPosition}/> : null}
+                <div id={styles.teamDisplayConatiner}>
+                    <div id={styles.goalkeepersContainer}>
+                        <div>{this.props.team.teamPlayers.goalkeepers.map(this.createStartingPlayerOption)}</div>
                     </div>
-                    <div>
-                        <h4>Defenders</h4>
-                        <div>{this.props.team.teamPlayers.defenders.map(this.createPlayerOption)}</div>
+                    <div id={styles.defendersContainer}>
+                        <div>{this.props.team.teamPlayers.defenders.map(this.createStartingPlayerOption)}</div>
                     </div>
-                    <div>
-                        <h4>Midfielders</h4>
-                        <div>{this.props.team.teamPlayers.midfielders.map(this.createPlayerOption)}</div>
+                    <div id={styles.midfieldersContainer}>
+                        <div>{this.props.team.teamPlayers.midfielders.map(this.createStartingPlayerOption)}</div>
                     </div>
-                    <div>
-                        <h4>Forwards</h4>
-                        <div>{this.props.team.teamPlayers.forwards.map(this.createPlayerOption)}</div>
+                    <div id={styles.forwardsContainer}>
+                        <div>{this.props.team.teamPlayers.forwards.map(this.createStartingPlayerOption)}</div>
+                    </div>
+                    <div id={styles.subsContainer}>
+                        <h3>Subs</h3>
+                        <div>{this.props.team.teamPlayers.subs.map(this.createPlayerOption)}</div>
+                    </div>
+                    <div id={styles.scoringContainer}>
+                        <p>Gameweek Score: {parseInt(getTeamScore(this.props.team.teamPlayers, this.props.team.playerStats))}</p>
+                        <p>Total Score: {}</p>
                     </div>
                 </div>
-
             </div>
         )
     }
@@ -69,7 +107,7 @@ class TeamDisplayModal extends Component {
 
 const mapDispatchToProps = () => {
     return{
-        addPlayers
+        setPlayers
     };
 }
 

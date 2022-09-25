@@ -1,14 +1,19 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-export const addPlayerSlice = createSlice({
+export const setPlayerslice = createSlice({
     name: 'addPlayer',
     initialState: {
         team: null,
+        gameweekSelected: null,
+        curGameweek: null,
+        gameweekScore: 0,
+        playerStats: {},
         teamPlayers: {
             goalkeepers: [],
             defenders: [],
             midfielders: [],
-            forwards: []
+            forwards: [],
+            subs: []
         },
         allPlayers: {
             goalkeepers: [],
@@ -23,18 +28,33 @@ export const addPlayerSlice = createSlice({
         },
         addPlayer: (state, player) => {
             state.teamPlayers[player.payload.position] = [...state.teamPlayers[player.payload.position], parseInt(player.payload.id)]
+            if (player.payload.isSub){
+                state.teamPlayers.subs = [...state.teamPlayers.subs, parseInt(player.payload.id)]
+            }
         },
-        addPlayers: (state, players) => {
+        setPlayers: (state, players) => {
+            state.teamPlayers[players.payload.position] = players.payload.players
+        },
+        setSubs: (state, players) => {
             state.teamPlayers[players.payload.position] = players.payload.players
         },
         loadPlayers: (state, playersPerPosition) => {
             const position = playersPerPosition.payload[0][6] + 's'
             state.allPlayers[position] = playersPerPosition.payload
+        },
+        setSelectedGameweek: (state, gameweek) => {
+            state.gameweekSelected = gameweek.payload
+        },
+        setCurrentGameweek: (state, gameweek) => {
+            state.curGameweek = gameweek.payload
+        },
+        setPlayerStats: (state, stats) => {
+            state.playerStats = stats.payload
         }
     }
   })
   
   // Action creators are generated for each case reducer function
-  export const { pickTeam, addPlayer, addPlayers, loadPlayers } = addPlayerSlice.actions
+  export const { pickTeam, addPlayer, setPlayers, loadPlayers, setSelectedGameweek, setCurrentGameweek, setPlayerStats} = setPlayerslice.actions
   
-  export default addPlayerSlice.reducer
+  export default setPlayerslice.reducer

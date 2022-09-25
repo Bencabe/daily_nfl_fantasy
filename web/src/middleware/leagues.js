@@ -40,8 +40,6 @@ const createLeague = async (leagueName, leaguePassword, leagueAdmin, playerLimit
     }
   });
   const responseJson = await response.json();
-  console.log(responseJson)
-  // log response
   return responseJson
 }
 
@@ -57,8 +55,6 @@ const joinLeague = async (userId, leagueId, teamName) => {
     }
   });
   const responseJson = await response.json();
-  // log response
-  console.log(responseJson)
   return responseJson
 }
 

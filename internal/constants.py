@@ -4,3 +4,6 @@ class DatabaseCreds:
     PORT = "3306"
     USER = "root"
     DB_NAME = "daily_ff"
+
+class Season:
+    ID = 19734

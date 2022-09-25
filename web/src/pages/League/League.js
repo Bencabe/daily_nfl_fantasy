@@ -24,11 +24,12 @@ class League extends Component {
                 for (let i=0; i<result.length; i++){
                     getLeague(result[i]).then(
                         leagueResult => {
+                            let leagueID = leagueResult[1]
                             this.setState(prevState => ({
                                 leagues: {
                                     ...prevState.leagues,
-                                    [leagueResult[0]]: {'name': leagueResult[1],
-                                                        'players': result[i]}
+                                    [leagueID]: {'name': leagueResult[1],
+                                                'players': result[i]}
                                 }
                             }))
                         }
@@ -56,21 +57,18 @@ class League extends Component {
         }
     }
 
-    createLeagueOption = (leagueId, index) => {
+    createLeagueOption = (leagueId) => {
         const league = this.state.leagues[leagueId]
         return <option key={leagueId} league-id={leagueId}>{league['name']}</option>
     }
 
     handleLeagueSelect(event) {
-        console.log(this)
         let selectedIndex = event.target.options.selectedIndex
         let team = event.target.options[selectedIndex].getAttribute('league-id')
         this.props.pickTeam(team)
-        // this.loadTeam(userId, team)
     }
 
     render() {
-        // console.log(this.state)
         return(
             <div id={styles.leagueMain}>
                 <select onChange={this.handleLeagueSelect}>

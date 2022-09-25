@@ -2,6 +2,7 @@ from flask import Flask, request
 from flask_cors import CORS
 import sys
 from database.database_client import DatabaseClient
+from constants import Season
 import json
 
 app = Flask(__name__)
@@ -13,8 +14,6 @@ def get_user():
     user = db_client.get_user(request.headers.get('email'))
     result = json.dumps(user)
     db_client.close()
-    print(result)
-
     return result
 
 @app.route('/add_user/<email>/<password>/<first_name>/<last_name>')
@@ -52,7 +51,21 @@ def user_leagues():
         except Exception as e: 
             return json.dumps(f"Error getting players: {e}")
 
+@app.route('/get_user_league', methods=['GET','POST'])
+def user_league():
+    if request.method == 'GET':
+        try:
+            print('trying')
+            db_client = DatabaseClient()
+            user_leagues = db_client.get_user_league(request.headers.get('user_id'), request.headers.get('league_id'))
+            result = json.dumps(user_leagues)
+            db_client.close()
+            return result
+        except Exception as e: 
+            return json.dumps(f"Error getting players: {e}")
+
 @app.route('/league', methods=['GET','POST'])
+
 def league():
     try:
         db_client = DatabaseClient()
@@ -77,19 +90,12 @@ def league():
                 request.headers.get('private_league'),
             )
             user_created_leagues = db_client.get_user_created_leagues(request.headers.get('league_admin'))
-            print(user_created_leagues)
-            print(user_created_leagues[0])
             for league in user_created_leagues:
-                print('hello')
-                print(league)
                 try:
-                    print(league)
-                    print(request.headers.get('league_admin'))
-                    print(request.headers.get('team_name'))
                     db_client.join_league(league[0], request.headers.get('league_admin'), request.headers.get('team_name'))
+                    db_client.close()
                 except Exception as e:
                     print(f"Error joining league: {e}")
-            db_client.close()
             return json.dumps('League created successfully')
         except Exception as e:
             return json.dumps(f"Error creating league: {e}")
@@ -99,6 +105,7 @@ def join_league():
     try:
         db_client = DatabaseClient()
         db_client.join_league(request.headers.get('league_id'), request.headers.get('user_id'), request.headers.get('team_name'))
+        db_client.close()
         return json.dumps("Successfully joined league")
     except Exception as e:
         return json.dumps(f"Error joining league: {e}")
@@ -130,19 +137,60 @@ def user_league_team():
     if request.method == 'POST':
         try:
             db_client = DatabaseClient()
-            print('hitting db client')
             db_client.update_team(
                 request.headers.get('league_id'),
                 request.headers.get('user_id'),
                 json.loads(request.data).get('goalkeepers'), 
                 json.loads(request.data).get('defenders'), 
                 json.loads(request.data).get('midfielders'), 
-                json.loads(request.data).get('forwards'))
+                json.loads(request.data).get('forwards'),
+                json.loads(request.data).get('subs'))
             db_client.close()
         except Exception as e:
             return json.dumps(f"Error saving team: {e}")
         return json.dumps("success")
 
+@app.route('/gameweeks', methods=['GET','POST'])
+def gameweeks():
+    if request.method == 'GET':
+        print('here')
+        try:
+            db_client = DatabaseClient()
+            gameweek_number = request.headers.get('gameweek_number')
+            if gameweek_number != 'current':
+                gameweek = db_client.get_gameweek(Season.ID, gameweek_number)
+            else:
+                gameweek = db_client.get_current_gameweek()
+            db_client.close()
+            return json.dumps(gameweek)
+        except Exception as e:
+            print(e)
+            return json.dumps(f"Error getting gameweek: {e}")
+
+
+@app.route('/gameweek_team', methods=['GET'])
+def gameweek_team():
+    if request.method == 'GET':
+        try: 
+            db_client = DatabaseClient()
+            gameweek_team = db_client.gameweek_team(request.headers.get('gameweek_id'),
+                                                    request.headers.get('team_id'))
+            db_client.close()
+            return json.dumps(gameweek_team)
+        except Exception as e:
+            return json.dumps(f"Error getting gameweek team: {e}")
+
+@app.route('/gameweek_stats', methods=['GET'])
+def gameweek_stats():
+    if request.method == 'GET':
+        try: 
+            db_client = DatabaseClient()
+            gameweek_stats = db_client.get_gameweek_stats(request.headers.get('gameweek_id'))
+            db_client.close()
+            return json.dumps(gameweek_stats)
+        except Exception as e:
+            print(e)
+            return json.dumps(f"Error getting gameweek team: {e}")
         
 
 

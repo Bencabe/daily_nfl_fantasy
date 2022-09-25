@@ -1,9 +1,10 @@
 import React, {Component} from 'react'
 import {getPlayersPerPosition} from '../../middleware/players'
 import {connect} from 'react-redux'
-import {addPlayer, loadPlayers} from './TeamSelectReducer'
+import {addPlayer, loadPlayers, setSelectedGameweek} from './TeamSelectReducer'
 import {saveUserLeagueTeam} from '../../middleware/teams'
 import styles from '../../styles/Team.module.css'
+import Select from 'react-select';
 
 class TeamSelectModal extends Component {
     constructor(props) {
@@ -19,7 +20,11 @@ class TeamSelectModal extends Component {
             selectedMidfielder: null,
             allForwards: [],
             selectedForward: null,
-            playerSelectErrorMessage: null
+            playerSelectErrorMessage: null,
+            allowedPlayersPerPosition: {'goalkeepers': {'starters': 1, 'total': 2},
+                                        'defenders': {'starters': 5, 'total': 5},
+                                        'midfielders': {'starters': 5, 'total': 5},
+                                        'forwards': {'starters': 3, 'total': 3},}
     }
     componentDidMount() {
         const positions = ['goalkeeper', 'defender', 'midfielder', 'forward']
@@ -33,44 +38,63 @@ class TeamSelectModal extends Component {
     }
 
     createPlayerOption(playerResult) {
-        return <option key={playerResult[0]} player-id={playerResult[0]} player-position={playerResult[6]}>{playerResult[2]} {playerResult[3]}</option>
+        return <option key={playerResult[1]} player-id={playerResult[1]} player-position={playerResult[6]}>{playerResult[8]}</option>
     }
 
     selectedPlayer(event) {
-        // console.log(something)
-        let selectedIndex = event.target.options.selectedIndex
-        let playerPosition = event.target.options[selectedIndex].getAttribute('player-position')
-        let playerID = event.target.options[selectedIndex].getAttribute('player-id')
-        if (playerPosition == 'goalkeeper') {
-            this.setState({
-                selectedGoalkeeper: 1
-            })
-        }
-        if (playerPosition == 'defender') {
-            this.setState({
-                selectedDefender: playerID
-            })
-        }
-        if (playerPosition == 'midfielder') {
-            this.setState({
-                selectedMidfielder: playerID
-            })
-        }
-        if (playerPosition == 'forward') {
-            this.setState({
-                selectedForward: playerID
-            })
+        switch (event.position){
+            case 'goalkeeper':
+                this.setState({
+                    selectedGoalkeeper: event.id
+                })
+            case 'defender':
+                this.setState({
+                    selectedDefender: event.id
+                })
+            case 'midfielder':
+                this.setState({
+                    selectedMidfielder: event.id
+                })
+            case 'forward':
+                this.setState({
+                    selectedForward: event.id
+                })
         }
     }
 
-    handlePlayerSelection(playerId, position){
+    numStartingPlayers() {
+        const numPlayersInTeam = this.props.team.teamPlayers['goalkeepers'].length + 
+            this.props.team.teamPlayers['defenders'].length + 
+            this.props.team.teamPlayers['midfielders'].length + 
+            this.props.team.teamPlayers['forwards'].length -
+            this.props.team.teamPlayers['subs'].length
+            return numPlayersInTeam
+    }
+
+    validateSelection(playerId, position){
+        let validation = {errMessage: null, isSub: false}
+        const numStartingPlayers = this.numStartingPlayers()
         if (this.props.team.teamPlayers[position].includes(parseInt(playerId))){
+            validation.errMessage = 'Player already selected'
+        }
+        else if (this.props.team.teamPlayers[position].length >= this.state.allowedPlayersPerPosition[position].total){
+            validation.errMessage = 'Allowed number of ' + position +  ' reached'
+        }
+        if (this.props.team.teamPlayers[position].length >= this.state.allowedPlayersPerPosition[position].starters || numStartingPlayers >= 11){
+            validation.isSub = true
+        }
+        return validation
+    }
+
+    handlePlayerSelection(playerId, position){
+        const selectionValidation = this.validateSelection(playerId, position)
+        if (selectionValidation.errMessage) {
             this.setState({
-                playerSelectErrorMessage: 'Player already selected'
+                playerSelectErrorMessage: selectionValidation.errMessage
             })
         }
         else{
-            const playerPayload = {id: playerId, position: position}
+            const playerPayload = {id: playerId, position: position, isSub: selectionValidation.isSub}
             this.props.addPlayer(playerPayload)
             this.setState({
                 playerSelectErrorMessage: null
@@ -84,60 +108,64 @@ class TeamSelectModal extends Component {
             this.props.team.teamPlayers.goalkeepers, 
             this.props.team.teamPlayers.defenders, 
             this.props.team.teamPlayers.midfielders, 
-            this.props.team.teamPlayers.forwards)
+            this.props.team.teamPlayers.forwards,
+            this.props.team.teamPlayers.subs)
+    }
+
+    createPlayerOptions(players){
+        const playerOptions = []
+        for (const i in players){
+            playerOptions.push({value: players[i][1], id: players[i][1], label: players[i][8], position: players[i][6]})
+        }
+        return playerOptions
     }
 
     render(){
         return(
-            <div>
-                <div>
-                    <div>
-                        <h3>Goalkeepers</h3>
-                        <div>
-                            <select onChange={this.selectedPlayer.bind(this)}>
-                                <option>Choose Player</option>
-                                {this.props.team.allPlayers.goalkeepers.map(this.createPlayerOption)}
-                            </select>
-                            <button onClick={() => this.handlePlayerSelection(this.state.selectedGoalkeeper, 'goalkeepers')}>Select Player</button><br/>
-                            <div>{this.state.playerSelectErrorMessage}</div>
-                        </div><br/>
-                    </div>
-                    <div>
-                        <h3>Defenders</h3>
-                        <div>
-                            <select onChange={this.selectedPlayer.bind(this)}>
-                                <option>Choose Player</option>
-                                {this.props.team.allPlayers.defenders.map(this.createPlayerOption)}
-                            </select>
-                            <button onClick={() => this.handlePlayerSelection(this.state.selectedDefender, 'defenders')}>Select Player</button><br/>
-                            <div>{this.state.playerSelectErrorMessage}</div>
-                        </div><br/>
-                    </div>
-                    <div>
-                        <h3>Midfielders</h3>
-                        <div>
-                            <select onChange={this.selectedPlayer.bind(this)}>
-                                <option>Choose Player</option>
-                                {this.props.team.allPlayers.midfielders.map(this.createPlayerOption)}
-                            </select>
-                            <button onClick={() => this.handlePlayerSelection(this.state.selectedMidfielder, 'midfielders')}>Select Player</button><br/>
-                            <div>{this.state.playerSelectErrorMessage}</div>
-                        </div><br/>
-                    </div>
-                    <div>
-                        <h3>Forwards</h3>
-                        <div>
-                            <select onChange={this.selectedPlayer.bind(this)}>
-                                <option>Choose Player</option>
-                                {this.props.team.allPlayers.forwards.map(this.createPlayerOption)}
-                            </select>
-                            <button onClick={() => this.handlePlayerSelection(this.state.selectedForward, 'forwards')}>Select Player</button><br/>
-                            <div>{this.state.playerSelectErrorMessage}</div>
-                        </div><br/>
-                    </div>
+                <div id={styles.playerSelectContainer}>
+                    <div className={styles.playerSelectContent}>
+                        <Select 
+                            className={styles.playerSelectDropdownContainer} 
+                            classNamePrefix='playerSelectDropdown'
+                            placeholder='Select Goalkeeper' 
+                            options={this.createPlayerOptions(this.props.team.allPlayers.goalkeepers)} 
+                            onChange={this.selectedPlayer.bind(this)}>
+                        </Select>
+                        <button className={styles.playerSelectTickBox} onClick={() => this.handlePlayerSelection(this.state.selectedGoalkeeper, 'goalkeepers')}>✓</button><br/>
+                    </div><br/>
+                    <div className={styles.playerSelectContent}>
+                        <Select 
+                            className={styles.playerSelectDropdownContainer} 
+                            classNamePrefix='playerSelectDropdown'
+                            placeholder='Select Defender' 
+                            options={this.createPlayerOptions(this.props.team.allPlayers.defenders)} 
+                            onChange={this.selectedPlayer.bind(this)}>
+                        </Select>
+                        <button className={styles.playerSelectTickBox} onClick={() => this.handlePlayerSelection(this.state.selectedDefender, 'defenders')}>✓</button><br/>
+                    </div><br/>
+                    <div className={styles.playerSelectContent}>
+                        <Select 
+                            className={styles.playerSelectDropdownContainer} 
+                            classNamePrefix='playerSelectDropdown'
+                            placeholder='Select Midfielder' 
+                            options={this.createPlayerOptions(this.props.team.allPlayers.midfielders)} 
+                            onChange={this.selectedPlayer.bind(this)}>
+                        </Select>
+                        <button className={styles.playerSelectTickBox} onClick={() => this.handlePlayerSelection(this.state.selectedMidfielder, 'midfielders')}>✓</button><br/>
+                    </div><br/>
+                    <div className={styles.playerSelectContent}>
+                        <Select 
+                        classNamePrefix='playerSelectDropdown'
+                            className={styles.playerSelectDropdownContainer} 
+                            placeholder='Select Forward' 
+                            options={this.createPlayerOptions(this.props.team.allPlayers.forwards)} 
+                            onChange={this.selectedPlayer.bind(this)}>
+                        </Select>
+                        <button className={styles.playerSelectTickBox} onClick={() => this.handlePlayerSelection(this.state.selectedForward, 'forwards')}>✓</button><br/>
+                    </div><br/>
+                    <div>{this.state.playerSelectErrorMessage}</div>
                     <button onClick={() => this.saveTeam()}>Save Team</button>
                 </div>
-            </div>
         )
     }
 }

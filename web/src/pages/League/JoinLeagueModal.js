@@ -3,7 +3,6 @@ import styles from '../../styles/League.module.css'
 import { getLeague, joinLeague } from '../../middleware/leagues'
 
 function JoinLeagueModal(props) {
-    // Declare a new state variable, which we'll call "count"
     const [errMessage, setErrMessage] = useState();
 
     const handleJoinLeagueForm = async event => {

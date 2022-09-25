@@ -6,22 +6,117 @@
 
 #selectModal{
     width: 50%;
-    margin-left: 5rem;
+    /* margin-left: 5rem; */
 }
 
 #displayModal{
-    width: 50%;
-    margin-right: 5rem;
+    background: url("../static/football_pitch_2.jpeg");
+    background-repeat: no-repeat;
+    height: 600px;
+    width: 700px;
+    background-size: 500px 600px;
+    position: absolute;
+    bottom: 50px;
+    left: 550px;
+    top: 100px
+    /* margin-right: 5rem; */
+}
+
+#forwardsContainer, #midfieldersContainer, #defendersContainer, #goalkeepersContainer, #teamName{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 500px;
+}
+
+#forwardsContainer, #midfieldersContainer, #defendersContainer, #goalkeepersContainer, #subsContainer, #teamName, #scoringContainer{
+    position: absolute;
+
+}
+
+#forwardsContainer{
+    bottom: 100px;
+}
+
+#midfieldersContainer{
+    bottom: 250px;
+
+}
+
+#defendersContainer{
+    bottom: 400px;
+
+}
+
+#goalkeepersContainer{
+    bottom: 500px;
+
+}
+
+#subsContainer, #subsContainer .selectedPlayer, #scoringContainer, .selectedPlayer{
+    right: 40px;
+    display: block;
 }
 
 .selectedPlayer{
-    display: flex;
+    display: inline-block;
+    text-align: center;
+    width: 100px;
+    height: 70px;
 }
 
 .selectedPlayerName{
-    width: 80%;
+    /* width: 80%; */
+    display: block;
+    font-weight: bold;
 }
 
-.selectedPlayerDeleteButton{
-    width: 20%
+
+:global(.playerSelectDropdown__control) {
+    border-color: var(--grass-green) !important;
+    border-radius: 4px 0 0 4px !important;
 }
+
+.playerSelectDropdownContainer{
+    width: 200px;
+}
+
+
+.playerSelectTickBox{
+    background-color: var(--grass-green);
+    color: white;
+    border: none;
+    border-radius: 0 20% 20% 0; 
+}
+
+.playerSelectTickBox:hover{
+    cursor: pointer;
+}
+
+.playerSelectTickBox:active{
+    cursor: pointer;
+    box-shadow: none;
+}
+
+#playerSelectContainer{
+    margin-top: 50px;
+}
+
+.playerSelectContent{
+    margin-top: 20px;
+    display: inline-flex;
+}
+
+#teamName{
+    left:550px;
+    top: 50px
+}
+
+#scoringContainer{
+   bottom: 50px;
+}
+
+
+
+
+
