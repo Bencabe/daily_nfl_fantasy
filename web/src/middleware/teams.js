@@ -1,5 +1,7 @@
+import config from '../config'
+
 const getUserLeagues = async (userId) => {
-    const response = await fetch('http://localhost:5000/get_user_leagues', {
+    const response = await fetch(`http://localhost:${config.port}/get_user_leagues`, {
       method: 'GET',
       mode: 'cors',
       headers: {
@@ -12,7 +14,7 @@ const getUserLeagues = async (userId) => {
 }
 
 const getUserLeague = async (userId, leagueId) => {
-  const response = await fetch('http://localhost:5000/get_user_league', {
+  const response = await fetch(`http://localhost:${config.port}/get_user_league`, {
     method: 'GET',
     mode: 'cors',
     headers: { 
@@ -26,7 +28,7 @@ const getUserLeague = async (userId, leagueId) => {
 }
 
 const getUserLeagueTeam = async (userId, leagueId) => {
-  const response = await fetch('http://localhost:5000/user_league_team', {
+  const response = await fetch(`http://localhost:${config.port}/user_league_team`, {
     method: 'GET',
     mode: 'cors',
     headers: {
@@ -41,7 +43,7 @@ const getUserLeagueTeam = async (userId, leagueId) => {
 
 
 const saveUserLeagueTeam = async (leagueId, userId, goalkeepers, defenders, midfielders, forwards, subs) => {
-  const response = await fetch('http://localhost:5000/user_league_team', {
+  const response = await fetch(`http://localhost:${config.port}/user_league_team`, {
     method: 'POST',
     mode: 'cors',
     headers: {

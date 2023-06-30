@@ -1,5 +1,7 @@
+import config from '../config'
+
 const getUserLeagues = async (userId) => {
-    const response = await fetch('http://localhost:5000/get_user_leagues', {
+    const response = await fetch(`http://localhost:${config.port}/get_user_leagues`, {
       method: 'GET',
       mode: 'cors',
       headers: {
@@ -12,7 +14,7 @@ const getUserLeagues = async (userId) => {
   }
 
 const getLeague = async (leagueId) => {
-  const response = await fetch('http://localhost:5000/league', {
+  const response = await fetch(`http://localhost:${config.port}/league`, {
     method: 'GET',
     mode: 'cors',
     headers: {
@@ -25,7 +27,7 @@ const getLeague = async (leagueId) => {
 }
 
 const createLeague = async (leagueName, leaguePassword, leagueAdmin, playerLimit, leagueType, privateLeague, teamName) => {
-  const response = await fetch('http://localhost:5000/league', {
+  const response = await fetch(`http://localhost:${config.port}/league`, {
     method: 'POST',
     mode: 'cors',
     headers: {
@@ -44,7 +46,7 @@ const createLeague = async (leagueName, leaguePassword, leagueAdmin, playerLimit
 }
 
 const joinLeague = async (userId, leagueId, teamName) => {
-  const response = await fetch('http://localhost:5000/join_league', {
+  const response = await fetch(`http://localhost:${config.port}/join_league`, {
     method: 'POST',
     mode: 'cors',
     headers: {

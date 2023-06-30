@@ -104,21 +104,14 @@ const goalsConcededScore = (goalsConceded) => {
 
 const getTeamScore = (players, playerStats) => {
     let teamScore = 0
-    // console.log(players)
     const positions = Object.keys(players)
     for (let i=0; i<=positions.length; i++ ){
-        // console.log(positions[i])
         let playerPerPosition = players[positions[i]]
-        // console.log(playerPerPosition)
-        // console.log(playerPerPosition && positions[i] != "subs")
         if (playerPerPosition && positions[i] != "subs" && typeof positions[i] === 'string'){
-            console.log(positions[i])
             for(let i=0; i<=playerPerPosition.length; i++ ){
                 let player = playerPerPosition[i]
-                // console.log(playerStats[player])
                 const playerScore = getPlayerScore(playerStats[player], positions[i])
                 teamScore += playerScore ? playerScore : 0
-                console.log(teamScore)
             }
         }
     }

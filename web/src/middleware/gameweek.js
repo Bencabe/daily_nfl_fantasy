@@ -1,7 +1,8 @@
 import {getUserLeague} from './teams'
+import config from '../config'
 
 const getGameweek = async (gameweekNumber) => {
-    const response = await fetch('http://localhost:5000/gameweeks', {
+    const response = await fetch(`http://localhost:${config.port}/gameweeks`, {
       method: 'GET',
       mode: 'cors',
       headers: {
@@ -17,7 +18,7 @@ const getGameweek = async (gameweekNumber) => {
 const getGameweekTeam = async(gameweekNumber, leagueId, userId) => {
     const userLeague = await getUserLeague(userId, leagueId)
     const gameweek = await getGameweek(gameweekNumber)
-    const response = await fetch('http://localhost:5000/gameweek_team', {
+    const response = await fetch(`http://localhost:${config.port}/gameweek_team`, {
       method: 'GET',
       mode: 'cors',
       headers: {
@@ -32,7 +33,7 @@ const getGameweekTeam = async(gameweekNumber, leagueId, userId) => {
 
 const getGameweekStats = async (gameweek_number) => {
     const gameweek_id = await getGameweek(gameweek_number)
-    const response = await fetch('http://localhost:5000/gameweek_stats', {
+    const response = await fetch(`http://localhost:${config.port}/gameweek_stats`, {
       method: 'GET',
       mode: 'cors',
       headers: {

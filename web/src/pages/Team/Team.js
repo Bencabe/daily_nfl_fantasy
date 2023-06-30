@@ -90,13 +90,11 @@ class Team extends Component {
         getUserLeagueTeam(userId, leagueId).then(
             (result) => {
                 if (result){
-                    // console.log(result)
                     this.setState({userLeagueTeam: result})
                     this.setAllPlayers(result)
                 }
             }
         )
-        console.log(this.state)
     }
 
     setAllPlayers(result) {

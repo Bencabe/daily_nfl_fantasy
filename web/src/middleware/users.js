@@ -1,5 +1,7 @@
+import config from '../config'
+
 const getUser = async (userEmail) => {
-    const response = await fetch('http://localhost:5000/get_user', {
+    const response = await fetch(`http://localhost:${config.port}/get_user`, {
       method: 'GET',
       mode: 'cors',
       headers: {
