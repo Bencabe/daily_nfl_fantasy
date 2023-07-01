@@ -1,8 +1,18 @@
 import { Outlet, Link } from "react-router-dom";
+import React, {Component} from 'react'
+import {connect} from 'react-redux'
+import {logOut} from '../pages/Login/LoginReducer'
 import styles from '../styles/Layout.module.css'
 
-const Layout = () => {
-  return (
+class Layout extends Component {
+  constructor(props) {
+    super(props)
+  }
+  state = {
+  }
+
+  render() {
+    return(
     <>
     <div id={styles.headerBanner}>
         {/* <img id={styles.logo} alt='logo'></img> */}
@@ -24,6 +34,9 @@ const Layout = () => {
               <li>
                 <Link to="/fixtures">Fixtures</Link>
               </li>
+              <li>
+                <Link to="/" onClick={() => this.props.logOut()}>Logout</Link>
+              </li>
             </ul>
           </nav>
         </div>
@@ -34,7 +47,19 @@ const Layout = () => {
         </div>
       </div>
     </>
-  )
+    );
+    }
 };
 
-export default Layout;
+const mapStateToProps = state => ({
+  user: JSON.parse(window.localStorage.getItem('user')) || state.auth.user,
+  loggedIn: JSON.parse(window.localStorage.getItem('loggedIn')) || state.auth.loggedIn,
+});
+
+const mapDispatchtoPros = () => {
+  return {
+    logOut
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchtoPros())(Layout);
