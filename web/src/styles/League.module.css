@@ -47,32 +47,32 @@
     display: flex;
 }
 
-.leagueModalButton{
-    width: 10vw;
-    height: 5vh;
-    border: none;
-    background-color: var(--silver-gray);
-}
-
 #joinLeagueButton{
-    border-radius: 0% 20% 20% 00%;
+    /* border-radius: 0% 20% 20% 00%; */
+    margin: 5px;
 }
 
 #createLeagueButton{
-    border-radius: 20% 0% 0% 20%;
+    /* border-radius: 20% 0% 0% 20%; */
     
 }
 
-.leagueModalButton{
-    width: 10vw;
-    height: 5vh;
-    border-radius: 25%;
+#leagueSelect{
     border: none;
-    background-color: var(--silver-gray);
+}
+
+.leagueModalButton{
+    width: 120px;
+    height: 60px;
+    border-radius: 10%;
+    border: none;
+    background-color: white;
 }
 
 .leagueModalButton:hover{
-    background-color: var(--grass-green);
+    /* background-color: var(--grass-green); */
+    background-image: linear-gradient(to right, var(--sky-blue), var(--grass-green));
+    /* z-index: 0; */
     color: white;
     /* border: 1px solid black; */
 }

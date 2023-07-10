@@ -2,7 +2,6 @@ import React, {Component} from 'react'
 import styles from '../../styles/Login.module.css'
 import nfl_logo from './nfl_logo.jpeg'
 import {getUser} from '../../middleware/users'
-import { useSelector, useDispatch } from 'react-redux'
 import { logIn, logOut, setUser } from './LoginReducer'
 import { connect } from 'react-redux'
 
@@ -49,9 +48,6 @@ class Login extends Component {
     render() {
         return(
             <div className={styles.loginregister}>
-                <div className={styles.logocontainer}>
-                    <img src={nfl_logo} alt="nfl_logo" />
-                </div>
                 <div className={styles.login}>
                     <h3>Sign In</h3> <br/>
                     <form>

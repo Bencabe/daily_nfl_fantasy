@@ -24,7 +24,7 @@ class League extends Component {
                 for (let i=0; i<result.length; i++){
                     getLeague(result[i]).then(
                         leagueResult => {
-                            let leagueID = leagueResult[1]
+                            let leagueID = leagueResult[0]
                             this.setState(prevState => ({
                                 leagues: {
                                     ...prevState.leagues,
@@ -71,7 +71,7 @@ class League extends Component {
     render() {
         return(
             <div id={styles.leagueMain}>
-                <select onChange={this.handleLeagueSelect}>
+                <select id={styles.leagueSelect} onChange={this.handleLeagueSelect}>
                     {/* {this.state.leagues.map(this.createLeagueOption)} */}
                     {Object.keys(this.state.leagues).map(this.createLeagueOption)}
                 </select>
@@ -84,6 +84,7 @@ class League extends Component {
                     { this.state.showJoinLeagueModal ? <JoinLeagueModal handleClose={() => this.toggleJoinLeagueModal()}
                                                                         userId={this.props.user.payload[0][0]} /> : null}
                 </div>
+                {console.log(this)}
                 <div id={styles.footer}>League ID: {this.props.team.leagueId}</div>
             </div>
         );

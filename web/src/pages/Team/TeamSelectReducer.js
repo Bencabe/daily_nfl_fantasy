@@ -54,7 +54,6 @@ export const setPlayerslice = createSlice({
     }
   })
   
-  // Action creators are generated for each case reducer function
   export const { pickTeam, addPlayer, setPlayers, loadPlayers, setSelectedGameweek, setCurrentGameweek, setPlayerStats} = setPlayerslice.actions
   
   export default setPlayerslice.reducer

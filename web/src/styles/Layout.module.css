@@ -8,6 +8,7 @@ body{
     background-image: linear-gradient(to right, var(--sky-blue), var(--grass-green));
     display: flex;
     width: 100%;
+    min-width:1250px;
     height: 20%;
     margin: 0;
     padding: 0;
@@ -113,6 +114,7 @@ body{
     background-color: white;
     height: 100vh;
     width: 80%;
+    min-width: 1250px;
     margin: auto;
     border-radius: 3%;
   }
