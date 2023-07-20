@@ -10,7 +10,7 @@ function JoinLeagueModal(props) {
         const passwordAttempted = event.target.leaguePassword.value
         const leagueId = event.target.leagueId.value
         const teamName = event.target.teamName.value
-        if (!league || !teamName){
+        if (!leagueId || !teamName){
             setErrMessage("Please provide a league ID and team name")
             return
         }

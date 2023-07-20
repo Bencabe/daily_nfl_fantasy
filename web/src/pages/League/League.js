@@ -84,7 +84,6 @@ class League extends Component {
                     { this.state.showJoinLeagueModal ? <JoinLeagueModal handleClose={() => this.toggleJoinLeagueModal()}
                                                                         userId={this.props.user.payload[0][0]} /> : null}
                 </div>
-                {console.log(this)}
                 <div id={styles.footer}>League ID: {this.props.team.leagueId}</div>
             </div>
         );

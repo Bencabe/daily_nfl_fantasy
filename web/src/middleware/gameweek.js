@@ -1,5 +1,6 @@
 import {getUserLeague} from './teams'
 import config from '../config'
+import GameweekTeam from '../classes/database/GameweekTeam'
 
 const getGameweek = async (gameweekNumber) => {
     const response = await fetch(`http://localhost:${config.port}/gameweeks`, {
@@ -16,19 +17,22 @@ const getGameweek = async (gameweekNumber) => {
 }
 
 const getGameweekTeam = async(gameweekNumber, leagueId, userId) => {
-    const userLeague = await getUserLeague(userId, leagueId)
+    const userLeague = await getUserLeague(userId, parseInt(leagueId))
     const gameweek = await getGameweek(gameweekNumber)
+    const teamId = userLeague[0][0]
+    const gameweekId = gameweek[0][0]
     const response = await fetch(`http://localhost:${config.port}/gameweek_team`, {
       method: 'GET',
       mode: 'cors',
       headers: {
-        'gameweek_id': gameweek[0][0],
-        'team_id':  userLeague[0][0],
+        'gameweek_id': gameweekId,
+        'team_id':  teamId,
         'Access-Control-Allow-Origin': 'http://localhost:3000'
       }
     });
     const userLeagueTeam = await response.json();
-    return userLeagueTeam
+    const gameweekTeam = new GameweekTeam(userLeagueTeam[0])
+    return gameweekTeam
 }
 
 const getGameweekStats = async (gameweek_number) => {

@@ -8,6 +8,7 @@ export const setPlayerslice = createSlice({
         curGameweek: null,
         gameweekScore: 0,
         playerStats: {},
+        leagueId: null,
         teamPlayers: {
             goalkeepers: [],
             defenders: [],

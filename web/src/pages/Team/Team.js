@@ -20,14 +20,16 @@ class Team extends Component {
         selectedLeague: null,
         curGameweek: null,
         selectedGameweek: null,
-        userLeagueTeam: null
+        userLeagueTeam: null,
+        canDelete: false
     }
 
     componentDidMount() {
         const userId = this.props.user.payload[0][0]
         getGameweek('current').then(
             result => {
-                setCurrentGameweek(result[0][1])
+                this.props.setCurrentGameweek(result[0][1])
+                this.props.setSelectedGameweek(result[0][1])
                 this.setState({
                     curGameweek: result[0][1],
                     selectedGameweek: result[0][1]
@@ -56,63 +58,36 @@ class Team extends Component {
                     this.setState({selectedLeague: leagueId})
                     if (this.props.team.leagueId == null){
                         this.props.pickTeam(leagueId)
-                        this.loadTeam(userId, leagueId, this.state.curGameweek)
+                        this.loadTeam()
                     }
                 }
             }
         )
     }
 
-    handleLeagueSelect(event) {
+    async handleLeagueSelect(event) {
         let selectedIndex = event.target.options.selectedIndex
         let leagueId = event.target.options[selectedIndex].getAttribute('league-id')
-        const userId = this.props.user.payload[0][0]
-        this.props.pickTeam(leagueId)
-        this.loadTeam(userId, leagueId, this.state.curGameweek)
+        await this.props.pickTeam(leagueId)
+        this.loadTeam()
     }
 
-    loadTeam(userId, leagueId, gameweek){
-        getGameweekStats(gameweek).then(function(result){
-            this.props.setPlayerStats(result)
-        }.bind(this))
-        if (this.state.curGameweek != gameweek){
-            // TODO: this is obviously awful, needs fixing so no duplication of code
-            getGameweekTeam(gameweek, this.state.selectedLeague, this.props.user.payload[0][0]).then(
-                result => {
-                    this.props.setPlayers({'players': JSON.parse(result[0][3]), position: 'goalkeepers'})
-                    this.props.setPlayers({'players': JSON.parse(result[0][4]), position: 'defenders'})
-                    this.props.setPlayers({'players': JSON.parse(result[0][5]), position: 'midfielders'})
-                    this.props.setPlayers({'players': JSON.parse(result[0][6]), position: 'forwards'})
-                    this.props.setPlayers({'players': JSON.parse(result[0][7]), position: 'subs'})
-                }
-            )
-        }
-        getUserLeagueTeam(userId, leagueId).then(
-            (result) => {
-                if (result){
-                    this.setState({userLeagueTeam: result})
-                    this.setAllPlayers(result)
-                }
-            }
-        )
+    async loadTeam(){
+        const gameweekStats = await getGameweekStats(this.props.team.gameweekSelected)
+        this.props.setPlayerStats(gameweekStats)
+        const gameweekTeam = await getGameweekTeam(this.props.team.gameweekSelected, this.props.team.leagueId, this.props.user.payload[0][0])
+        this.props.setPlayers({'players': gameweekTeam.goalkeepers, position: 'goalkeepers'})
+        this.props.setPlayers({'players': gameweekTeam.defenders, position: 'defenders'})
+        this.props.setPlayers({'players': gameweekTeam.midfielders, position: 'midfielders'})
+        this.props.setPlayers({'players': gameweekTeam.forwards, position: 'forwards'})
+        this.props.setPlayers({'players': gameweekTeam.subs, position: 'subs'})
     }
 
-    setAllPlayers(result) {
-        this.props.setPlayers({'players': JSON.parse(result[3]), position: 'goalkeepers'})
-        this.props.setPlayers({'players': JSON.parse(result[4]), position: 'defenders'})
-        this.props.setPlayers({'players': JSON.parse(result[5]), position: 'midfielders'})
-        this.props.setPlayers({'players': JSON.parse(result[6]), position: 'forwards'})
-        this.props.setPlayers({'players': JSON.parse(result[8]), position: 'subs'})
-
-    } 
-    updateSelectedGameweek(operation){
-        const newGameweek = operation=='add'? this.state.selectedGameweek + 1 : this.state.selectedGameweek - 1
-        this.setState({
-            selectedGameweek: newGameweek
-        })
-        this.loadTeam(this.props.user.payload[0][0], this.props.team.leagueId, newGameweek)
+    async updateSelectedGameweek(operation) {
+        const newGameweek = operation=='add'? this.props.team.gameweekSelected + 1 : this.props.team.gameweekSelected - 1
+        this.props.setSelectedGameweek(newGameweek)
+        this.loadTeam()
     }
-
 
 
     render() {
@@ -130,8 +105,8 @@ class Team extends Component {
                 <br/>
                 <br/>
                 <div><button onClick={() => this.updateSelectedGameweek('subtract')} disabled={this.state.selectedGameweek <= 1} >{"<"}</button>
-                <span>Gameweek {this.state.selectedGameweek}</span>
-                <button onClick={() => this.updateSelectedGameweek('add')} disabled={this.state.selectedGameweek >= this.state.curGameweek}>{">"}</button></div>
+                <span>Gameweek {this.props.team.gameweekSelected}</span>
+                <button onClick={() => this.updateSelectedGameweek('add')} disabled={this.props.team.gameweekSelected  >= this.state.curGameweek}>{">"}</button></div>
                 <div id={styles.body}>
                     <div id={styles.selectModal}><TeamSelectModal/></div>
                     <div id={styles.displayModal}><TeamDisplayModal/></div>

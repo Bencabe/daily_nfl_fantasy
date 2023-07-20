@@ -12,19 +12,19 @@ class TeamSelectModal extends Component {
         this.handlePlayerSelection = this.handlePlayerSelection.bind(this);
     }
     state = {
-            allGoalkeepers: [],
-            selectedGoalkeeper: null,
-            allDefenders: [],
-            selectedDefender: null,
-            allMidfielders: [],
-            selectedMidfielder: null,
-            allForwards: [],
-            selectedForward: null,
-            playerSelectErrorMessage: null,
-            allowedPlayersPerPosition: {'goalkeepers': {'starters': 1, 'total': 2},
-                                        'defenders': {'starters': 5, 'total': 5},
-                                        'midfielders': {'starters': 5, 'total': 5},
-                                        'forwards': {'starters': 3, 'total': 3},}
+        allGoalkeepers: [],
+        selectedGoalkeeper: null,
+        allDefenders: [],
+        selectedDefender: null,
+        allMidfielders: [],
+        selectedMidfielder: null,
+        allForwards: [],
+        selectedForward: null,
+        playerSelectErrorMessage: null,
+        allowedPlayersPerPosition: {'goalkeepers': {'starters': 1, 'total': 2},
+                                    'defenders': {'starters': 5, 'total': 5},
+                                    'midfielders': {'starters': 5, 'total': 5},
+                                    'forwards': {'starters': 3, 'total': 3},}
     }
     componentDidMount() {
         const positions = ['goalkeeper', 'defender', 'midfielder', 'forward']

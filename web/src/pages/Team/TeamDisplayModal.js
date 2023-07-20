@@ -18,14 +18,16 @@ class TeamDisplayModal extends Component {
         displayPointsModal: false,
         statsPlayer: null, 
         statsPlayerPosition: null,
-        gameweekScore: 0
+        gameweekScore: 0,
+        canDelete: false
     }
 
     createPlayerOption(playerId) {
         let player
-        const fullPlayerList = this.props.team.allPlayers.goalkeepers.concat(this.props.team.allPlayers.defenders,
-                                                                            this.props.team.allPlayers.midfielders,
-                                                                            this.props.team.allPlayers.forwards)
+        const fullPlayerList = [...this.props.team.allPlayers.goalkeepers,
+                                ...this.props.team.allPlayers.defenders,
+                                ...this.props.team.allPlayers.midfielders,
+                                ...this.props.team.allPlayers.forwards]
         for (let i=0; i<fullPlayerList.length; i++){
             if (fullPlayerList[i][1] == playerId){
                 player = fullPlayerList[i]
@@ -34,7 +36,7 @@ class TeamDisplayModal extends Component {
                 return <div key={player[1]} className={styles.selectedPlayer}>
                             <option className={styles.selectedPlayerName} player-id={player[1]}>{player[8].split(' ')[1]}</option>
                             <button className={styles.playerScore } value={[playerPosition]} onClick={this.togglePointsModal} id={player[1]}>{playerScore}</button>
-                            <button className={styles.selectedPlayerDeleteButton} id={player[1]} value={playerPosition} onClick={this.deletePlayer}>x</button>
+                            {this.canDeletePlayers() ? <button className={styles.selectedPlayerDeleteButton} id={player[1]} value={playerPosition} onClick={this.deletePlayer}>x</button> : null} 
                         </div>
             }
         }
@@ -68,6 +70,14 @@ class TeamDisplayModal extends Component {
     togglePointsModal(event) {
         this.setState({statsPlayer: event.currentTarget.id, statsPlayerPosition: event.currentTarget.value})
         this.setState({displayPointsModal: this.state.displayPointsModal ? false : true})
+    }
+
+    canDeletePlayers() {
+        return this.props.team.gameweekSelected == this.props.team.curGameweek && !this.curGameweekActive()
+    }
+
+    curGameweekActive() {
+        return false
     }
 
 
