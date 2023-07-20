@@ -8,24 +8,23 @@ import json
 app = Flask(__name__)
 cors = CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
-@app.route('/get_user', methods=['GET','POST'])
-def get_user():
+@app.route('/user', methods=['GET','POST'])
+def user():
+    # TODO: need to encrypt user details
     db_client = DatabaseClient()
-    user = db_client.get_user(request.headers.get('email'))
-    result = json.dumps(user)
+    if request.method == 'GET':
+        user = db_client.get_user(request.headers.get('email'))
+        result = json.dumps(user)
+    if request.method == 'POST':
+        # TODO clean up error handling and strings
+        user_details = json.loads(request.data)
+        try: 
+            db_client.add_user(user_details['email'],user_details['password'],user_details['firstName'],user_details['lastName'])
+            return "User added successfully", 200
+        except Exception as e: 
+            return f"Error adding contact: {e}", 500
     db_client.close()
     return result
-
-@app.route('/add_user/<email>/<password>/<first_name>/<last_name>')
-def add_user(email,password,first_name,last_name):
-    # TODO clean up error handling and strings
-    try:
-        db_client = DatabaseClient()
-        db_client.add_user(email,password,first_name,last_name)
-        db_client.close()
-        return "User added successfully"
-    except Exception as e: 
-        return f"Error adding contact: {e}"
 
 @app.route('/get_players_per_position/<position>')
 def get_players_per_position(position):

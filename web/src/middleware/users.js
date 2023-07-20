@@ -1,7 +1,7 @@
 import config from '../config'
 
 const getUser = async (userEmail) => {
-    const response = await fetch(`http://localhost:${config.port}/get_user`, {
+    const response = await fetch(`http://localhost:${config.port}/user`, {
       method: 'GET',
       mode: 'cors',
       headers: {
@@ -13,4 +13,19 @@ const getUser = async (userEmail) => {
     return user
   }
 
-export {getUser}
+const registerUser = async (userDetails) => {
+    const response = await fetch(`http://localhost:${config.port}/user`, {
+      method: 'POST',
+      mode: 'cors',
+      headers: {
+        'Access-Control-Allow-Origin': 'http://localhost:3000'
+      },
+      body: JSON.stringify(userDetails)
+    });
+    if (response.status == 200){
+      return {message: "User added successfully"}
+    }
+    return {message: "error adding user"}
+  }
+
+export {getUser, registerUser}

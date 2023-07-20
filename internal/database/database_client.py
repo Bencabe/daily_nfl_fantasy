@@ -27,7 +27,8 @@ class DatabaseClient:
                "(email,password,first_name,last_name) "
                "VALUES (%s, %s, %s, %s)")
         values = (email,password,first_name,last_name)
-        cursor.execute(query,values)
+        cursor = self.con.cursor()
+        cursor.execute(query, values)
         self.con.commit()
         cursor.close()
         
@@ -44,7 +45,7 @@ class DatabaseClient:
 
     def get_user_league(self,user_id, league_id):
         query = ("SELECT * FROM user_league WHERE user_id = %s AND league_id = %s")
-        values = (user_id, user_id)
+        values = (user_id, league_id)
         cursor = self.con.cursor()
         cursor.execute(query, values)
         vals = []
