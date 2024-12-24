@@ -7,3 +7,7 @@ class DatabaseCreds:
 
 class Season:
     ID = 19734
+
+class JWT:
+    SECRET = "SECRET"
+    ALGORITH = "HS256"

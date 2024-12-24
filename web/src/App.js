@@ -15,9 +15,9 @@ class App extends Component {
 
   render() {
     return(
-      <div>
-        {this.props.loggedIn ?   <Main /> : <Login store={this.props.store} updateUserAuthentication={this.updateUserAuthentication}/>}
-      </div>
+        <div>
+          {this.props.loggedIn ? <Main /> : <Login store={this.props.store} updateUserAuthentication={this.updateUserAuthentication}/>}
+        </div>
     );
   }
 }

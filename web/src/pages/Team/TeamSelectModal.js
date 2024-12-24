@@ -2,7 +2,8 @@ import React, {Component} from 'react'
 import {getPlayersPerPosition} from '../../middleware/players'
 import {connect} from 'react-redux'
 import {addPlayer, loadPlayers, setSelectedGameweek} from './TeamSelectReducer'
-import {saveUserLeagueTeam} from '../../middleware/teams'
+import {saveUserLeagueTeam,} from '../../middleware/teams'
+import {setGameweekTeam} from '../../middleware/gameweek'
 import styles from '../../styles/Team.module.css'
 import Select from 'react-select';
 
@@ -110,6 +111,14 @@ class TeamSelectModal extends Component {
             this.props.team.teamPlayers.midfielders, 
             this.props.team.teamPlayers.forwards,
             this.props.team.teamPlayers.subs)
+        
+        setGameweekTeam(
+            this.props.user.payload[0][0],
+            this.props.team.gameweekSelected.id,
+            this.props.team.leagueId,
+            this.props.team.gameweekSelected.seasonId,
+            this.props.team.teamPlayers
+        )
     }
 
     createPlayerOptions(players){

@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import CreateLeagueModal from './CreateLeagueModal'
 import JoinLeagueModal from './JoinLeagueModal'
+import LeagueTable from './LeageTableModal'
 import {pickTeam} from '../Team/TeamSelectReducer'
 import {getUserLeagues, getLeague, createLeague} from '../../middleware/leagues'
 import {connect} from 'react-redux'
@@ -71,18 +72,23 @@ class League extends Component {
     render() {
         return(
             <div id={styles.leagueMain}>
-                <select id={styles.leagueSelect} onChange={this.handleLeagueSelect}>
-                    {/* {this.state.leagues.map(this.createLeagueOption)} */}
-                    {Object.keys(this.state.leagues).map(this.createLeagueOption)}
-                </select>
-                <div id={styles.leagueModals}>
-                    <button id={styles.createLeagueButton} className={styles.leagueModalButton} onClick={() => this.toggleCreateLeagueModal()}>Create League</button>
-                    { this.state.showCreateLeagueModal ? <CreateLeagueModal handleClose={() => this.toggleCreateLeagueModal()} 
-                                                                            userId={this.props.user.payload[0][0]}
-                                                                            createLeague={createLeague}/> : null}
-                    <button id={styles.joinLeagueButton} className={styles.leagueModalButton} onClick={() => this.toggleJoinLeagueModal()}>Join League</button>
-                    { this.state.showJoinLeagueModal ? <JoinLeagueModal handleClose={() => this.toggleJoinLeagueModal()}
-                                                                        userId={this.props.user.payload[0][0]} /> : null}
+                <div>
+                    <select id={styles.leagueSelect} onChange={this.handleLeagueSelect}>
+                        {/* {this.state.leagues.map(this.createLeagueOption)} */}
+                        {Object.keys(this.state.leagues).map(this.createLeagueOption)}
+                    </select>
+                    <div id={styles.leagueModals}>
+                        <button id={styles.createLeagueButton} className={styles.leagueModalButton} onClick={() => this.toggleCreateLeagueModal()}>Create League</button>
+                        { this.state.showCreateLeagueModal ? <CreateLeagueModal handleClose={() => this.toggleCreateLeagueModal()} 
+                                                                                userId={this.props.user.payload[0][0]}
+                                                                                createLeague={createLeague}/> : null}
+                        <button id={styles.joinLeagueButton} className={styles.leagueModalButton} onClick={() => this.toggleJoinLeagueModal()}>Join League</button>
+                        { this.state.showJoinLeagueModal ? <JoinLeagueModal handleClose={() => this.toggleJoinLeagueModal()}
+                                                                            userId={this.props.user.payload[0][0]} /> : null}
+                    </div>
+                </div>
+                <div id={styles.leagueTable}>
+                    <LeagueTable leagueId={this.props.team.leagueId}></LeagueTable>
                 </div>
                 <div id={styles.footer}>League ID: {this.props.team.leagueId}</div>
             </div>

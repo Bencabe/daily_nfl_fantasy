@@ -2,6 +2,7 @@ from constants import DatabaseCreds
 import mysql.connector
 import json
 import pandas as pd
+from models.auth_models import User
 
 class DatabaseClient:
     def __init__(self):
@@ -20,6 +21,17 @@ class DatabaseClient:
             vals.append(val)
         cursor.close()
         return vals
+
+
+    def get_user_model(self,email) -> User:
+        query = ("SELECT * FROM users WHERE email = %s")
+        cursor = self.con.cursor(dictionary=True)
+        cursor.execute(query, (email,))
+        user_data = cursor.fetchone()
+        print(user_data)
+        cursor.close()
+        return User.model_validate(user_data)
+        
     
     def add_user(self,email,password,first_name,last_name):
         cursor = self.con.cursor()
@@ -123,9 +135,10 @@ class DatabaseClient:
         cursor.execute(query, values)
         self.con.commit()
         cursor.close()
-
-    def get_current_gameweek(self):
-        query = ("SELECT id, number FROM gameweeks WHERE current=1")
+    
+    def get_league_teams(self, league_id):
+        query = ("SELECT * FROM user_league WHERE league_id = '{}'".format(league_id))
+        print(query)
         cursor = self.con.cursor()
         cursor.execute(query)
         vals = []
@@ -134,8 +147,37 @@ class DatabaseClient:
         cursor.close()
         return vals
 
+    def get_current_gameweek(self):
+        query = ("SELECT * FROM gameweeks WHERE current=1")
+        cursor = self.con.cursor()
+        cursor.execute(query)
+        vals = []
+        for val in cursor:
+            vals.append(val)
+        cursor.close()
+        return vals
+    
+    def set_gameweek_team(self, gameweek_id, season_id, team_id, players):
+        print("in db")
+        query = ("REPLACE INTO gameweek_teams"
+                "(gameweek_id, season_id, team_id, goalkeepers, defenders, midfielders, forwards, subs)"
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)")
+        values = (gameweek_id, 
+                season_id, \
+                team_id, \
+                str(players.get('goalkeepers')), \
+                str(players.get('defenders')), \
+                str(players.get('midfielders')), \
+                str(players.get('forwards')), \
+                str(players.get('subs'))\
+            )
+        cursor = self.con.cursor()
+        cursor.execute(query, values)
+        self.con.commit()
+        cursor.close()
+
     def get_gameweek(self, season_id, gameweek_number):
-        query = ("SELECT id FROM gameweeks WHERE season_id=%s AND number=%s")
+        query = ("SELECT * FROM gameweeks WHERE season_id=%s AND number=%s")
         values = (season_id, gameweek_number)
         cursor = self.con.cursor()
         cursor.execute(query, values)
@@ -145,14 +187,14 @@ class DatabaseClient:
         cursor.close()
         return vals
     
-    # def get_player_gameweek_stats(self):
-    #     query = ("SELECT * FROM gameweeks WHERE current=1")
-    #     cursor = self.con.cursor()
-    #     cursor.execute(query)
-    #     vals = []
-    #     for val in cursor:
-    #         vals.append(val)
-    #     return vals
+    def get_player_gameweek_stats(self):
+        query = ("SELECT * FROM gameweeks WHERE current=1")
+        cursor = self.con.cursor()
+        cursor.execute(query)
+        vals = []
+        for val in cursor:
+            vals.append(val)
+        return vals
 
     def gameweek_team(self, gameweek_id, team_id):
         query = ("SELECT * FROM gameweek_teams WHERE gameweek_id=%s AND team_id=%s")
@@ -172,6 +214,7 @@ class DatabaseClient:
                  ON stats.fixture_id = fixtures.id\
                  WHERE round_id = {gameweek_id}')
         return json.loads(pd.read_sql(query, self.con).to_json(orient='index'))
+    
 
 
 

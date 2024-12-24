@@ -10,19 +10,15 @@ const getPlayerScore = (playerFixture, position) => {
     const defending_score = getDefendingScore(playerFixture)
     const goalkeeping_score = getGoalkeepingScore(playerFixture)
     if (position == 'goalkeeper' || position == 'goalkeepers') {
-        // console.log('g')
         return score + defending_score + goalkeeping_score
     }
     if (position == 'defender' || position == 'defenders') {
-        // console.log('d')
         return score + defending_score
     }
     if (position == 'midfielder' || position == 'midfielders'){
-        // console.log('m')
         return score + defending_score + passing_score + attacking_score
     }
     if (position == 'forward' || position == 'forwards'){
-        // console.log('f')
         return score + passing_score + attacking_score
     }
 }

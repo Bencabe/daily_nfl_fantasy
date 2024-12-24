@@ -1,0 +1,111 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #1a1a1a;
+    color: white;
+  }
+  
+  .logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .menuContainer {
+    position: relative;
+    z-index: 9999;
+  }
+  
+  .hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 21px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+  
+  .hamburger span {
+    width: 100%;
+    height: 3px;
+    background: white;
+    transition: all 0.3s;
+  }
+  
+  .hamburger.active span:first-child {
+    transform: rotate(45deg) translate(6px, 6px);
+  }
+  
+  .hamburger.active span:nth-child(2) {
+    opacity: 0;
+  }
+  
+  .hamburger.active span:last-child {
+    transform: rotate(-45deg) translate(6px, -6px);
+  }
+  
+  .dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 9999;
+    background: #1a1a1a;
+    min-width: 200px;
+    border-radius: 4px;
+    padding: 0.5rem 0;
+    margin-top: 0.5rem;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  
+  .dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  
+  .dropdown a,
+  .dropdown button {
+    display: block;
+    padding: 0.75rem 1.5rem;
+    color: white;
+    text-decoration: none;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .dropdown a:hover,
+  .dropdown button:hover {
+    background-color: #333;
+  }
+
+  .dropdown a {
+    display: block;
+    padding: 0.75rem 1.5rem;
+    color: white;
+    text-decoration: none;
+    width: calc(100% - 3rem); /* Subtracting total padding to keep width contained */
+    text-align: left;
+    transition: background-color 0.2s;
+    outline: none; /* Removes the focus outline */
+  }
+  
+  .dropdown a:focus {
+    background-color: #333;
+    outline: none;
+  }
+  
+  
+  

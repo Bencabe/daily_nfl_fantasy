@@ -1,12 +1,11 @@
 from flask import Flask, request
 from flask_cors import CORS
-import sys
 from database.database_client import DatabaseClient
 from constants import Season
 import json
 
 app = Flask(__name__)
-cors = CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+cors = CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}}, supports_credentials=True)
 
 @app.route('/user', methods=['GET','POST'])
 def user():
@@ -26,6 +25,24 @@ def user():
     db_client.close()
     return result
 
+@app.route('/login', methods=['POST'])
+def login():
+    # TODO: need to encrypt user details
+    db_client = DatabaseClient()
+    if request.method == 'POST':
+        # TODO clean up error handling and strings
+        try:
+            user = db_client.get_user_model(request.headers.get('email'))
+            db_client.close()
+            if user.password == request.headers.get('password'):
+                return user.model_dump_json()
+        except:
+            return {"response": "User not found"}, 404
+        return {"response": "Incorrect password"}, 401
+
+    
+
+
 @app.route('/get_players_per_position/<position>')
 def get_players_per_position(position):
     # TODO clean up error handling and strings
@@ -37,6 +54,19 @@ def get_players_per_position(position):
         return result
     except Exception as e: 
         return f"Error getting players: {e}"
+    
+
+@app.route('/league_teams', methods=['GET'])
+def league_teams():
+    if request.method == 'GET':
+        try:
+            db_client = DatabaseClient()
+            league_teams = db_client.get_league_teams(request.headers.get('league_id'))
+            result = json.dumps(league_teams)
+            db_client.close()
+            return result
+        except Exception as e: 
+            return json.dumps(f"Error getting league teams: {e}")
 
 @app.route('/get_user_leagues', methods=['GET','POST'])
 def user_leagues():
@@ -54,7 +84,6 @@ def user_leagues():
 def user_league():
     if request.method == 'GET':
         try:
-            print('trying')
             db_client = DatabaseClient()
             user_leagues = db_client.get_user_league(request.headers.get('user_id'), request.headers.get('league_id'))
             result = json.dumps(user_leagues)
@@ -64,7 +93,6 @@ def user_league():
             return json.dumps(f"Error getting players: {e}")
 
 @app.route('/league', methods=['GET','POST'])
-
 def league():
     try:
         db_client = DatabaseClient()
@@ -152,7 +180,6 @@ def user_league_team():
 @app.route('/gameweeks', methods=['GET','POST'])
 def gameweeks():
     if request.method == 'GET':
-        print('here')
         try:
             db_client = DatabaseClient()
             gameweek_number = request.headers.get('gameweek_number')
@@ -161,13 +188,13 @@ def gameweeks():
             else:
                 gameweek = db_client.get_current_gameweek()
             db_client.close()
-            return json.dumps(gameweek)
+            return json.dumps(gameweek, default=str)
         except Exception as e:
             print(e)
             return json.dumps(f"Error getting gameweek: {e}")
 
 
-@app.route('/gameweek_team', methods=['GET'])
+@app.route('/gameweek_team', methods=['GET', 'POST'])
 def gameweek_team():
     if request.method == 'GET':
         try: 
@@ -178,6 +205,21 @@ def gameweek_team():
             return json.dumps(gameweek_team)
         except Exception as e:
             return json.dumps(f"Error getting gameweek team: {e}")
+    if request.method == "POST":
+        players = json.loads(request.data)
+        try:
+            db_client = DatabaseClient()
+            db_client.set_gameweek_team(
+                request.headers.get('gameweek_id'),
+                request.headers.get('season_id'),
+                request.headers.get('team_id'),
+                players
+            )
+            db_client.close()
+        except Exception as e:
+            return json.dumps(f"Error seeting gameweek team: {e}")
+        return json.dumps("success")
+
 
 @app.route('/gameweek_stats', methods=['GET'])
 def gameweek_stats():
@@ -196,4 +238,4 @@ def gameweek_stats():
 
 
 if __name__ == '__main__':
-   app.run(port=5001, debug = True)
+   app.run(port=5001, debug=True)

@@ -52,11 +52,6 @@
     margin: 5px;
 }
 
-#createLeagueButton{
-    /* border-radius: 20% 0% 0% 20%; */
-    
-}
-
 #leagueSelect{
     border: none;
 }
@@ -81,4 +76,14 @@
     position: absolute;
     bottom: 0;
     font-size: small;
+}
+
+#leagueTable{
+    /* border-collapse: collapse; */
+    position:relative;
+    transform: translateY(20vh);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
 }

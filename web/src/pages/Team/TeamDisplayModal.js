@@ -73,7 +73,7 @@ class TeamDisplayModal extends Component {
     }
 
     canDeletePlayers() {
-        return this.props.team.gameweekSelected == this.props.team.curGameweek && !this.curGameweekActive()
+        return this.props.team.gameweekSelected.number == this.props.team.curGameweek.number && !this.curGameweekActive()
     }
 
     curGameweekActive() {

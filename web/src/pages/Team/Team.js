@@ -4,9 +4,9 @@ import {getUserLeagues, getLeague} from '../../middleware/leagues'
 import TeamSelectModal from './TeamSelectModal'
 import TeamDisplayModal from './TeamDisplayModal'
 import {pickTeam, setPlayers, setSelectedGameweek, setCurrentGameweek, setPlayerStats} from './TeamSelectReducer'
-import {getUserLeagueTeam} from '../../middleware/teams'
 import {getGameweek, getGameweekTeam, getGameweekStats} from '../../middleware/gameweek'
 import styles from '../../styles/Team.module.css'
+import Gameweek from '../../classes/Gameweek'
 
 class Team extends Component {
     constructor(props) {
@@ -24,23 +24,19 @@ class Team extends Component {
         canDelete: false
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         const userId = this.props.user.payload[0][0]
-        getGameweek('current').then(
-            result => {
-                this.props.setCurrentGameweek(result[0][1])
-                this.props.setSelectedGameweek(result[0][1])
-                this.setState({
-                    curGameweek: result[0][1],
-                    selectedGameweek: result[0][1]
-                })
-            }
-        )
+        const curGameweek = await getGameweek('current')
+        await this.props.setCurrentGameweek(curGameweek.serialize())
+        await this.props.setSelectedGameweek(curGameweek.serialize())
+        this.setState({
+            selectedGameweek: curGameweek
+        })
         getUserLeagues(userId).then(
             (result) => {
                 for (let i=0; i<result.length; i++){
                     const leagueId = result[i][1]
-                    getLeague(result[i]).then(
+                    getLeague(leagueId).then(
                         getLeagueresult => 
                             this.setState({
                             userLeagues: [...this.state.userLeagues, getLeagueresult],
@@ -73,9 +69,9 @@ class Team extends Component {
     }
 
     async loadTeam(){
-        const gameweekStats = await getGameweekStats(this.props.team.gameweekSelected)
+        const gameweekStats = await getGameweekStats(this.props.team.gameweekSelected.id)
         this.props.setPlayerStats(gameweekStats)
-        const gameweekTeam = await getGameweekTeam(this.props.team.gameweekSelected, this.props.team.leagueId, this.props.user.payload[0][0])
+        const gameweekTeam = await getGameweekTeam(this.props.team.gameweekSelected.id, this.props.team.leagueId, this.props.user.payload[0][0])
         this.props.setPlayers({'players': gameweekTeam.goalkeepers, position: 'goalkeepers'})
         this.props.setPlayers({'players': gameweekTeam.defenders, position: 'defenders'})
         this.props.setPlayers({'players': gameweekTeam.midfielders, position: 'midfielders'})
@@ -84,8 +80,12 @@ class Team extends Component {
     }
 
     async updateSelectedGameweek(operation) {
-        const newGameweek = operation=='add'? this.props.team.gameweekSelected + 1 : this.props.team.gameweekSelected - 1
-        this.props.setSelectedGameweek(newGameweek)
+        // const curGameweek = new Gameweek(this.props.team.gameweekSelected)
+        // console.log(this.props.team.gameweekSelected)
+        // console.log(curGameweek)
+        this.state.selectedGameweek.updateNumber(operation)
+        console.log(this.props.team.gameweekSelected)
+        console.log(this.state.selectedGameweek)
         this.loadTeam()
     }
 
@@ -104,9 +104,10 @@ class Team extends Component {
                     <div id={styles.teamName}><h4>{this.state.userLeagueTeam ? this.state.userLeagueTeam[7] : null}</h4> <div>{}</div></div>
                 <br/>
                 <br/>
-                <div><button onClick={() => this.updateSelectedGameweek('subtract')} disabled={this.state.selectedGameweek <= 1} >{"<"}</button>
-                <span>Gameweek {this.props.team.gameweekSelected}</span>
-                <button onClick={() => this.updateSelectedGameweek('add')} disabled={this.props.team.gameweekSelected  >= this.state.curGameweek}>{">"}</button></div>
+                {/* {console.log(this.props.team.gameweekSelected)} */}
+                <div><button onClick={() => this.updateSelectedGameweek('subtract')} disabled={this.props.team.gameweekSelected.number <= 1} >{"<"}</button>
+                <span>Gameweek {this.props.team.gameweekSelected.number}</span>
+                <button onClick={() => this.updateSelectedGameweek('add')} disabled={this.props.team.gameweekSelected.number  >= this.props.team.curGameweek.number}>{">"}</button></div>
                 <div id={styles.body}>
                     <div id={styles.selectModal}><TeamSelectModal/></div>
                     <div id={styles.displayModal}><TeamDisplayModal/></div>

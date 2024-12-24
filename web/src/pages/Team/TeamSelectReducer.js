@@ -1,11 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit'
+import Gameweek from '../../classes/Gameweek'
 
 export const setPlayerslice = createSlice({
     name: 'addPlayer',
     initialState: {
         team: null,
-        gameweekSelected: null,
-        curGameweek: null,
+        gameweekSelected: {},
+        curGameweek: {},
         gameweekScore: 0,
         playerStats: {},
         leagueId: null,
@@ -47,7 +48,8 @@ export const setPlayerslice = createSlice({
             state.gameweekSelected = gameweek.payload
         },
         setCurrentGameweek: (state, gameweek) => {
-            state.curGameweek = gameweek.payload
+            const gameweekArr = [gameweek.id,gameweek.number,gameweek.seasonId,gameweek.startDate,gameweek.endDate,gameweek.current]
+            state.curGameweek = gameweekArr
         },
         setPlayerStats: (state, stats) => {
             state.playerStats = stats.payload

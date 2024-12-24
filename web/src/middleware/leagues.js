@@ -60,4 +60,18 @@ const joinLeague = async (userId, leagueId, teamName) => {
   return responseJson
 }
 
+export const getLeagueTeams = async (leagueId) => {
+  console.log(leagueId)
+  const response = await fetch(`http://localhost:${config.port}/league_teams`, {
+    method: 'GET',
+    mode: 'cors',
+    headers: {
+      'league_id': leagueId,
+      'Access-Control-Allow-Origin': 'http://localhost:3000'
+    }
+  });
+  const userLeagues = await response.json();
+  return userLeagues
+}
+
 export {getUserLeagues, getLeague, createLeague, joinLeague}
