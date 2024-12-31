@@ -104,36 +104,16 @@ async def player_draft(
     await websocket.accept()
     await draft_service.connect(league_id, websocket)
     
-    while True:
-        try:
-            receive_task = asyncio.create_task(websocket.receive_json())
-            timer_task = asyncio.create_task(asyncio.sleep(TURN_TIME_LIMIT))
-            
-            done, pending = await asyncio.wait(
-                [receive_task, timer_task],
-                return_when=asyncio.FIRST_COMPLETED
-            )
-            
-            for task in pending:
-                task.cancel()
-            
-            if timer_task in done:
-                time_expired_message = {"message_type": "timeExpired"}
-                response = draft_service.handle_message(time_expired_message, league_id)
-                await draft_service.broadcast(response, league_id)
-            else:
-                # Message received
-                data = receive_task.result()
-                response = draft_service.handle_message(data, league_id)
-                await draft_service.broadcast(response, league_id)
-                
-                # Only continue timer if it wasn't a player selection
-                if data.get("type") != "playerSelected":
-                    timer_task = asyncio.create_task(asyncio.sleep(TURN_TIME_LIMIT))
+    try:
+        while True:
+            data = await websocket.receive_json()
+            response = draft_service.handle_message(data, league_id)
+            await draft_service.broadcast(response, league_id)
+    except Exception as e:
+        print(f"WebSocket error: {e}")
+    finally:
+        await draft_service.disconnect(websocket, league_id)
 
-        except Exception as e:
-            print(f"WebSocket error: {e}")
-            break
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+import asyncio
 from itertools import cycle
 from random import shuffle
 from fastapi import Depends, WebSocket
@@ -5,10 +6,11 @@ from database.database_client import DatabaseClient
 from models.db_models import League, LeagueTeam, Player
 from models.draft_models import DraftMessage, DraftStatus, PlayerSelected, StartDraft, TimeExpired, TurnChange, PlayerConnect, Positions
 
-    
+TURN_TIME_LIMIT = 62
 class DraftService:
-    # TODO: maintining connections in this class this will not work in a distributed environment. Implement a queue
+    # TODO: maintining connections in this class this will not work in a distributed environment. Could potentially use redis to solve this
     connections: dict[int, list[WebSocket]] = {}
+    league_timers: dict[int, asyncio.Task] = {}
     
     def __init__(self, db_client: DatabaseClient = Depends(DatabaseClient)):
         self.db_client = db_client
@@ -30,6 +32,19 @@ class DraftService:
         for connection in cls.connections[league_id]:
             await connection.send_json(message.model_dump(by_alias=True))
     
+    async def _start_timer(self, league_id: int):
+        if league_id in self.league_timers:
+            self.league_timers[league_id].cancel()
+        
+        async def timer_expired():
+            await asyncio.sleep(TURN_TIME_LIMIT)
+            time_expired_message = {"message_type": "timeExpired"}
+            response = self.handle_message(time_expired_message, league_id)
+            await self.broadcast(response, league_id)
+            await self._start_timer(league_id)
+
+        self.league_timers[league_id] = asyncio.create_task(timer_expired())
+    
     def _update_turn(
             self, 
             league: League,
@@ -48,6 +63,7 @@ class DraftService:
             )
         league.draft_turn = next_player
         self.db_client.update_league(league.model_dump(by_alias=True))
+        asyncio.create_task(self._start_timer(league.id))
         return turn_update
 
     def _select_random_player(self, league_teams: dict[int, LeagueTeam], league: League, players: list[Player]) -> LeagueTeam:
@@ -128,6 +144,8 @@ class DraftService:
                 current_user_turn = next((user for user in league_users if user.id == league.draft_turn), None)
                 if not current_user_turn:
                     raise Exception("users turn not found")
+                if not self.league_timers.get(league_id):
+                    asyncio.create_task(self._start_timer(league_id))
                 return DraftStatus(
                     message_type="draftStatus",
                     draft_state=league.draft_started,
@@ -149,6 +167,7 @@ class DraftService:
             self.db_client.update_league(league.model_dump())
             if not current_user_turn:
                 raise Exception("users turn not found")
+            asyncio.create_task(self._start_timer(league_id))
             return DraftStatus(
                     message_type="draftStatus",
                     draft_state=league.draft_started,
