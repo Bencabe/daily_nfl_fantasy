@@ -91,6 +91,9 @@ class DraftService:
         if len(current_team.forwards) < 3:
             available_players.extend([p for p in players if p.position_category == Positions.Forward and p.id not in selected_players])
 
+        if len(available_players == 0):
+            # if there aren't any players available the team is full
+            return current_team
         shuffle(available_players)
         random_player: Player = available_players[0]
 
