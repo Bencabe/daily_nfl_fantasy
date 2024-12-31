@@ -6,7 +6,7 @@ class DatabaseCreds:
     DB_NAME = "daily_ff"
 
 class Season:
-    ID = 19734
+    ID = 23614
 
 class JWT:
     SECRET = "SECRET"

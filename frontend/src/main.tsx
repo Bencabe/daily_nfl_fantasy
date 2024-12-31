@@ -24,18 +24,6 @@ export type GlobalContextType = {
 
 export const GlobalContext = React.createContext<GlobalContextType | null>(null);
 
-// const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
-//   const [globalState, setGlobalState] = useState({
-//     user: null,
-//     settings: {}
-//   });
-
-//   return (
-//     <GlobalContext.Provider value={globalState}>
-//       {children}
-//     </GlobalContext.Provider>
-//   );
-// };
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);

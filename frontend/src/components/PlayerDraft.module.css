@@ -1,0 +1,65 @@
+.draftContainer {
+    padding: 20px;
+  }
+  
+  .viewToggle {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .activeView {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .filters {
+    margin-bottom: 20px;
+  }
+  
+  .playerTable {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .playerTable th,
+  .playerTable td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .selectButton {
+    padding: 5px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .selectButton:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  .filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+  
+  .filters input,
+  .filters select {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-width: 200px;
+  }
+  
+  .filters input:focus,
+  .filters select:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+  }  

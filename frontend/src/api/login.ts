@@ -1,6 +1,5 @@
 import config from '../../config'
 import axios from 'axios';
-import { User } from '../components/Login';
 
 const getUser = async (userEmail: string) => {
     const response = await fetch(`http://localhost:${config.port}/user`, {

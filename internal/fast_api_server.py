@@ -1,9 +1,11 @@
-from fastapi import FastAPI, Header, Response, Request, WebSocket
+import asyncio
+from fastapi import Depends, FastAPI, Header, Response, Request, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from database.database_client import DatabaseClient
 import uvicorn
 import jwt
 from constants import JWT
+from services.draft_service import DraftService
 from middlewares.jwt_auth import JWTMiddleware, validate_jwt
 import datetime
 
@@ -85,36 +87,55 @@ async def whoami(request: Request, response: Response):
     response.status_code = 404
     return {"message": "user not authenticated"}
 
+import asyncio
+from fastapi import Depends, FastAPI, WebSocket
+from services.draft_service import DraftService
+
+# Jank, front end timer not lining up with backend timer by about 2 seconds.
+# TODO: find a better way to do this so the turn timing is more accurate
+
+TURN_TIME_LIMIT = 62  # seconds per turn
+
 @app.websocket("/player_draft/{league_id}")
-async def player_draft(websocket: WebSocket):
-    users = [
-        {'id': 7, 'name': 'Ben'},
-        {'id': 8, 'name': 'Ben2'}
-    ]
-    players = [
-        {'id': 1, 'name': 'Bruno'},
-        {'id': 1, 'name': 'Rashford'}
-    ]
+async def player_draft(
+    websocket: WebSocket,
+    league_id: int,
+    draft_service: DraftService = Depends(DraftService)
+):
     await websocket.accept()
+    await draft_service.connect(league_id, websocket)
+    
     while True:
-        data = await websocket.receive_json()
-        await websocket.send_json({
-            'type': 'playerList',
-            'players': players
-        })
+        try:
+            receive_task = asyncio.create_task(websocket.receive_json())
+            timer_task = asyncio.create_task(asyncio.sleep(TURN_TIME_LIMIT))
+            
+            done, pending = await asyncio.wait(
+                [receive_task, timer_task],
+                return_when=asyncio.FIRST_COMPLETED
+            )
+            
+            for task in pending:
+                task.cancel()
+            
+            if timer_task in done:
+                time_expired_message = {"message_type": "timeExpired"}
+                response = draft_service.handle_message(time_expired_message, league_id)
+                await draft_service.broadcast(response, league_id)
+            else:
+                # Message received
+                data = receive_task.result()
+                response = draft_service.handle_message(data, league_id)
+                await draft_service.broadcast(response, league_id)
+                
+                # Only continue timer if it wasn't a player selection
+                if data.get("type") != "playerSelected":
+                    timer_task = asyncio.create_task(asyncio.sleep(TURN_TIME_LIMIT))
 
+        except Exception as e:
+            print(f"WebSocket error: {e}")
+            break
 
-# @app.get("/get_players_per_position/{position}")
-# async def get_players_per_position(position: str):
-#     db_client = DatabaseClient()
-#     try:
-#         players = db_client.get_players_per_position(position)
-#         db_client.close()
-#         return json.dumps(players)
-#     except Exception as e:
-#         return {"error": f"Error getting players: {str(e)}"}
-
-# Continue converting the rest of the routes in a similar manner...
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=5001)

@@ -1,0 +1,48 @@
+.selectedPlayersView {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .teamSection {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .teamHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    cursor: pointer;
+    background-color: #f0f0f0;
+  }
+  
+  .teamHeader:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .expandIcon {
+    font-size: 1.2rem;
+  }
+  
+  .positionGroups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .positionGroup {
+    padding: 1rem;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+  }
+  
+  .positionGroup h4 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+  
