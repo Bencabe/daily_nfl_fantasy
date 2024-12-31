@@ -51,7 +51,6 @@ async def login(response: Response, email: str = Header(None), password: str = H
     db_client = DatabaseClient()
     try:
         user = db_client.get_user_model(email)
-        print(user)
         db_client.close()
         if user.password == password:
             jwt_token = jwt.encode(

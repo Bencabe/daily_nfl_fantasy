@@ -438,7 +438,6 @@ class DatabaseClient:
         cursor.execute(query)
         teams: list[UserLeague] = []
         for team in cursor:
-            print(team)
             teams.append(
                 UserLeague(
                     team_id=team['team_id'],
@@ -452,9 +451,6 @@ class DatabaseClient:
                     team_name=team['team_name']
                 )
             )
-            print(teams)
-        print("returning")
-        print(teams)
         return teams
         # with self.con.cursor(dictionary=True) as cur:
         #     cur.execute(query)

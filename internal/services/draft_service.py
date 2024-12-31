@@ -2,7 +2,7 @@ from itertools import cycle
 from random import shuffle
 from fastapi import Depends, WebSocket
 from database.database_client import DatabaseClient
-from models.db_models import League, LeagueTeam
+from models.db_models import League, LeagueTeam, Player
 from models.draft_models import DraftMessage, DraftStatus, PlayerSelected, StartDraft, TimeExpired, TurnChange, PlayerConnect, Positions
 
     
@@ -32,8 +32,7 @@ class DraftService:
     
     def _update_turn(
             self, 
-            league: League, 
-            message: TimeExpired | PlayerSelected,
+            league: League,
             league_teams: dict[int, LeagueTeam]
         ) -> TurnChange:
         if not league.draft_order:
@@ -51,6 +50,51 @@ class DraftService:
         self.db_client.update_league(league.model_dump(by_alias=True))
         return turn_update
 
+    def _select_random_player(self, league_teams: dict[int, LeagueTeam], league: League, players: list[Player]) -> LeagueTeam:
+        # Get current user's team before changing turn
+        if not league.draft_turn:
+            raise(Exception("draft has not been started"))
+        current_team = league_teams[league.draft_turn]
+        
+        # Get all selected players across all teams
+        selected_players = []
+        for team in league_teams.values():
+            selected_players.extend(team.goalkeepers)
+            selected_players.extend(team.defenders)
+            selected_players.extend(team.midfielders)
+            selected_players.extend(team.forwards)
+        
+        # Filter available players based on position limits and not already selected
+        available_players: list[Player] = []
+        if len(current_team.goalkeepers) < 2:
+            available_players.extend([p for p in players if p.position_category == Positions.Goalkeeper and p.id not in selected_players])
+        if len(current_team.defenders) < 5:
+            available_players.extend([p for p in players if p.position_category == Positions.Defender and p.id not in selected_players])
+        if len(current_team.midfielders) < 5:
+            available_players.extend([p for p in players if p.position_category == Positions.Midfielder and p.id not in selected_players]) 
+        if len(current_team.forwards) < 3:
+            available_players.extend([p for p in players if p.position_category == Positions.Forward and p.id not in selected_players])
+
+        shuffle(available_players)
+        random_player: Player = available_players[0]
+
+        if not random_player or not isinstance(random_player, Player):
+            raise Exception("No available players")
+        
+        # Add player to appropriate position list
+        match random_player.position_category:
+            case Positions.Goalkeeper:
+                current_team.goalkeepers.append(random_player.id)
+            case Positions.Defender:
+                current_team.defenders.append(random_player.id)
+            case Positions.Midfielder:
+                current_team.midfielders.append(random_player.id)
+            case Positions.Forward:
+                current_team.forwards.append(random_player.id)
+        
+        return current_team
+                
+
     def handle_message(
             self, 
             raw_message: dict[str, any], 
@@ -65,7 +109,18 @@ class DraftService:
             league_teams[user.id] = self.db_client.get_league_team(user.id, league_id)
         
         if isinstance(message, TimeExpired):
-            turn_update = self._update_turn(league, message, league_teams)
+            updated_team = self._select_random_player(league_teams, league, players)
+            league_teams[league.draft_turn] = updated_team
+            self.db_client.update_team(
+                league_id,
+                league.draft_turn,
+                updated_team.goalkeepers,
+                updated_team.defenders,
+                updated_team.midfielders,
+                updated_team.forwards,
+                updated_team.subs
+            )
+            turn_update = self._update_turn(league, league_teams)
             return turn_update
         if isinstance(message, PlayerConnect):
             # TODO validate player is part of the league
@@ -103,7 +158,7 @@ class DraftService:
                     league_teams=league_teams,
                 )
         if isinstance(message, PlayerSelected):
-            turn_update = self._update_turn(league, message, league_teams)
+            turn_update = self._update_turn(league, league_teams)
             team = league_teams[message.user_id]
             match message.player_position:
                 case Positions.Goalkeeper:
