@@ -13,7 +13,7 @@ from database.database_client import DatabaseClient
 import sys
 from typing import Optional
 from database.database_client import DatabaseClient
-from models.db_models import UserLeague
+from models.db_models import LeagueTeam
 from constants import Season
 
 def add_gameweek_teams(gameweek_id: Optional[int] = None):
@@ -26,7 +26,7 @@ def add_gameweek_teams(gameweek_id: Optional[int] = None):
         gameweek_id = cur_gameweeks[0].id
 
 
-    user_league_teams: list[UserLeague] = db_client.get_all_user_league_teams()
+    user_league_teams: list[LeagueTeam] = db_client.get_all_user_league_teams()
 
     for team in user_league_teams:
         gameweek_team = {
@@ -37,7 +37,8 @@ def add_gameweek_teams(gameweek_id: Optional[int] = None):
             'defenders': team.defenders,
             'midfielders': team.midfielders,
             'forwards': team.forwards,
-            'subs': team.subs
+            'subs': team.subs,
+            'tactics': team.tactic
         }
         db_client.add_data_mapping_object("gameweek_teams", gameweek_team)
 

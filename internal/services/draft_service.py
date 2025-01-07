@@ -9,28 +9,29 @@ from models.draft_models import DraftMessage, DraftStatus, PlayerSelected, Start
 TURN_TIME_LIMIT = 62
 class DraftService:
     # TODO: maintining connections in this class this will not work in a distributed environment. Could potentially use redis to solve this
-    connections: dict[int, list[WebSocket]] = {}
+    connections: dict[int, dict[int, WebSocket]] = {}
     league_timers: dict[int, asyncio.Task] = {}
     
     def __init__(self, db_client: DatabaseClient = Depends(DatabaseClient)):
         self.db_client = db_client
         # self.connections = set()
     
-    async def connect(cls, league_id: int, websocket: WebSocket):
-        cur_connections = cls.connections.get(league_id, [])
-        if websocket not in cur_connections:
-            cur_connections.append(websocket)
-        cls.connections[league_id] = cur_connections
+    async def connect(cls, league_id: int, user_id: int, websocket: WebSocket):
+        league = cls.connections.get(league_id, None)
+        if not league:
+            cls.connections[league_id] = {}
+        cls.connections[league_id][user_id] = websocket
         
-    async def disconnect(cls, websocket, league_id: int):
-        cur_connections = cls.connections.get(league_id, [])
-        if websocket in cur_connections:
-            cur_connections.remove(websocket)
-        cls.connections[league_id] = cur_connections
+    async def disconnect(cls, league_id: int, user_id: int):
+        if league_id in cls.connections:
+            if user_id in cls.connections[league_id]:
+                if cls.connections[league_id][user_id]:
+                    await cls.connections[league_id][user_id].close()
+                    cls.connections[league_id][user_id] = None
     
     async def broadcast(cls, message: DraftMessage, league_id: int):
-        for connection in cls.connections[league_id]:
-            await connection.send_json(message.model_dump(by_alias=True))
+        for user in cls.connections[league_id].keys():
+            await cls.connections[league_id][user].send_json(message.model_dump(by_alias=True))
     
     async def _start_timer(self, league_id: int):
         if league_id in self.league_timers:
@@ -64,6 +65,25 @@ class DraftService:
         league.draft_turn = next_player
         self.db_client.update_league(league.model_dump(by_alias=True))
         asyncio.create_task(self._start_timer(league.id))
+
+        # FINISH THIS LOGIC TO COMPLETE THE DRAFT
+        # all_teams_full = True
+        # for team in league_teams.values():
+        #     if (len(team.goalkeepers) < 2 or 
+        #         len(team.defenders) < 5 or 
+        #         len(team.midfielders) < 5 or 
+        #         len(team.forwards) < 3):
+        #         all_teams_full = False
+        #         break
+        
+        # if all_teams_full:
+        #     league.draft_completed = True
+        #     self.db_client.update_league(league.model_dump(by_alias=True))
+        #     return DraftCompleted(
+        #         message_type="draftCompleted",
+        #         league_teams=league_teams
+        #     )
+        
         return turn_update
 
     def _select_random_player(self, league_teams: dict[int, LeagueTeam], league: League, players: list[Player]) -> LeagueTeam:
@@ -91,7 +111,7 @@ class DraftService:
         if len(current_team.forwards) < 3:
             available_players.extend([p for p in players if p.position_category == Positions.Forward and p.id not in selected_players])
 
-        if len(available_players == 0):
+        if len(available_players) == 0:
             # if there aren't any players available the team is full
             return current_team
         shuffle(available_players)

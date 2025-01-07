@@ -4,7 +4,7 @@ import jwt
 from constants import JWT 
 from http import cookies
 
-EXEMPT_ROUTES = ["/login", "/whoami"]
+EXEMPT_ROUTES = ["/login", "/whoami", "/docs", "/openapi.json"]
 
 def validate_jwt(request: Request):
     jwt_token = request.cookies.get('jwt_token')
@@ -19,6 +19,9 @@ def validate_jwt(request: Request):
 
 class JWTMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+
+        if request.method == "OPTIONS":
+            return await call_next(request)
 
         if request.url.path in EXEMPT_ROUTES:
             return await call_next(request)

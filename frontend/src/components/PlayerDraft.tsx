@@ -81,7 +81,7 @@ const PlayerDraft: React.FC = () => {
   }, [players, nameFilter, teamFilter, positionFilter, currentTurn]);
 
   const { sendMessage, lastMessage } = useWebSocket<WebSocketMessage>(
-    `ws://0.0.0.0:5001/player_draft/${user.activeLeague}`,
+    `ws://0.0.0.0:5001/player_draft/${user.activeLeague}?user_id=${user.id}`,
     {shouldReconnect: () => draftStarted}
   );
 

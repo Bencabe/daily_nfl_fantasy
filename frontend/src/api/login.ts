@@ -7,7 +7,7 @@ const getUser = async (userEmail: string) => {
       mode: 'cors',
       headers: {
         'email': userEmail,
-        'Access-Control-Allow-Origin': 'http://localhost:3000'
+        'Access-Control-Allow-Origin': '*'
       }
     });
     const user = await response.json();
@@ -20,6 +20,7 @@ const getUser = async (userEmail: string) => {
       headers: {
         'email': userEmail,
         'password': password,
+        'Access-Control-Allow-Origin': '*'
       },
       withCredentials: true,
     });

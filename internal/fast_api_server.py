@@ -1,11 +1,12 @@
-import asyncio
 from fastapi import Depends, FastAPI, Header, Response, Request, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from database.database_client import DatabaseClient
 import uvicorn
 import jwt
-from constants import JWT
+from constants import JWT, Season
+from models.db_models import Gameweek
 from services.draft_service import DraftService
+from services.team_management import GameweekStats, TeamManagementService
 from middlewares.jwt_auth import JWTMiddleware, validate_jwt
 import datetime
 
@@ -15,10 +16,11 @@ app = FastAPI()
 # CORS setup
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000", "http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 app.add_middleware(JWTMiddleware)
@@ -86,23 +88,51 @@ async def whoami(request: Request, response: Response):
     response.status_code = 404
     return {"message": "user not authenticated"}
 
-import asyncio
-from fastapi import Depends, FastAPI, WebSocket
-from services.draft_service import DraftService
+@app.get("/gameweek_stats", response_model=GameweekStats, operation_id="getGameweekStats")
+async def get_gameweek_stats(
+        league_id: int,
+        user_id: int,
+        gameweek_id: int,
+        current_gameweek: bool,
+        team_management_service: TeamManagementService = Depends(TeamManagementService.get_instance)
+    ):
+    return team_management_service.get_gameweek_stats(league_id, user_id, gameweek_id, current_gameweek)
 
-# Jank, front end timer not lining up with backend timer by about 2 seconds.
-# TODO: find a better way to do this so the turn timing is more accurate
+@app.get("/gameweek_by_number", response_model=Gameweek, operation_id="getGameweekByNumber")
+async def get_gameweek_team(
+        gameweek_number: int,
+        db_client: DatabaseClient = Depends(DatabaseClient)
+    ):
+    return db_client.get_gameweek_by_number(gameweek_number, season_id=Season.ID)
 
-TURN_TIME_LIMIT = 62  # seconds per turn
+@app.get("/gameweek_current_gameweek", response_model=Gameweek, operation_id="getCurrentGameweek")
+async def get_current_gameweek(
+        db_client: DatabaseClient = Depends(DatabaseClient)
+    ):
+    return db_client.get_current_gameweek_model()[0]
+
+@app.get("/all_gameweeks", response_model=list[Gameweek], operation_id="getAllGameweeks")
+async def get_current_gameweek(
+        db_client: DatabaseClient = Depends(DatabaseClient)
+    ):
+    return db_client.get_all_gameweeks(Season.ID)
+
+# @app.get("/gameweek_team", response_model=, operation_id="")
+# async def get_current_gameweek(
+#         db_client: DatabaseClient = Depends(DatabaseClient)
+#     ):
+#     return db_client.get_gameweek_team_model()[0]
+
 
 @app.websocket("/player_draft/{league_id}")
 async def player_draft(
     websocket: WebSocket,
     league_id: int,
+    user_id: int,
     draft_service: DraftService = Depends(DraftService)
 ):
     await websocket.accept()
-    await draft_service.connect(league_id, websocket)
+    await draft_service.connect(league_id, user_id, websocket)
     
     try:
         while True:
@@ -112,7 +142,8 @@ async def player_draft(
     except Exception as e:
         print(f"WebSocket error: {e}")
     finally:
-        await draft_service.disconnect(websocket, league_id)
+        await draft_service.disconnect(league_id, user_id)
+
 
 
 

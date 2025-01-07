@@ -57,41 +57,6 @@ def player_stat_mapping(stats, season_id):
     return mapping
 
 
-    mapping = {}
-    for player in player_stats:
-        if player.get('player'):
-            player_details = player['player']['data']
-            players_id = player['player_id']
-            mapping[players_id] = {}
-            mapping[players_id]['fantasy_id'] = players_id
-            mapping[players_id]['first_name'] = player_details.get('firstname')
-            mapping[players_id]['last_name'] = player_details.get('lastname')
-            mapping[players_id]['display_name'] = player_details.get('display_name')
-            mapping[players_id]['position_id'] = player_details.get('position_id')
-            mapping[players_id]['team_id'] = player.get('team_id')
-            if player_details.get('position_id') == 1:
-                mapping[players_id]['position_category'] = 'goalkeeper'
-            if player_details.get('position_id') == 2:
-                mapping[players_id]['position_category'] = 'defender'
-            if player_details.get('position_id') == 3:
-                mapping[players_id]['position_category'] = 'midfielder'
-            if player_details.get('position_id') == 4:
-                mapping[players_id]['position_category'] = 'forward'
-        else:
-            players_id = player['player_id']
-            mapping[players_id] = {}
-            mapping[players_id]['fantasy_id'] = players_id
-            mapping[players_id]['team_id'] = player.get('team_id')
-            if player.get('position_id') == 'G':
-                mapping[players_id]['position_category'] = 'goalkeeper'
-            if player.get('position_id') == 'D':
-                mapping[players_id]['position_category'] = 'defender'
-            if player.get('position_id') == 'M':
-                mapping[players_id]['position_category'] = 'midfielder'
-            if player.get('position_id') == 'F':
-                mapping[players_id]['position_category'] = 'forward'     
-    return mapping
-
 api_client = FantasyDataClient()
 db_client = DatabaseClient()
 gameweek_id = int(sys.argv[1]) if len(sys.argv) > 1 else None
@@ -112,11 +77,15 @@ for fixture in gameweek_fixtures:
 
 
 for fixture in gameweek_player_stats:
+    if "data" not in fixture:
+        raise Exception(f"No data in fixture: {fixture}")
     starting_player_stats = player_stat_mapping(fixture['data']['lineup']['data'], season_id)
     subs_stats = player_stat_mapping(fixture['data']['bench']['data'], season_id)
     for player_id in starting_player_stats:
         db_client.add_data_mapping_object('gameweek_player_stats',starting_player_stats[player_id])
     for player_id in subs_stats:
         db_client.add_data_mapping_object('gameweek_player_stats', subs_stats[player_id])
+
+print("Data insertion complete")
 
 

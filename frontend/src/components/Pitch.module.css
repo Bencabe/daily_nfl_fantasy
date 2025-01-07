@@ -1,0 +1,62 @@
+.fullTeamView {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.pitchContainer {
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 60vw;
+    height: 90vh;
+    position: relative;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.positionGroup {
+    position: absolute;
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.goalkeepers {
+    bottom: 5%;
+}
+
+.defenders {
+    bottom: 25%;
+}
+
+.midfielders {
+    bottom: 50%;
+}
+
+.forwards {
+    bottom: 75%;
+}
+
+.benchContainer {
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+}
+
+.benchPlayers {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.pitchContainer, .benchContainer {
+    cursor: move;
+  }
+  
+  .pitchContainer.dragOver,
+  .benchContainer.dragOver {
+    border: 2px dashed #666;
+  }
+  

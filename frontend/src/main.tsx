@@ -2,12 +2,12 @@ import { StrictMode, useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom'
 import {validateJWT} from './api/login.ts'
-import App from './App.tsx'
 import LoginPage, { User } from './components/Login.tsx'
 import './index.css'
 import PlayerDraft from './components/PlayerDraft.tsx';
 import NavBar from './components/NavBar';
 import React from 'react'
+import Home from './components/Home.tsx'
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -69,7 +69,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={
           <ProtectedRoute>
-            <Layout><App /></Layout>
+            <Layout><Home /></Layout>
           </ProtectedRoute>
         } />
           <Route path="/draft/:leagueId" element={

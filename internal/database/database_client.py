@@ -2,7 +2,7 @@ from constants import DatabaseCreds
 import mysql.connector
 import json
 import pandas as pd
-from models.db_models import Gameweek, League, UserLeague, Player, LeagueTeam
+from models.db_models import Gameweek, GameweekPlayerStats, GameweekTeam, League, Player, LeagueTeam
 from models.auth_models import PublicUser, User
 
 class DatabaseClient:
@@ -200,6 +200,7 @@ class DatabaseClient:
             midfielders=json.loads(league_team['midfielders']),
             forwards=json.loads(league_team['forwards']),
             subs=json.loads(league_team['subs']),
+            tactic=league_team['tactic']
         )
 
     def update_team(self, league_id, user_id, goalkeepers, defenders, midfielders, forwards, subs):
@@ -230,14 +231,14 @@ class DatabaseClient:
         cursor.close()
         return vals
     
-    def get_league_team_models(self, league_id) -> list[UserLeague]:
+    def get_league_team_models(self, league_id) -> list[LeagueTeam]:
         query = ("SELECT * FROM user_league WHERE league_id = '{}'".format(league_id))
         cursor = self.con.cursor(dictionary=True)
         cursor.execute(query)
-        vals: list[UserLeague] = []
+        vals: list[LeagueTeam] = []
         for val in cursor:
             vals.append(
-                UserLeague(
+                LeagueTeam(
                     team_id=val['team_id'],
                     league_id=val['league_id'],
                     user_id=val['user_id'],
@@ -246,7 +247,8 @@ class DatabaseClient:
                     midfielders=json.loads(val['midfielders']),
                     forwards=json.loads(val['forwards']),
                     subs=json.loads(val['subs']),
-                    team_name=val['team_name']
+                    team_name=val['team_name'],
+                    tactic=val['tactic']
                 )
             )
         cursor.close()
@@ -322,6 +324,30 @@ class DatabaseClient:
         cursor.close()
         return vals
     
+    def get_all_gameweeks(self, season_id: int) -> list[Gameweek]:
+        query = ("SELECT * FROM gameweeks WHERE season_id=%s")
+        values = (season_id,)
+        cursor = self.con.cursor(dictionary=True)
+        cursor.execute(query, values)
+        vals: list[Gameweek] = []
+        for val in cursor:
+            vals.append(Gameweek.model_validate(val))
+        cursor.close()
+        return vals
+    
+    def get_gameweek_by_number(self, season_id, gameweek_number) ->  Gameweek:
+        query = ("SELECT * FROM gameweeks WHERE season_id=%s AND number=%s")
+        values = (season_id, gameweek_number)
+        cursor = self.con.cursor()
+        cursor.execute(query, values)
+        gameweeks: list[Gameweek] = []
+        for val in cursor:
+            gameweeks.append(Gameweek.model_validate(val))
+        cursor.close()
+        if len(gameweeks) != 1:
+            raise Exception(f"Incorrect number of gameweeks returned: {len(gameweeks)}. Please check database")
+        return gameweeks[0]
+    
     def get_player_gameweek_stats(self):
         query = ("SELECT * FROM gameweeks WHERE current=1")
         cursor = self.con.cursor()
@@ -341,6 +367,46 @@ class DatabaseClient:
             vals.append(val)
         cursor.close()
         return vals
+    
+    def get_gameweek_team_model(self, gameweek_id: int, team_id: int) -> GameweekTeam:
+        query = ("SELECT * FROM gameweek_teams WHERE gameweek_id=%s AND team_id=%s LIMIT 1")
+        values = (gameweek_id, team_id)
+        cursor = self.con.cursor(dictionary=True)
+        cursor.execute(query, values)
+        gameweek_team = cursor.fetchone()
+        return GameweekTeam(
+            gameweek_id=gameweek_team['gameweek_id'],
+            season_id=gameweek_team['season_id'],
+            team_id=gameweek_team['team_id'],
+            goalkeepers=json.loads(gameweek_team['goalkeepers']),
+            defenders=json.loads(gameweek_team['defenders']),
+            midfielders=json.loads(gameweek_team['midfielders']),
+            forwards=json.loads(gameweek_team['forwards']),
+            subs=json.loads(gameweek_team['subs']),
+            tactic=gameweek_team['tactic']
+        )
+
+    def get_gameweek_players(self, gameweek_id):
+        query = (f"SELECT * FROM gameweek_players WHERE gameweek_id={gameweek_id}")
+        cursor = self.con.cursor()
+        cursor.execute(query)
+        vals = []
+        for val in cursor:
+            vals.append(val)
+        return vals
+
+    def get_gameweek_player_stats(self, gameweek_id):
+        query = (f'SELECT stats.*, fixtures.round_id\
+                 FROM daily_ff.gameweek_player_stats as stats\
+                 JOIN daily_ff.fixtures as fixtures\
+                 ON stats.fixture_id = fixtures.id\
+                 WHERE round_id = {gameweek_id}')
+        cursor = self.con.cursor(dictionary=True)
+        cursor.execute(query)
+        vals = []
+        for val in cursor:
+            vals.append(val)
+        return vals
 
     def get_gameweek_stats(self, gameweek_id):
         query = (f'SELECT stats.*, fixtures.round_id\
@@ -349,6 +415,10 @@ class DatabaseClient:
                  ON stats.fixture_id = fixtures.id\
                  WHERE round_id = {gameweek_id}')
         return json.loads(pd.read_sql(query, self.con).to_json(orient='index'))
+
+    def get_gameweek_stats_model(self, gameweek_id) -> list[GameweekPlayerStats]:
+        player_stat = self.get_gameweek_player_stats(gameweek_id)
+        return [GameweekPlayerStats.model_validate(player_stat) for player_stat in player_stat]
     
     def get_fixtures_in_gameweek(self, gameweek_id):
         query = (f"SELECT * FROM fixtures WHERE round_id={gameweek_id}")
@@ -429,17 +499,17 @@ class DatabaseClient:
         return Gameweek.model_validate(next_gameweek)
     
 
-    def get_all_user_league_teams(self) -> list[UserLeague]:
+    def get_all_user_league_teams(self) -> list[LeagueTeam]:
         query = """
             SELECT *
             FROM user_league
             """
         cursor = self.con.cursor(dictionary=True)
         cursor.execute(query)
-        teams: list[UserLeague] = []
+        teams: list[LeagueTeam] = []
         for team in cursor:
             teams.append(
-                UserLeague(
+                LeagueTeam(
                     team_id=team['team_id'],
                     league_id=team['league_id'],
                     user_id=team['user_id'],
@@ -448,26 +518,12 @@ class DatabaseClient:
                     midfielders=json.loads(team['midfielders']),
                     forwards=json.loads(team['forwards']),
                     subs=json.loads(team['subs']),
-                    team_name=team['team_name']
+                    team_name=team['team_name'],
+                    tactic=team['tactic'],
                 )
             )
         return teams
-        # with self.con.cursor(dictionary=True) as cur:
-        #     cur.execute(query)
-        #     teams = cur.fetchall()
 
-            
-        #     return [UserLeague(
-        #         team_id=team['team_id'],
-        #         league_id=team['league_id'],
-        #         user_id=team['user_id'],
-        #         goalkeepers=json.loads(team['goalkeepers']),
-        #         defenders=json.loads(team['defenders']),
-        #         midfielders=json.loads(team['midfielders']),
-        #         forwards=json.loads(team['forwards']),
-        #         subs=json.loads(team['subs']),
-        #         team_name=team['team_name']
-        #     ) for team in teams]
 
 
 

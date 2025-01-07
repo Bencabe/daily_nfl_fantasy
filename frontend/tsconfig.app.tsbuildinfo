@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts"],"version":"5.6.2"}
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/api/login.ts","./src/components/login.tsx","./src/components/navbar.tsx","./src/components/playerdraft.tsx","./src/components/selectedplayerview.tsx","./src/components/team.tsx","./src/types/draft.ts","./src/utils/customhooks.ts"],"version":"5.6.2"}
