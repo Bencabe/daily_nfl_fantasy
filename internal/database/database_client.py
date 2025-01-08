@@ -2,7 +2,7 @@ from constants import DatabaseCreds
 import mysql.connector
 import json
 import pandas as pd
-from models.db_models import Gameweek, GameweekPlayerStats, GameweekTeam, League, Player, LeagueTeam
+from models.db_models import Gameweek, GameweekPlayerStats, GameweekTeam, League, Player, LeagueTeam, LeagueFixture, TeamTactics
 from models.auth_models import PublicUser, User
 
 class DatabaseClient:
@@ -203,9 +203,18 @@ class DatabaseClient:
             tactic=league_team['tactic']
         )
 
-    def update_team(self, league_id, user_id, goalkeepers, defenders, midfielders, forwards, subs):
-        query = ("UPDATE user_league SET goalkeepers=%s,defenders=%s,midfielders=%s,forwards=%s,subs=%s WHERE league_id=%s AND user_id=%s")
-        values = (str(goalkeepers), str(defenders), str(midfielders), str(forwards), str(subs), league_id, user_id)
+    def update_team(
+            self, 
+            league_id: int, 
+            user_id: int, 
+            goalkeepers: list[int], 
+            defenders: list[int], 
+            midfielders: list[int], 
+            forwards: list[int], 
+            subs: list[int], 
+            tactic: TeamTactics):
+        query = ("UPDATE user_league SET goalkeepers=%s,defenders=%s,midfielders=%s,forwards=%s,subs=%s,tactic=%s WHERE league_id=%s AND user_id=%s")
+        values = (str(goalkeepers), str(defenders), str(midfielders), str(forwards), str(subs), tactic, league_id, user_id)
         cursor = self.con.cursor()
         cursor.execute(query, values)
         self.con.commit()
@@ -523,6 +532,35 @@ class DatabaseClient:
                 )
             )
         return teams
+    
+    def get_league_fixtures(self, league_id: int) -> list[LeagueFixture]:
+        query = (f"SELECT * FROM league_fixtures WHERE league_id={league_id}")
+        cursor = self.con.cursor()
+        cursor.execute(query)
+        vals: list[LeagueFixture] = []
+        for val in cursor:
+            vals.append(LeagueFixture.model_validate(val))
+        return vals
+    
+    def create_league_fixture(self, user_id_1: int, user_id_2: int, gameweek_id: int, league_id: int):
+        query = ("INSERT INTO league_fixtures "
+                "(user_1, user_2, gameweek_id, league_id) "
+                "VALUES (%s, %s, %s, %s)")
+        values = (user_id_1, user_id_2, gameweek_id, league_id)
+        cursor = self.con.cursor()
+        cursor.execute(query, values)
+        self.con.commit()
+        cursor.close()
+    
+    def create_league_fixtures(self, user_fixtures: list[LeagueFixture]):
+        for fixture in user_fixtures:
+            self.create_league_fixture(
+                fixture.user_id_1, 
+                fixture.user_id_2, 
+                fixture.gameweek_id, 
+                fixture.league_id
+            )
+
 
 
 

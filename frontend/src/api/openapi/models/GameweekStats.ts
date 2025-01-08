@@ -13,5 +13,7 @@ export type GameweekStats = {
     totalTeamPoints: number;
     teamTactic?: TeamTactics;
     subs: Array<number>;
+    teamId: number;
+    teamName: string;
 };
 

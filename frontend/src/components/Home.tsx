@@ -7,6 +7,7 @@ import PitchVisualization from './Pitch';
 import styles from './Home.module.css';
 import FantasyEPLModal from './FantasyEPLModal';
 import { TeamTactics } from '../api/openapi';
+import { LeagueTeam } from '../api/openapi/models/LeagueTeam';
 
 function Home() {
   const { user } = useGlobalContext();
@@ -27,6 +28,7 @@ function Home() {
   const [gameweekNumber, setGameweekNumber] = useState<number>(1);
   const [gameweeks, setGameweeks] = useState<Gameweek[]>([]);
   const [showScoreModal, setShowScoreModal] = useState(false);
+  const [selectedTactic, setSelectedTactic] = useState<TeamTactics>(gameweekStats?.teamTactic ||  TeamTactics.DEFAULT);
 
   useEffect(() => {
     const fetchGameweek = async () => {
@@ -47,11 +49,54 @@ function Home() {
       const fetchGameweekTeam = async () => {
         const stats = await api.getGameweekStats(user.activeLeague, user.id, currentGameweek.id, true);
         setGameweekStats(stats);
-        console.log(stats);
+        setSelectedTactic(stats.teamTactic || TeamTactics.DEFAULT);
       };
       fetchGameweekTeam();
     }
   }, [currentGameweek])
+
+  const handleTacticChange = async (tactic: TeamTactics) => {
+    if (!currentGameweek || !gameweekStats) return;
+    
+    try {
+      // await api.updateTeamTactics(user.activeLeague, user.id, currentGameweek.id, tactic);
+      setSelectedTactic(tactic);
+      
+      // Refresh gameweek stats to show updated tactic
+      const stats = await api.getGameweekStats(user.activeLeague, user.id, currentGameweek.id, true);
+      setGameweekStats(stats);
+      setGameweekStats(stats);
+    } catch (error) {
+      console.error('Failed to update team tactics:', error);
+    }
+  };
+
+  const getPositionPlayerIds = (position: string): number[] => {
+    if (!gameweekStats) return [];
+    return gameweekStats.playerStats.filter(p => p.player.positionCategory === position).map(p => p.player.id);
+  }
+
+  const handleSaveTeamChanges = async () => {
+    if (!gameweekStats || !currentGameweek) return;
+    
+    try {
+      const leagueTeam: LeagueTeam = {
+        goalkeepers: getPositionPlayerIds('Goalkeeper'),
+        defenders: getPositionPlayerIds('Defender'),
+        midfielders: getPositionPlayerIds('Midfielder'),
+        forwards: getPositionPlayerIds('Forward'),
+        subs: gameweekStats.subs,
+        tactic: selectedTactic,
+        teamId: gameweekStats.teamId,
+        leagueId: user.activeLeague,
+        userId: user.id,
+        teamName: gameweekStats.teamName
+      }
+      await api.updateTeam(leagueTeam)
+    } catch (error) {
+      console.error('Failed to save team changes:', error);
+    }
+  };
 
   const handlePlayerMove = async (playerId: number, isBenched: boolean) => {
     if (!gameweekStats || !currentGameweek) return;
@@ -78,6 +123,7 @@ function Home() {
     const current = newGameweek.id == currentGameweek!.id;
     const stats = await api.getGameweekStats(user.activeLeague, user.id, newGameweek.id, current);
     setGameweekStats(stats);
+    setSelectedTactic(stats.teamTactic || TeamTactics.DEFAULT);
   };
 
   return (
@@ -137,7 +183,7 @@ function Home() {
               <h3>Offensive Tactic</h3>
               <p>Goals: {gameweekStats.teamStats.goals} (Target: 4) [{gameweekStats.teamStats.goals > 4 ? '+15' : '-10'}]</p>
               <p>Assists: {gameweekStats.teamStats.assists} (Target: 4) [{gameweekStats.teamStats.assists > 4 ? '+15' : '-10'}]</p>
-              <p>Goals vs Conceded: {gameweekStats.teamStats.goals + gameweekStats.teamStats.assists} vs {gameweekStats.teamStats.goalsConceded} [{gameweekStats.teamStats.goalsConceded < (gameweekStats.teamStats.goals + gameweekStats.teamStats.assists) ? '+10' : '-10'}]</p>
+              <p>Goals & Assists vs Goals Conceded: {gameweekStats.teamStats.goals + gameweekStats.teamStats.assists} vs {gameweekStats.teamStats.goalsConceded} [{gameweekStats.teamStats.goalsConceded < (gameweekStats.teamStats.goals + gameweekStats.teamStats.assists) ? '+10' : '-10'}]</p>
             </div>
           )}
           <div className={styles.totalTeamPoints}>
@@ -145,12 +191,50 @@ function Home() {
           </div>
       </FantasyEPLModal>
 
+      <div className={styles.tacticsSelector}>
+      <h3>Team Strategy</h3>
+      <div className={styles.tacticOptions}>
+        <button 
+          className={`${styles.tacticButton} ${selectedTactic === TeamTactics.OFFENSIVE ? styles.selected : ''}`}
+          onClick={() => handleTacticChange(TeamTactics.OFFENSIVE)}
+        >
+          Offensive
+        </button>
+        <button 
+          className={`${styles.tacticButton} ${selectedTactic === TeamTactics.DEFENSIVE ? styles.selected : ''}`}
+          onClick={() => handleTacticChange(TeamTactics.DEFENSIVE)}
+        >
+          Defensive
+        </button>
+        <button 
+          className={`${styles.tacticButton} ${selectedTactic === TeamTactics.POSSESION ? styles.selected : ''}`}
+          onClick={() => handleTacticChange(TeamTactics.POSSESION)}
+        >
+          Possession
+        </button>
+        <button 
+          className={`${styles.tacticButton} ${selectedTactic === TeamTactics.DEFAULT ? styles.selected : ''}`}
+          onClick={() => handleTacticChange(TeamTactics.DEFAULT)}
+        >
+          Default
+        </button>
+      </div>
+    </div>
+
       {gameweekStats && (
         <div className={styles.pitchWrapper}>
           <PitchVisualization 
             gameweekStats={gameweekStats}
             handlePlayerMove={handlePlayerMove}
           />
+          <div className={styles.saveButtonContainer}>
+            <button 
+              className={styles.saveButton}
+              onClick={handleSaveTeamChanges}
+            >
+              Save Team Changes
+            </button>
+          </div>
         </div>
       )}
     </div>

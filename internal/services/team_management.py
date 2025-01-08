@@ -100,11 +100,28 @@ class GameweekStats(BaseModel):
     total_team_points: int = Field(alias="totalTeamPoints")
     team_tactic: TeamTactics = Field(default=TeamTactics.Default, alias="teamTactic")
     subs: list[int]
+    team_id: int = Field(alias="teamId")
+    team_name: str = Field(alias="teamName")
 
 
 class TeamManagementService:
     def __init__(self, db_client: DatabaseClient):
         self.db_client = db_client
+
+    def update_team(self, team: LeagueTeam):
+        team.validate()
+        self.db_client.update_team(
+            team.league_id,
+            team.user_id,
+            team.goalkeepers,
+            team.defenders,
+            team.midfielders,
+            team.forwards,
+            team.subs,
+            team.tactic
+        )
+    
+        
 
     def get_team(self, user_id, league_id) -> LeagueTeam:
         team = self.db_client.get_league_team(user_id, league_id)
@@ -127,9 +144,11 @@ class TeamManagementService:
                 team.subs,
             )
         return team
+
     
     def get_gameweek_stats(self, league_id: int, user_id: int, gameweek_id: int, cur_gameweek: bool) -> GameweekStats:
         team = self.get_team(user_id, league_id)
+        team_name = team.team_name
         if not cur_gameweek:
             team = self.db_client.get_gameweek_team_model(gameweek_id, team.team_id)
         gameweek_stats = self.db_client.get_gameweek_stats_model(gameweek_id)
@@ -152,6 +171,8 @@ class TeamManagementService:
             total_team_points=team_stats.get_team_points(team.tactic),
             subs=team.subs,
             team_tactic=team.tactic,
+            team_id=team.team_id,
+            team_name=team_name,
         )
     
     def _calculate_total_gameweek_points(self, gameweek_player_stats: list[PlayerScores], team: LeagueTeam | GameweekTeam):
@@ -248,6 +269,7 @@ class TeamManagementService:
         return player
 
     def _get_midfielder_score(self, stats: GameweekPlayerStats):
+        pass_accuracy = stats.pass_accuracy if stats.pass_accuracy else 0
         player = MidfielderStats(
             goals=self._stat_generator(stats.goals, 5),
             assists=self._stat_generator(stats.assists, 4),
@@ -258,7 +280,7 @@ class TeamManagementService:
             interceptions=self._stat_generator(stats.interceptions, 0.25),
             duels_won=self._stat_generator(stats.duels_won, 0.25),
             key_passes=self._stat_generator(stats.key_passes, 0.5),
-            pass_accuracy=BaseStat(value=stats.pass_accuracy, points=1 if stats.pass_accuracy > 75 else 0),
+            pass_accuracy=BaseStat(value=pass_accuracy, points=1 if pass_accuracy > 75 else 0),
             penalties_won=self._stat_generator(stats.penalties_won, 2),
             penalties_committed=self._stat_generator(stats.penalties_committed, -3),
             owngoals=self._stat_generator(stats.owngoals, -4),

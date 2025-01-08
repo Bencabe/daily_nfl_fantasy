@@ -29,7 +29,9 @@ const NavBar = () => {
         </button>
         
         <div className={`${styles.dropdown} ${isOpen ? styles.show : ''}`}>
+          <div onClick={() => handleNavigation("/")}>Home</div>
           <div onClick={() => handleNavigation(`/draft/${user.activeLeague}`)}>Draft</div>
+          <div onClick={() => handleNavigation(`/player_select`)}>Player Select</div>
           {/* Other navigation items */}
         </div>
       </div>

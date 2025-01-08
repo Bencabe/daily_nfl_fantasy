@@ -93,6 +93,13 @@ class Gameweek(BaseModel):
     current: bool 
     stage_id: int
 
+class LeagueFixture(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    id: int
+    user_id_1: int = Field(alias="userId1")
+    user_id_2: int = Field(alias="userId2")
+    gameweek_id: int = Field(alias="gameweekId")
+    league_id: int = Field(alias="leagueId")
 
 class GameweekPlayerStats(BaseModel):
     model_config = ConfigDict(populate_by_name=True)

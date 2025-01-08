@@ -141,3 +141,60 @@ cursor: not-allowed;
     display: flex;
     justify-content: space-between;
   }
+
+  /* Strategy select CSS */
+
+  .tacticsSelector {
+    margin: 20px 0;
+    text-align: center;
+  }
+  
+  .tacticOptions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 10px;
+  }
+  
+  .tacticButton {
+    padding: 8px 16px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .tacticButton:hover {
+    background: #f5f5f5;
+  }
+  
+  .tacticButton.selected {
+    background: #4CAF50;
+    color: white;
+    border-color: #45a049;
+  }
+
+  /* Save team CSS */
+
+  .saveButtonContainer {
+    margin: 20px 0;
+    text-align: center;
+  }
+  
+  .saveButton {
+    padding: 12px 24px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .saveButton:hover {
+    background-color: #45a049;
+  }
+  
+  

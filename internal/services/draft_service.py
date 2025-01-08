@@ -3,6 +3,7 @@ from itertools import cycle
 from random import shuffle
 from fastapi import Depends, WebSocket
 from database.database_client import DatabaseClient
+from services.league_management import LeagueManagementService
 from models.db_models import League, LeagueTeam, Player
 from models.draft_models import DraftMessage, DraftStatus, PlayerSelected, StartDraft, TimeExpired, TurnChange, PlayerConnect, Positions
 
@@ -12,8 +13,12 @@ class DraftService:
     connections: dict[int, dict[int, WebSocket]] = {}
     league_timers: dict[int, asyncio.Task] = {}
     
-    def __init__(self, db_client: DatabaseClient = Depends(DatabaseClient)):
+    def __init__(self, 
+            db_client: DatabaseClient = Depends(DatabaseClient),
+            league_management: LeagueManagementService = Depends(LeagueManagementService),
+        ):
         self.db_client = db_client
+        self.league_management = league_management
         # self.connections = set()
     
     async def connect(cls, league_id: int, user_id: int, websocket: WebSocket):
@@ -191,6 +196,7 @@ class DraftService:
             if not current_user_turn:
                 raise Exception("users turn not found")
             asyncio.create_task(self._start_timer(league_id))
+            self.league_management.create_fixtures(league_id)
             return DraftStatus(
                     message_type="draftStatus",
                     draft_state=league.draft_started,
@@ -222,4 +228,11 @@ class DraftService:
                 team.subs
             )
             return turn_update
+        
+    @classmethod
+    def get_instance(cls, 
+            db_client: DatabaseClient = Depends(DatabaseClient),
+            league_management: LeagueManagementService = Depends(LeagueManagementService.get_instance)
+            ) -> "DraftService":
+        return cls(db_client, league_management)
             

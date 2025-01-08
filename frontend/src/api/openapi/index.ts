@@ -17,6 +17,7 @@ export type { Gameweek } from './models/Gameweek';
 export type { GameweekStats } from './models/GameweekStats';
 export type { GoalkeepStats } from './models/GoalkeepStats';
 export type { HTTPValidationError } from './models/HTTPValidationError';
+export type { LeagueTeam } from './models/LeagueTeam';
 export type { MidfielderStats } from './models/MidfielderStats';
 export type { Player } from './models/Player';
 export type { PlayerScores } from './models/PlayerScores';

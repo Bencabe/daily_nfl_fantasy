@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { Gameweek } from '../models/Gameweek';
 import type { GameweekStats } from '../models/GameweekStats';
+import type { LeagueTeam } from '../models/LeagueTeam';
 import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class DefaultService {
@@ -111,6 +112,25 @@ export class DefaultService {
         return this.httpRequest.request({
             method: 'GET',
             url: '/all_gameweeks',
+        });
+    }
+    /**
+     * Update Team
+     * @param requestBody
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public updateTeam(
+        requestBody: LeagueTeam,
+    ): CancelablePromise<any> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/team',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
         });
     }
 }

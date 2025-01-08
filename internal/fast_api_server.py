@@ -4,7 +4,7 @@ from database.database_client import DatabaseClient
 import uvicorn
 import jwt
 from constants import JWT, Season
-from models.db_models import Gameweek
+from models.db_models import Gameweek, LeagueTeam
 from services.draft_service import DraftService
 from services.team_management import GameweekStats, TeamManagementService
 from middlewares.jwt_auth import JWTMiddleware, validate_jwt
@@ -117,11 +117,12 @@ async def get_current_gameweek(
     ):
     return db_client.get_all_gameweeks(Season.ID)
 
-# @app.get("/gameweek_team", response_model=, operation_id="")
-# async def get_current_gameweek(
-#         db_client: DatabaseClient = Depends(DatabaseClient)
-#     ):
-#     return db_client.get_gameweek_team_model()[0]
+@app.post("/team", response_model=None, operation_id="updateTeam")
+async def update_team(
+        team: LeagueTeam,
+        team_management: TeamManagementService = Depends(TeamManagementService.get_instance)
+    ):
+    team_management.update_team(team)
 
 
 @app.websocket("/player_draft/{league_id}")
@@ -129,7 +130,7 @@ async def player_draft(
     websocket: WebSocket,
     league_id: int,
     user_id: int,
-    draft_service: DraftService = Depends(DraftService)
+    draft_service: DraftService = Depends(DraftService.get_instance)
 ):
     await websocket.accept()
     await draft_service.connect(league_id, user_id, websocket)
