@@ -38,7 +38,7 @@ def add_gameweek_teams(gameweek_id: Optional[int] = None):
             'midfielders': team.midfielders,
             'forwards': team.forwards,
             'subs': team.subs,
-            'tactics': team.tactic
+            'tactic': team.tactic
         }
         db_client.add_data_mapping_object("gameweek_teams", gameweek_team)
 

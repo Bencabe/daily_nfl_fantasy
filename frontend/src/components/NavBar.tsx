@@ -17,7 +17,7 @@ const NavBar = () => {
 
   return (
     <nav className={styles.navbar}>
-      <div className={styles.logo}>Daily EPL Fantasy</div>
+      <div className={styles.logo}>Fantasy EPL</div>
       <div className={styles.menuContainer}>
         <button 
           className={`${styles.hamburger} ${isOpen ? styles.active : ''}`}
@@ -32,7 +32,8 @@ const NavBar = () => {
           <div onClick={() => handleNavigation("/")}>Home</div>
           <div onClick={() => handleNavigation(`/draft/${user.activeLeague}`)}>Draft</div>
           <div onClick={() => handleNavigation(`/player_select`)}>Player Select</div>
-          {/* Other navigation items */}
+          <div onClick={() => handleNavigation(`/league_fixtures`)}>League Fixtures</div>
+          <div onClick={() => handleNavigation(`/league_table`)}>League Table</div>
         </div>
       </div>
     </nav>

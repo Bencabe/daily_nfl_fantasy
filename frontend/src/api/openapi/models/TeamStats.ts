@@ -10,5 +10,7 @@ export type TeamStats = {
     goalsConceded: number;
     goals: number;
     assists: number;
+    keyPasses: number;
+    dispossesed: number;
 };
 

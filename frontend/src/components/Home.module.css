@@ -1,8 +1,19 @@
 .container {
     display: flex;
     flex-direction: column;
-    width: 100vw;
+    /* width: 100vw; */
     min-height: 100vh;
+    padding: 0;   /* Add this to ensure no padding */
+    margin: 0;    /* Add this to ensure no margin */
+    box-sizing: border-box; /* Add this to include padding in width calculation */
+    overflow-x: hidden;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+    overflow-y: auto;
+}
+
+.container::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
 }
 
 .pitchWrapper {
@@ -15,7 +26,8 @@
     padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
-    width: 0%;
+
+    width: 100%;
 }
 
 .playerStats {
@@ -44,8 +56,9 @@ cursor: not-allowed;
 .scoreContainer {
     display: flex;
     justify-content: space-around;
-    margin: 20px 0;
-    padding: 15px;
+    /* margin: 20px 0; */
+    /* padding: 15px; */
+    left: 0;
     background: #f8f9fa;
     border-radius: 10px;
   }

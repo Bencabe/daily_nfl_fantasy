@@ -17,6 +17,7 @@ type PositionGroups = {
 };
   
 const isOnBench = (gameweekStats: GameweekStats, player: Player) => {
+  console.log(gameweekStats)
   return gameweekStats.subs.includes(player.id);
 }
 
@@ -36,6 +37,7 @@ const PitchVisualization = ({
     },
     subs: gameweekStats.playerStats.filter(p => isOnBench(gameweekStats, p.player))
   };
+  console.log(playersByPosition)
 
   const handleDragStart = (e: DragEvent, playerId: number) => {
     e.dataTransfer.setData('playerId', playerId.toString());

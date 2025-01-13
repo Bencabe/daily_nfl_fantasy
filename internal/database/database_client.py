@@ -2,7 +2,7 @@ from constants import DatabaseCreds
 import mysql.connector
 import json
 import pandas as pd
-from models.db_models import Gameweek, GameweekPlayerStats, GameweekTeam, League, Player, LeagueTeam, LeagueFixture, TeamTactics
+from models.db_models import FootballTeam, Gameweek, GameweekPlayerStats, GameweekTeam, League, Player, LeagueTeam, LeagueFixture, TeamTactics
 from models.auth_models import PublicUser, User
 
 class DatabaseClient:
@@ -24,10 +24,18 @@ class DatabaseClient:
         return vals
 
 
-    def get_user_model(self,email) -> User:
+    def get_user_model(self, email) -> User:
         query = ("SELECT * FROM users WHERE email = %s")
         cursor = self.con.cursor(dictionary=True)
         cursor.execute(query, (email,))
+        user_data = cursor.fetchone()
+        cursor.close()
+        return User.model_validate(user_data)
+    
+    def get_user_by_id(self, id) -> User:
+        query = ("SELECT * FROM users WHERE id = %s")
+        cursor = self.con.cursor(dictionary=True)
+        cursor.execute(query, (id,))
         user_data = cursor.fetchone()
         cursor.close()
         return User.model_validate(user_data)
@@ -212,7 +220,7 @@ class DatabaseClient:
             midfielders: list[int], 
             forwards: list[int], 
             subs: list[int], 
-            tactic: TeamTactics):
+            tactic: TeamTactics = TeamTactics.Default):
         query = ("UPDATE user_league SET goalkeepers=%s,defenders=%s,midfielders=%s,forwards=%s,subs=%s,tactic=%s WHERE league_id=%s AND user_id=%s")
         values = (str(goalkeepers), str(defenders), str(midfielders), str(forwards), str(subs), tactic, league_id, user_id)
         cursor = self.con.cursor()
@@ -240,7 +248,7 @@ class DatabaseClient:
         cursor.close()
         return vals
     
-    def get_league_team_models(self, league_id) -> list[LeagueTeam]:
+    def get_league_team_modals(self, league_id) -> list[LeagueTeam]:
         query = ("SELECT * FROM user_league WHERE league_id = '{}'".format(league_id))
         cursor = self.con.cursor(dictionary=True)
         cursor.execute(query)
@@ -264,7 +272,7 @@ class DatabaseClient:
         return vals
 
     def get_league_users(self, league_id) -> list[PublicUser]:
-        league_teams = self.get_league_team_models(league_id)
+        league_teams = self.get_league_team_modals(league_id)
         user_ids = [league_team.user_id for league_team in league_teams]
         
         query = ("SELECT * FROM users WHERE id IN ({})".format(','.join(['%s'] * len(user_ids))))
@@ -377,12 +385,14 @@ class DatabaseClient:
         cursor.close()
         return vals
     
-    def get_gameweek_team_model(self, gameweek_id: int, team_id: int) -> GameweekTeam:
+    def get_gameweek_team_model(self, gameweek_id: int, team_id: int) -> GameweekTeam | None:
         query = ("SELECT * FROM gameweek_teams WHERE gameweek_id=%s AND team_id=%s LIMIT 1")
         values = (gameweek_id, team_id)
         cursor = self.con.cursor(dictionary=True)
         cursor.execute(query, values)
         gameweek_team = cursor.fetchone()
+        if not gameweek_team:
+            return None
         return GameweekTeam(
             gameweek_id=gameweek_team['gameweek_id'],
             season_id=gameweek_team['season_id'],
@@ -424,6 +434,19 @@ class DatabaseClient:
                  ON stats.fixture_id = fixtures.id\
                  WHERE round_id = {gameweek_id}')
         return json.loads(pd.read_sql(query, self.con).to_json(orient='index'))
+    
+    def get_season_stats(self, season_id: int) -> list[GameweekPlayerStats]:
+        query = (f'SELECT stats.*, fixtures.round_id\
+                 FROM daily_ff.gameweek_player_stats as stats\
+                 JOIN daily_ff.fixtures as fixtures\
+                 ON stats.fixture_id = fixtures.id\
+                 WHERE stats.season_id = {season_id}')
+        cursor = self.con.cursor(dictionary=True)
+        cursor.execute(query)
+        vals:  list[GameweekPlayerStats] = []
+        for val in cursor:
+            vals.append(GameweekPlayerStats.model_validate(val))
+        return vals
 
     def get_gameweek_stats_model(self, gameweek_id) -> list[GameweekPlayerStats]:
         player_stat = self.get_gameweek_player_stats(gameweek_id)
@@ -535,7 +558,7 @@ class DatabaseClient:
     
     def get_league_fixtures(self, league_id: int) -> list[LeagueFixture]:
         query = (f"SELECT * FROM league_fixtures WHERE league_id={league_id}")
-        cursor = self.con.cursor()
+        cursor = self.con.cursor(dictionary=True)
         cursor.execute(query)
         vals: list[LeagueFixture] = []
         for val in cursor:
@@ -560,6 +583,15 @@ class DatabaseClient:
                 fixture.gameweek_id, 
                 fixture.league_id
             )
+    
+    def get_football_teams(self) -> list[LeagueFixture]:
+        query = ("SELECT * FROM football_teams")
+        cursor = self.con.cursor(dictionary=True)
+        cursor.execute(query)
+        vals: list[FootballTeam] = []
+        for val in cursor:
+            vals.append(FootballTeam.model_validate(val))
+        return vals
 
 
 

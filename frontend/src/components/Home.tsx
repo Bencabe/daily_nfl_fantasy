@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react' 
 import { useGlobalContext } from '../utils/customHooks'
-import { EplFantasy } from '../api/openapi/EplFantasy'
 import { Gameweek } from '../api/openapi/models/Gameweek';
 import { GameweekStats } from '../api/openapi/models/GameweekStats';
 import PitchVisualization from './Pitch';
@@ -8,20 +7,10 @@ import styles from './Home.module.css';
 import FantasyEPLModal from './FantasyEPLModal';
 import { TeamTactics } from '../api/openapi';
 import { LeagueTeam } from '../api/openapi/models/LeagueTeam';
+import api from '../api/main';
 
 function Home() {
   const { user } = useGlobalContext();
-  const api = new EplFantasy({
-    BASE: 'http://localhost:5001',
-    HEADERS: {
-      'Authorization': `Bearer ${document.cookie.split('jwt_token=')[1]}`,
-      'Cookie': document.cookie,
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-    },
-    CREDENTIALS: 'include',
-    WITH_CREDENTIALS: true
-  }).default;
   
   const [currentGameweek, setCurrentGameweek] = useState<Gameweek | null>(null);
   const [gameweekStats, setGameweekStats] = useState<GameweekStats | null>(null);
@@ -163,32 +152,33 @@ function Home() {
 
       <FantasyEPLModal isOpen={showScoreModal} onClose={() => setShowScoreModal(false)}>
         <h2>Team Score Breakdown</h2>
-        {gameweekStats?.teamTactic === 'Possesion' && (
-            <div>
-              <h3>Possession Tactic</h3>
-              <p>Pass Accuracy: {Math.round(gameweekStats.teamStats.passAccuracy)}% (Target: 75%) [{gameweekStats.teamStats.passAccuracy > 75 ? '+15' : '-10'}]</p>
-              <p>Total Passes: {gameweekStats.teamStats.totalPasses} (Target: 400) [{gameweekStats.teamStats.totalPasses > 400 ? '+30' : '-20'}]</p>
-            </div>
-          )}
-          {gameweekStats?.teamTactic === 'Defensive' && (
-            <div>
-              <h3>Defensive Tactic</h3>
-              <p>Tackles: {gameweekStats.teamStats.tackles} (Target: 20) [{gameweekStats.teamStats.tackles > 20 ? '+15' : '-10'}]</p>
-              <p>Interceptions: {gameweekStats.teamStats.interceptions} (Target: 10) [{gameweekStats.teamStats.interceptions > 10 ? '+15' : '-10'}]</p>
-              <p>Goals Conceded: {gameweekStats.teamStats.goalsConceded} (Target: under 10) [{gameweekStats.teamStats.goalsConceded < 10 ? '+15' : '-10'}]</p>
-            </div>
-          )}
-          {gameweekStats?.teamTactic === 'Offensive' && (
-            <div>
-              <h3>Offensive Tactic</h3>
-              <p>Goals: {gameweekStats.teamStats.goals} (Target: 4) [{gameweekStats.teamStats.goals > 4 ? '+15' : '-10'}]</p>
-              <p>Assists: {gameweekStats.teamStats.assists} (Target: 4) [{gameweekStats.teamStats.assists > 4 ? '+15' : '-10'}]</p>
-              <p>Goals & Assists vs Goals Conceded: {gameweekStats.teamStats.goals + gameweekStats.teamStats.assists} vs {gameweekStats.teamStats.goalsConceded} [{gameweekStats.teamStats.goalsConceded < (gameweekStats.teamStats.goals + gameweekStats.teamStats.assists) ? '+10' : '-10'}]</p>
-            </div>
-          )}
-          <div className={styles.totalTeamPoints}>
-            Total Team Points: {gameweekStats?.totalTeamPoints || 0}
+        {gameweekStats?.teamTactic === TeamTactics.POSSESION && (
+          <div>
+            <h3>Possession Tactic</h3>
+            <p>Pass Accuracy: {Math.round(gameweekStats.teamStats.passAccuracy)}% (Target: 80%) [{gameweekStats.teamStats.passAccuracy > 80 ? '+15' : '-10'}]</p>
+            <p>Total Passes: {gameweekStats.teamStats.totalPasses} (Target: 350) [{gameweekStats.teamStats.totalPasses > 350 ? '+15' : '-10'}]</p>
+            <p>Times Dispossessed: {gameweekStats.teamStats.dispossesed} (Target: under 7) [{gameweekStats.teamStats.dispossesed < 7 ? '+15' : '-10'}]</p>
           </div>
+        )}
+        {gameweekStats?.teamTactic === TeamTactics.DEFENSIVE && (
+          <div>
+            <h3>Defensive Tactic</h3>
+            <p>Tackles: {gameweekStats.teamStats.tackles} (Target: 20) [{gameweekStats.teamStats.tackles > 20 ? '+15' : '-10'}]</p>
+            <p>Interceptions: {gameweekStats.teamStats.interceptions} (Target: 10) [{gameweekStats.teamStats.interceptions > 10 ? '+15' : '-10'}]</p>
+            <p>Goals Conceded: {gameweekStats.teamStats.goalsConceded} (Target: under 10) [{gameweekStats.teamStats.goalsConceded < 10 ? '+20' : '-10'}]</p>
+          </div>
+        )}
+        {gameweekStats?.teamTactic === TeamTactics.OFFENSIVE && (
+          <div>
+            <h3>Offensive Tactic</h3>
+            <p>Goals + Assists: {gameweekStats.teamStats.goals + gameweekStats.teamStats.assists} (Target: over 6) [{(gameweekStats.teamStats.goals + gameweekStats.teamStats.assists) > 6 ? '+15' : '-10'}]</p>
+            <p>Key Passes: {gameweekStats.teamStats.keyPasses} (Target: 10) [{gameweekStats.teamStats.keyPasses > 10 ? '+15' : '-10'}]</p>
+            <p>Goals & Assists vs Goals Conceded: {gameweekStats.teamStats.goals + gameweekStats.teamStats.assists} vs {gameweekStats.teamStats.goalsConceded} [{gameweekStats.teamStats.goalsConceded < (gameweekStats.teamStats.goals + gameweekStats.teamStats.assists) ? '+15' : '-5'}]</p>
+          </div>
+        )}
+        <div className={styles.totalTeamPoints}>
+          Total Team Points: {gameweekStats?.totalTeamPoints || 0}
+        </div>
       </FantasyEPLModal>
 
       <div className={styles.tacticsSelector}>

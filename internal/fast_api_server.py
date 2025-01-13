@@ -4,7 +4,9 @@ from database.database_client import DatabaseClient
 import uvicorn
 import jwt
 from constants import JWT, Season
-from models.db_models import Gameweek, LeagueTeam
+from services.player_management import PlayerManagementService, SeasonPlayerStats
+from services.league_management import LeagueFixtureResults, LeagueManagementService
+from models.db_models import FootballTeam, Gameweek, LeagueTeam, Player
 from services.draft_service import DraftService
 from services.team_management import GameweekStats, TeamManagementService
 from middlewares.jwt_auth import JWTMiddleware, validate_jwt
@@ -123,6 +125,38 @@ async def update_team(
         team_management: TeamManagementService = Depends(TeamManagementService.get_instance)
     ):
     team_management.update_team(team)
+
+@app.get("/players", response_model=list[Player], operation_id="getAllPlayers")
+async def get_all_players(
+        db_client: DatabaseClient = Depends(DatabaseClient)
+    ):
+    return db_client.get_all_players()
+
+@app.get("/season_player_stats", response_model=list[SeasonPlayerStats], operation_id="getSeasonPlayerStats")
+async def get_season_player_stats(
+        player_service: PlayerManagementService = Depends(PlayerManagementService.get_instance)
+    ):
+    return player_service.get_season_player_stats()
+
+@app.get("/league_teams", operation_id="getLeagueTeams")
+async def get_league_teams(
+        league_id: int,
+        league_management: LeagueManagementService = Depends(LeagueManagementService.get_instance)
+    ) -> list[LeagueTeam]:
+    return league_management.get_league_teams(league_id)
+
+@app.get("/football_teams", response_model=list[FootballTeam], operation_id="getFootballTeams")
+async def get_league_teams(
+        db_client: DatabaseClient = Depends(DatabaseClient)
+    ):
+    return db_client.get_football_teams()
+
+@app.get("/league_fixture_results", response_model=LeagueFixtureResults, operation_id="getLeagueFixtureResults")
+async def get_league_teams(
+        league_id: int,
+        league_management: LeagueManagementService = Depends(LeagueManagementService.get_instance)
+    ):
+    return league_management.get_league_fixture_results(league_id)
 
 
 @app.websocket("/player_draft/{league_id}")

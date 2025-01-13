@@ -1,14 +1,93 @@
 from fastapi import Depends
+from pydantic import BaseModel, ConfigDict, Field
 # from pydantic import BaseModel
 from database.database_client import DatabaseClient
-from models.db_models import LeagueFixture
+from models.auth_models import PublicUser, User
+from services.team_management import TeamManagementService
+from models.db_models import  LeagueFixture
 from constants import Season
 
 
+class GameweekFixtureResult(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    user_1: PublicUser = Field(alias="user1")
+    user_1_score: int = Field(alias="user1Score")
+    user_2: PublicUser = Field(alias="user2")
+    user_2_score: int = Field(alias="user2Score")
+    gameweek_id: int = Field(alias="gameweekId")
+    gameweek_number: int = Field(alias="gameweekNumber")
+    odd_player: bool = Field(alias="oddPlayer")
+
+class LeagueFixtureResults(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    gameweek_fixtures: list[GameweekFixtureResult] = Field(alias="gameweekFixtures")
+    league_id: int = Field(alias="leagueId")
 
 class LeagueManagementService:
-    def __init__(self, db_client: DatabaseClient):
+    def __init__(self, db_client: DatabaseClient, team_management: TeamManagementService):
         self.db_client = db_client
+        self.team_management = team_management
+    
+    def get_league_teams(self, league_id: int):
+        return self.db_client.get_league_team_modals(league_id)
+    
+    def get_fixtures(self, league_id: int) -> list[LeagueFixture]:
+        return self.db_client.get_league_fixtures(league_id)
+
+    def _get_user_gameweek_score(self, league_id:int, user_id: int, gameweek_id: int) -> int:
+        team = self.team_management.get_gameweek_stats(league_id, user_id, gameweek_id, False)
+        return team.total_player_points + team.total_team_points
+    
+
+    def get_league_fixture_results(self, league_id: int) -> LeagueFixtureResults:
+        fixtures = self.get_fixtures(league_id)
+        gameweeks = self.db_client.get_all_gameweeks(Season.ID)
+        current_gameweek = next(gameweeks for gameweeks in gameweeks if gameweeks.current)
+        gameweek_fixtures: list[GameweekFixtureResult] = []
+        users: dict[int, User] = {}
+        gameweek_totals: dict[int, int] = {}
+        for fixture in fixtures:
+            user_1 = users.get(fixture.user_1, self.db_client.get_user_by_id(fixture.user_1))
+            users[fixture.user_1] = user_1
+            user_1_score = self._get_user_gameweek_score(league_id, fixture.user_1, fixture.gameweek_id)
+            odd_player = False
+            gameweek_totals[fixture.gameweek_id] = gameweek_totals.get(fixture.gameweek_id, 0) + user_1_score
+            gameweek = next(gameweeks for gameweeks in gameweeks if gameweeks.id == fixture.gameweek_id)
+            if gameweek.number > current_gameweek.number:
+                break
+            if fixture.user_1 == fixture.user_2:
+                # will replace user_2 score with gameweek average in this case
+                user_2_score = 0
+                user_2 = user_1
+                odd_player = True
+            else:
+                user_2_score = self._get_user_gameweek_score(league_id, fixture.user_2, fixture.gameweek_id)
+                user_2 = users.get(fixture.user_2, self.db_client.get_user_by_id(fixture.user_2))
+                users[fixture.user_2] = user_2
+                gameweek_totals[fixture.gameweek_id] += user_2_score
+            
+            gameweek_fixtures.append(
+                GameweekFixtureResult(
+                    user_1=user_1.get_public(),
+                    user_1_score=user_1_score,
+                    user_2=user_2.get_public(),
+                    user_2_score=user_2_score,
+                    gameweek_id=fixture.gameweek_id,
+                    gameweek_number=gameweek.number,
+                    odd_player=odd_player
+                )
+            )
+            
+            for gameweek_fixture in gameweek_fixtures:
+                if gameweek_fixture.odd_player:
+                    gameweek_fixture.user_2_score = gameweek_totals[gameweek_fixture.gameweek_id] // (len(users.keys()))
+
+        return LeagueFixtureResults(
+            gameweek_fixtures=gameweek_fixtures,
+            league_id=league_id
+        )
+
+         
 
     def create_fixtures(self, league_id: int):
         users = self.db_client.get_league_users(league_id)
@@ -42,7 +121,8 @@ class LeagueManagementService:
     def get_instance(cls, 
             db_client: DatabaseClient = Depends(DatabaseClient),
             ) -> "LeagueManagementService":
-        return cls(db_client)
+        team_management_service = TeamManagementService.get_instance(db_client)
+        return cls(db_client, team_management_service)
                 
 
 

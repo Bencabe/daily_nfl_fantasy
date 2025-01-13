@@ -8,12 +8,17 @@ import PlayerDraft from './components/PlayerDraft.tsx';
 import NavBar from './components/NavBar';
 import React from 'react'
 import Home from './components/Home.tsx'
+import PlayerSelection from './components/PlayerSelection.tsx';
+import LeagueFixtures from './components/LeagueFixtures.tsx';
+import LeagueTable from './components/LeagueTable.tsx'
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <NavBar />
-      {children}
+      <div className="page-wrapper">
+        {children}
+      </div>
     </>
   );
 };
@@ -72,9 +77,24 @@ createRoot(document.getElementById('root')!).render(
             <Layout><Home /></Layout>
           </ProtectedRoute>
         } />
-          <Route path="/draft/:leagueId" element={
+        <Route path="/draft/:leagueId" element={
           <ProtectedRoute>
-            <Layout><PlayerDraft /></Layout>=
+            <Layout><PlayerDraft /></Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="/player_select" element={
+          <ProtectedRoute>
+            <Layout><PlayerSelection /></Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="/league_fixtures" element={
+          <ProtectedRoute>
+            <Layout><LeagueFixtures /></Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="/league_table" element={
+          <ProtectedRoute>
+            <Layout><LeagueTable /></Layout>
           </ProtectedRoute>
         } />
       </Routes>

@@ -72,6 +72,7 @@ for fixture in gameweek_fixtures:
         print("Rate limit exceeded, sleeping for 60 seconds")
         time.sleep(60)
         fixture_stats = api_client.get_player_stats_by_fixture(fixture[0])
+        error_message = fixture_stats.get("message")
         
     gameweek_player_stats.append(fixture_stats)
 
