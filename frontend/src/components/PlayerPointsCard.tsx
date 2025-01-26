@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import styles from './PlayerPointsCard.module.css';
-import { BaseStat, Player, PlayerScores, TeamStats } from '../api/openapi';
+import { BaseStat, Player, PlayerScores } from '../api/openapi';
 import FantasyEPLModal from './FantasyEPLModal';
 import { convertStatName } from '../utils/helperFunctions';
 

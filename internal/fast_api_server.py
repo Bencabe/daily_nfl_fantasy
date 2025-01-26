@@ -11,14 +11,16 @@ from services.draft_service import DraftService
 from services.team_management import GameweekStats, TeamManagementService
 from middlewares.jwt_auth import JWTMiddleware, validate_jwt
 import datetime
+import os
 
 app = FastAPI()
 
+FRONTEND_URL = os.getenv("FRONTEND_URL", "host.docker.internal:3000")
 
 # CORS setup
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],
+    allow_origins=["http://localhost:3000", "http://localhost:5173", FRONTEND_URL],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -27,28 +29,9 @@ app.add_middleware(
 
 app.add_middleware(JWTMiddleware)
 
-# class UserDetails(BaseModel):
-#     email: str
-#     password: str
-#     firstName: str
-#     lastName: str
-
-# @app.get("/user")
-# async def get_user(email: str = Header(None)):
-#     db_client = DatabaseClient()
-#     user = db_client.get_user(email)
-#     db_client.close()
-#     return json.dumps(user)
-
-# @app.post("/user")
-# async def create_user(user_details: UserDetails):
-#     db_client = DatabaseClient()
-#     try:
-#         db_client.add_user(user_details.email, user_details.password, user_details.firstName, user_details.lastName)
-#         db_client.close()
-#         return {"message": "User added successfully"}
-#     except Exception as e:
-#         return {"error": f"Error adding contact: {str(e)}"}
+@app.get("/healthcheck")
+async def health_check():
+    return {"status": "healthy", "timestamp": datetime.datetime.now()}
 
 @app.post("/login")
 async def login(response: Response, email: str = Header(None), password: str = Header(None)):
