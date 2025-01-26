@@ -11,6 +11,12 @@ class InvalidSubstitues(Exception):
     def __init__(self, message="Invalid Subs"):
         self.message = message
         super().__init__(self.message)
+
+class TeamTactics(StrEnum):
+    Default = "Default"
+    Possesion = "Possesion"
+    Defensive = "Defensive"
+    Offensive = "Offensive"
 class League(BaseModel):
     id: int
     name: str
@@ -37,12 +43,6 @@ class Player(BaseModel):
     display_name: str = Field(alias="displayName")
     image_path: str = Field(alias="imagePath")
     nationality: str
-
-class TeamTactics(StrEnum):
-    Default = "Default"
-    Possesion = "Possesion"
-    Defensive = "Defensive"
-    Offensive = "Offensive"
 class Team(BaseModel):
     goalkeepers: list[int]
     defenders: list[int]
@@ -87,11 +87,11 @@ class Gameweek(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
     id: int 
     number: int  
-    season_id: int
-    start_date:  datetime
-    end_date:  datetime
+    season_id: int = Field(alias="seasonId")
+    start_date:  datetime = Field(alias="startDate")
+    end_date:  datetime = Field(alias="endDate")    
     current: bool 
-    stage_id: int
+    stage_id: int = Field(alias="stageId") 
 
 class LeagueFixture(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
@@ -168,6 +168,7 @@ class GameweekPlayerStats(PlayerStats):
     fixture_id: int = Field(alias="fixtureId")
     league_id: int = Field(alias="leagueId") 
     season_id: int = Field(alias="seasonId")
+
     
 
 class FootballTeam(BaseModel):

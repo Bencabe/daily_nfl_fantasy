@@ -60,4 +60,13 @@
     margin: 0 20px;
     color: #666;
   }
+
+  .clickable {
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  
+  .clickable:hover {
+    color: #0066cc;
+  }
   

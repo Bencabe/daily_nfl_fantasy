@@ -13,7 +13,6 @@ export type User = {
 
 
 const LoginPage = () => {
-  console.log('login page');
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -25,16 +24,13 @@ const LoginPage = () => {
 
   const onLogin = async (username: string, password: string) => {
     // Perform login logic here
-    console.log('Login:', username, password);
     const user = await login(username, password)
     if (isUser(user)) {
-      console.log(user)
       navigate('/', {state: {user: user}})
       setError('')
     }
     else {
       setError('Incorrect username or password')
-      console.log(user)
     }
   };
 

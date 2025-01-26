@@ -17,16 +17,17 @@ type PositionGroups = {
 };
   
 const isOnBench = (gameweekStats: GameweekStats, player: Player) => {
-  console.log(gameweekStats)
   return gameweekStats.subs.includes(player.id);
 }
 
 const PitchVisualization = ({ 
   gameweekStats, 
-  handlePlayerMove 
+  handlePlayerMove,
+  teamEditable
 }: { 
   gameweekStats: GameweekStats,
   handlePlayerMove: (playerId: number, isBenched: boolean) => void 
+  teamEditable: boolean
 }) => {
   const playersByPosition: PositionGroups = {
     starting: {
@@ -37,9 +38,12 @@ const PitchVisualization = ({
     },
     subs: gameweekStats.playerStats.filter(p => isOnBench(gameweekStats, p.player))
   };
-  console.log(playersByPosition)
 
   const handleDragStart = (e: DragEvent, playerId: number) => {
+    if (!teamEditable) {
+      e.preventDefault();
+      return;
+    }
     e.dataTransfer.setData('playerId', playerId.toString());
   };
 
@@ -69,7 +73,7 @@ const PitchVisualization = ({
             {players.map(playerStat => (
               <div 
                 key={playerStat.player.id}
-                draggable
+                draggable={teamEditable}
                 onDragStart={(e) => handleDragStart(e, playerStat.player.id)}
               >
                 <PlayerPointsCard 
@@ -86,7 +90,6 @@ const PitchVisualization = ({
         onDrop={(e) => handleDrop(e, 'bench')}
         onDragOver={handleDragOver}
       >
-        <h3>Substitutes</h3>
         <div className={styles.benchPlayers}>
           {playersByPosition.subs.map(playerStat => (
             <div

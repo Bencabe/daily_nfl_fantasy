@@ -1,70 +1,8 @@
-from pydantic import BaseModel, ConfigDict, Field
+
 from database.database_client import DatabaseClient
 from constants import Season
 from models.db_models import GameweekPlayerStats, Player, PlayerStats
-
-class BaseStat(BaseModel):
-    value: int
-    points: int
-
-
-class BasePlayerStats(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-    minutes_played: BaseStat = Field(alias="minutesPlayed")
-    red_cards: BaseStat = Field(alias="redCards")
-    yellow_cards: BaseStat = Field(alias="yellowCards")
-    assists: BaseStat = Field(alias="assists")
-    goals: BaseStat = Field(alias="goals")
-    penalties_committed: BaseStat = Field(alias="penaltiesCommitted")
-    penalties_won: BaseStat = Field(alias="penaltiesWon")
-    owngoals: BaseStat = Field(alias="ownGoals")
-    total_score: int = Field(default=0, alias="totalScore")
-
-class GoalkeepStats(BasePlayerStats):
-    saves: BaseStat = Field(alias="saves")
-    penalties_saved: BaseStat = Field(alias="penaltiesSaved")
-    clean_sheet: BaseStat = Field(alias="cleanSheet")
-    goals_conceded: BaseStat = Field(alias="goalsConceded")
-
-class DefenderStats(BasePlayerStats):
-    tackles: BaseStat = Field(alias="tackles")
-    interceptions: BaseStat = Field(alias="interceptions")
-    blocks: BaseStat = Field(alias="blocks")
-    aerials_won: BaseStat = Field(alias="aerialsWon")
-    duels_won: BaseStat = Field(alias="duelsWon")
-    clean_sheet: BaseStat = Field(alias="cleanSheet")
-    goals_conceded: BaseStat = Field(alias="goalsConceded")
-    fouls_committed: BaseStat = Field(alias="foulsCommitted")
-
-class MidfielderStats(BasePlayerStats):
-    tackles: BaseStat = Field(alias="tackles")
-    interceptions: BaseStat = Field(alias="interceptions")
-    duels_won: BaseStat = Field(alias="duelsWon")
-    key_passes: BaseStat = Field(alias="keyPasses")
-    pass_accuracy: BaseStat = Field(alias="passAccuracy")
-    dribbles: BaseStat = Field(alias="dribbles")
-    fouls_committed: BaseStat = Field(alias="foulsCommitted")
-    fouls_won: BaseStat = Field(alias="foulsWon")
-
-class ForwardStats(BasePlayerStats):
-    shots_on_target: BaseStat = Field(alias="shotsOnTarget")
-    key_passes: BaseStat = Field(alias="keyPasses")
-    aerials_won: BaseStat = Field(alias="aerialsWon")
-
-PlayerStatTypes = GoalkeepStats | DefenderStats | MidfielderStats | ForwardStats
-
-class PlayerScores(BaseModel):
-    """Model containing all info the frontend needs to display player stats for a gameweek"""
-    model_config = ConfigDict(populate_by_name=True)
-    player: Player
-    # key is a fixture id
-    fixture_stats: dict[int, PlayerStatTypes] = Field(alias="fixtureStats")
-
-class SeasonPlayerStats(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-    stats: PlayerStats
-    player: Player
-    games_played: int = Field(alias="gamesPlayed", default=0)
+from models.football_models import BaseStat, GoalkeepStats, DefenderStats, MidfielderStats, ForwardStats, PlayerScores, PlayerStatTypes, SeasonPlayerStats, TeamPlayerStat, TeamStats
 
 
 class PlayerManagementService:
@@ -100,12 +38,6 @@ class PlayerManagementService:
         return season_player_stats
 
 
-
-
-
-
-
-
     def get_player_gameweek_scores(self, players: list[Player], gameweek_stats: list[GameweekPlayerStats]) -> list[PlayerScores]:
         gameweek_player_stats: list[PlayerScores] = []
         for player in players:
@@ -115,25 +47,37 @@ class PlayerManagementService:
         
         return gameweek_player_stats
     
-    def _get_gameweek_fixture_scores(self, player: Player, player_stats: list[GameweekPlayerStats]) -> dict[int, PlayerStatTypes]:
-        fixture_scores: dict[int, PlayerStatTypes] = {}
+    def _get_gameweek_fixture_scores(self, player: Player, player_stats: list[GameweekPlayerStats]) -> dict[int, TeamPlayerStat]:
+        fixture_scores: dict[int, TeamPlayerStat] = {}
         for gameweek_stat in player_stats:
             fixture_scores[gameweek_stat.fixture_id] = self._get_fixture_score(player, gameweek_stat)
         return fixture_scores
 
-    def _get_fixture_score(self, player: Player, stats: GameweekPlayerStats):
+    def _get_fixture_score(self, player: Player, stats: GameweekPlayerStats) -> TeamPlayerStat:
+        team_stats = TeamStats(
+            total_passes=stats.total_passes or 0,
+            tackles=stats.tackles or 0,
+            pass_accuracy=stats.pass_accuracy or 0,
+            interceptions=stats.interceptions or 0,
+            goals_conceded=stats.goals_conceded or 0,
+            goals=stats.goals or 0,
+            assists=stats.assists or 0,
+            key_passes=stats.key_passes or 0,
+            dispossesed=stats.dispossesed or 0,
+        )
         match player.position_id:
             case 1:
-                return self._get_goalkeeper_score(stats)
+                player_stats = self._get_goalkeeper_score(stats)
             case 2:
-                return self._get_defender_score(stats)
+                player_stats = self._get_defender_score(stats)
             case 3:
-                return self._get_midfielder_score(stats)
+                player_stats = self._get_midfielder_score(stats)
             case 4:
-                return self._get_forward_score(stats)
+                player_stats = self._get_forward_score(stats)
             case _:
-                return 0
-        return 0
+                raise Exception("Invalid player position")
+            
+        return TeamPlayerStat(team_stats=team_stats, player_stats=player_stats)
     
     def _stat_generator(self, stat: int | float | None, modifier: float) -> BaseStat:
         if not stat:

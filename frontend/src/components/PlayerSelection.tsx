@@ -6,6 +6,7 @@ import { LeagueTeam } from '../api/openapi/models/LeagueTeam'
 import styles from './PlayerSelection.module.css'
 import { FootballTeam } from '../api/openapi/models/FootballTeam'
 import { SeasonPlayerStats } from '../api/openapi'
+import { convertStatName } from '../utils/helperFunctions'
 
 const PlayerSelection = () => {
     const { user } = useGlobalContext()
@@ -32,7 +33,6 @@ const PlayerSelection = () => {
             setLeagueTeams(teams)
             setFootballTeams(footballTeams)
             setSeasonPlayerStats(allSeasonPlayerStats)
-            console.log(allSeasonPlayerStats)
 
             
             const currentUserTeam = teams.find(team => team.userId === user.id)
@@ -85,7 +85,6 @@ const PlayerSelection = () => {
 
     const handleSwapSelection = (seasonPlayerStats: SeasonPlayerStats) => {
         if (!isPlayerTaken(seasonPlayerStats.player.id)) {
-            console.log('Selected player for swap:', seasonPlayerStats.player)
             setSelectedAvailablePlayer(seasonPlayerStats)
             setIsModalOpen(true)
         }
@@ -238,7 +237,7 @@ const PlayerSelection = () => {
                                 >
                                     {statKeys.map(statKey => (
                                         <option key={statKey} value={statKey}>
-                                            {statKey.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                                            {convertStatName(statKey)}
                                         </option>
                                     ))}
                                 </select>

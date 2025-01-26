@@ -5,10 +5,10 @@
 export type Gameweek = {
     id: number;
     number: number;
-    season_id: number;
-    start_date: string;
-    end_date: string;
+    seasonId: number;
+    startDate: string;
+    endDate: string;
     current: boolean;
-    stage_id: number;
+    stageId: number;
 };
 

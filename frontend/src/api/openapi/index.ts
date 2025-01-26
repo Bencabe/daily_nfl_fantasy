@@ -27,6 +27,7 @@ export type { PlayerScores } from './models/PlayerScores';
 export type { PlayerStats } from './models/PlayerStats';
 export type { PublicUser } from './models/PublicUser';
 export type { SeasonPlayerStats } from './models/SeasonPlayerStats';
+export type { TeamPlayerStat } from './models/TeamPlayerStat';
 export type { TeamStats } from './models/TeamStats';
 export { TeamTactics } from './models/TeamTactics';
 export type { ValidationError } from './models/ValidationError';

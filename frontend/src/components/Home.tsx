@@ -4,10 +4,11 @@ import { Gameweek } from '../api/openapi/models/Gameweek';
 import { GameweekStats } from '../api/openapi/models/GameweekStats';
 import PitchVisualization from './Pitch';
 import styles from './Home.module.css';
-import FantasyEPLModal from './FantasyEPLModal';
 import { TeamTactics } from '../api/openapi';
 import { LeagueTeam } from '../api/openapi/models/LeagueTeam';
 import api from '../api/main';
+import { useSearchParams } from 'react-router-dom';
+import TeamScoreBreakdown from './TeamScoreBreakdown';
 
 function Home() {
   const { user } = useGlobalContext();
@@ -18,31 +19,61 @@ function Home() {
   const [gameweeks, setGameweeks] = useState<Gameweek[]>([]);
   const [showScoreModal, setShowScoreModal] = useState(false);
   const [selectedTactic, setSelectedTactic] = useState<TeamTactics>(gameweekStats?.teamTactic ||  TeamTactics.DEFAULT);
+  const [teamEditable, setTeamEditable] = useState(false);
+  const [searchParams] = useSearchParams();
+  const viewUserId = searchParams.get('user') ? Number(searchParams.get('user')) : user.id;
+  const viewGameweek = searchParams.get('gameweek') ? Number(searchParams.get('gameweek')) : null;
 
   useEffect(() => {
     const fetchGameweek = async () => {
       const gameweeks = await api.getAllGameweeks();
-      const gameweek = gameweeks.find(gw => gw.current === true);
+      let gameweek;
+      
+      if (viewGameweek) {
+        gameweek = gameweeks.find(gw => gw.number === viewGameweek);
+      } else {
+        gameweek = gameweeks.find(gw => gw.current === true);
+      }
+      
       if (!gameweek) {
-        throw new Error("no current gameweek found");
+        throw new Error("no gameweek found");
       }
       setCurrentGameweek(gameweek);
       setGameweekNumber(gameweek.number);
       setGameweeks(gameweeks);
     };
     fetchGameweek();
-  }, [])
+  }, [viewGameweek])
 
   useEffect(() => {
     if (currentGameweek) {
       const fetchGameweekTeam = async () => {
-        const stats = await api.getGameweekStats(user.activeLeague, user.id, currentGameweek.id, true);
+        const stats = await api.getGameweekStats(user.activeLeague, viewUserId, currentGameweek.id, currentGameweek.current);
         setGameweekStats(stats);
         setSelectedTactic(stats.teamTactic || TeamTactics.DEFAULT);
+        setTeamEditable(canEditTeam());
       };
       fetchGameweekTeam();
     }
-  }, [currentGameweek])
+  }, [currentGameweek, viewUserId])
+
+  useEffect(() => {
+    setTeamEditable(canEditTeam());
+  }, [gameweekNumber])
+
+
+  const canEditTeam = () => {
+    if (!currentGameweek) {
+      return false;
+    }
+    const now = new Date()
+    const currentGameweekActive = now >= new Date(currentGameweek.startDate);
+    return currentGameweek 
+          && currentGameweek.current 
+          && user.id === viewUserId
+          && !currentGameweekActive
+          && gameweekNumber === currentGameweek.number;
+  }
 
   const handleTacticChange = async (tactic: TeamTactics) => {
     if (!currentGameweek || !gameweekStats) return;
@@ -110,7 +141,7 @@ function Home() {
       throw new Error(`no gameweek found for number ${newNumber}`);
     }
     const current = newGameweek.id == currentGameweek!.id;
-    const stats = await api.getGameweekStats(user.activeLeague, user.id, newGameweek.id, current);
+    const stats = await api.getGameweekStats(user.activeLeague, viewUserId, newGameweek.id, current);
     setGameweekStats(stats);
     setSelectedTactic(stats.teamTactic || TeamTactics.DEFAULT);
   };
@@ -133,76 +164,41 @@ function Home() {
         </button>
       </div>
 
-      <div className={styles.scoresContainer}>
-        <div className={styles.scoreCard}>
-          <div>Player Points</div>
-          <div>{gameweekStats?.totalPlayerPoints || 0}</div>
-        </div>
-        
-        <div className={styles.scoreCard} onClick={() => setShowScoreModal(true)}>
-          <div>Team Points</div>
-          <div>{gameweekStats?.totalTeamPoints || 0}</div>
-        </div>
-        
-        <div className={styles.scoreCard}>
-          <div className={styles.totalPoints}> Total Points</div>
-          <div>{(gameweekStats?.totalTeamPoints || 0) + (gameweekStats?.totalPlayerPoints || 0)}</div>
-        </div>
-      </div>
-
-      <FantasyEPLModal isOpen={showScoreModal} onClose={() => setShowScoreModal(false)}>
-        <h2>Team Score Breakdown</h2>
-        {gameweekStats?.teamTactic === TeamTactics.POSSESION && (
-          <div>
-            <h3>Possession Tactic</h3>
-            <p>Pass Accuracy: {Math.round(gameweekStats.teamStats.passAccuracy)}% (Target: 80%) [{gameweekStats.teamStats.passAccuracy > 80 ? '+15' : '-10'}]</p>
-            <p>Total Passes: {gameweekStats.teamStats.totalPasses} (Target: 350) [{gameweekStats.teamStats.totalPasses > 350 ? '+15' : '-10'}]</p>
-            <p>Times Dispossessed: {gameweekStats.teamStats.dispossesed} (Target: under 7) [{gameweekStats.teamStats.dispossesed < 7 ? '+15' : '-10'}]</p>
-          </div>
-        )}
-        {gameweekStats?.teamTactic === TeamTactics.DEFENSIVE && (
-          <div>
-            <h3>Defensive Tactic</h3>
-            <p>Tackles: {gameweekStats.teamStats.tackles} (Target: 20) [{gameweekStats.teamStats.tackles > 20 ? '+15' : '-10'}]</p>
-            <p>Interceptions: {gameweekStats.teamStats.interceptions} (Target: 10) [{gameweekStats.teamStats.interceptions > 10 ? '+15' : '-10'}]</p>
-            <p>Goals Conceded: {gameweekStats.teamStats.goalsConceded} (Target: under 10) [{gameweekStats.teamStats.goalsConceded < 10 ? '+20' : '-10'}]</p>
-          </div>
-        )}
-        {gameweekStats?.teamTactic === TeamTactics.OFFENSIVE && (
-          <div>
-            <h3>Offensive Tactic</h3>
-            <p>Goals + Assists: {gameweekStats.teamStats.goals + gameweekStats.teamStats.assists} (Target: over 6) [{(gameweekStats.teamStats.goals + gameweekStats.teamStats.assists) > 6 ? '+15' : '-10'}]</p>
-            <p>Key Passes: {gameweekStats.teamStats.keyPasses} (Target: 10) [{gameweekStats.teamStats.keyPasses > 10 ? '+15' : '-10'}]</p>
-            <p>Goals & Assists vs Goals Conceded: {gameweekStats.teamStats.goals + gameweekStats.teamStats.assists} vs {gameweekStats.teamStats.goalsConceded} [{gameweekStats.teamStats.goalsConceded < (gameweekStats.teamStats.goals + gameweekStats.teamStats.assists) ? '+15' : '-5'}]</p>
-          </div>
-        )}
-        <div className={styles.totalTeamPoints}>
-          Total Team Points: {gameweekStats?.totalTeamPoints || 0}
-        </div>
-      </FantasyEPLModal>
+      {!teamEditable ? (
+        <TeamScoreBreakdown
+          showScoreModal={showScoreModal}
+          setShowScoreModal={setShowScoreModal}
+          gameweekStats={gameweekStats}
+        />
+      ) : null }
+      
 
       <div className={styles.tacticsSelector}>
       <h3>Team Strategy</h3>
       <div className={styles.tacticOptions}>
-        <button 
+        <button
+          disabled={!teamEditable}
           className={`${styles.tacticButton} ${selectedTactic === TeamTactics.OFFENSIVE ? styles.selected : ''}`}
           onClick={() => handleTacticChange(TeamTactics.OFFENSIVE)}
         >
           Offensive
         </button>
         <button 
+          disabled={!teamEditable}
           className={`${styles.tacticButton} ${selectedTactic === TeamTactics.DEFENSIVE ? styles.selected : ''}`}
           onClick={() => handleTacticChange(TeamTactics.DEFENSIVE)}
         >
           Defensive
         </button>
-        <button 
+        <button
+          disabled={!teamEditable}
           className={`${styles.tacticButton} ${selectedTactic === TeamTactics.POSSESION ? styles.selected : ''}`}
           onClick={() => handleTacticChange(TeamTactics.POSSESION)}
         >
           Possession
         </button>
-        <button 
+        <button
+          disabled={!teamEditable}
           className={`${styles.tacticButton} ${selectedTactic === TeamTactics.DEFAULT ? styles.selected : ''}`}
           onClick={() => handleTacticChange(TeamTactics.DEFAULT)}
         >
@@ -216,10 +212,11 @@ function Home() {
           <PitchVisualization 
             gameweekStats={gameweekStats}
             handlePlayerMove={handlePlayerMove}
+            teamEditable={teamEditable}
           />
           <div className={styles.saveButtonContainer}>
-            <button 
-              className={styles.saveButton}
+            <button
+              className={`${styles.saveButton} ${teamEditable ? '' : styles.hidden}`}
               onClick={handleSaveTeamChanges}
             >
               Save Team Changes

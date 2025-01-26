@@ -3,6 +3,7 @@ import { LeagueFixtureResults, GameweekFixtureResult } from "../api/openapi";
 import { useGlobalContext } from "../utils/customHooks";
 import api from "../api/main";
 import styles from "./LeagueFixtures.module.css";
+import { useNavigate } from 'react-router-dom';
 
 const LeagueFixtures = () => {
   const { user } = useGlobalContext();
@@ -10,6 +11,7 @@ const LeagueFixtures = () => {
     gameweekFixtures: [], 
     leagueId: user.activeLeague
   });
+  const navigate = useNavigate();
 
   const groupedFixtures = fixtures.gameweekFixtures.reduce((acc, fixture) => {
     const gameweekNumber = fixture.gameweekNumber;
@@ -20,6 +22,11 @@ const LeagueFixtures = () => {
     return acc;
   }, {} as Record<number, GameweekFixtureResult[]>);
 
+  const handleScoreClick = (userId: number, gameweekNumber: number) => {
+    navigate(`/?user=${userId}&gameweek=${gameweekNumber}`);
+  };
+
+
   useEffect(() => {
     const fetchFixtures = async () => {
       const fixtures = await api.getLeagueFixtureResults(user.activeLeague);
@@ -27,6 +34,7 @@ const LeagueFixtures = () => {
     };
     fetchFixtures();
   }, []);
+  
 
   return (
     <div className={styles.fixturesContainer}>
@@ -42,16 +50,42 @@ const LeagueFixtures = () => {
               {fixtureGroup.map((fixture, index) => (
                 <div key={index} className={styles.fixtureCard}>
                   <div className={styles.matchup}>
-                    <div className={styles.team}>
-                      <span className={styles.playerName}>{fixture.user1.firstName}</span>
-                      <span className={styles.score}>{fixture.user1Score}</span>
-                    </div>
+                  <div className={styles.team}>
+                    <span className={styles.playerName}>{fixture.user1.firstName}</span>
+                    <span 
+                      className={`${styles.score} ${styles.clickable}`}
+                      onClick={() => handleScoreClick(fixture.user1.id, Number(gameweekNumber))}
+                    >
+                      {fixture.user1Score}
+                    </span>
+                  </div>
                     <span className={styles.vs}>vs</span>
                     <div className={styles.team}>
-                      <span className={styles.playerName}>
+                      {fixture.oddPlayer ? (
+                        <>
+                        <span className={styles.playerName}>
+                          {'League Average'}
+                        </span>
+                        <span className={styles.score}>
+                            {fixture.user2Score}
+                        </span>
+                        </>
+                      ) : (
+                        <>
+                        <span className={styles.playerName}>
+                          {fixture.user2.firstName}
+                        </span>
+                        <span
+                          className={`${styles.score} ${styles.clickable}`}
+                          onClick={() => handleScoreClick(fixture.user1.id, Number(gameweekNumber))}
+                        >{fixture.user2Score}</span>
+                        </>
+                      )
+                      }
+                      {/* <span className={styles.playerName}>
                         {fixture.oddPlayer ? 'League Average' : fixture.user2.firstName}
                       </span>
-                      <span className={styles.score}>{fixture.user2Score}</span>
+                      <span className={styles.score}>{fixture.user2Score}</span> */}
                     </div>
                   </div>
                 </div>
