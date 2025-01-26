@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build-prod": "tsc -b && API_URL=http://fantasy-epl.eu-north-1.elasticbeanstalk.com vite build",
+    "build-prod": "tsc -b && VITE_API_PORT=80 VITE_API_URL=http://fantasy-epl.eu-north-1.elasticbeanstalk.com VITE_FRONTEND_HOST=http://fantasy-epl.s3-website.eu-north-1.amazonaws.com vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "generate-api": "npx openapi-typescript-codegen --input http://localhost:5001/openapi.json --output ./src/api/openapi --name EplFantasy",

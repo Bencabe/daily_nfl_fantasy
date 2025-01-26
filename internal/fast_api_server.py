@@ -54,6 +54,7 @@ async def login(response: Response, email: str = Header(None), password: str = H
                 httponly=True,
                 # secure=True,  # Set to True if using HTTPS
                 samesite=None,
+                domain='fantasy-epl.eu-north-1.elasticbeanstalk.com',
                 max_age=3600,  # Cookie expiration time in seconds (e.g., 1 hour)
             )
             return user.model_dump(by_alias=True)

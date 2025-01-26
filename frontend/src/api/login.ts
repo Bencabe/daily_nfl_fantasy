@@ -2,12 +2,11 @@ import config from '../../config'
 import axios from 'axios';
 
 const getUser = async (userEmail: string) => {
-    const response = await fetch(`http://localhost:${config.port}/user`, {
+    const response = await fetch(`${config.host}:${config.port}/user`, {
       method: 'GET',
       mode: 'cors',
       headers: {
         'email': userEmail,
-        'Access-Control-Allow-Origin': '*'
       }
     });
     const user = await response.json();
@@ -16,24 +15,25 @@ const getUser = async (userEmail: string) => {
 
   const login = async (userEmail: string, password: string) => {
     // TODO encrypt password
-    const response = await axios.post(`http://localhost:${config.port}/login`, null, {
+    const response = await axios.post(`${config.host}:${config.port}/login`, null, {
       headers: {
         'email': userEmail,
         'password': password,
-        'Access-Control-Allow-Origin': '*'
       },
       withCredentials: true,
     });
+    console.log("HELLO") 
+    console.log(response.data) 
     
     return response.data;
   };
 
 const validateJWT = async () => {
   try {
-    const response = await axios.post(`http://localhost:${config.port}/whoami`, {}, {
+    const response = await axios.post(`${config.host}:${config.port}/whoami`, {}, {
       withCredentials: true,
       headers: {
-        'Access-Control-Allow-Origin': 'http://localhost:3000',
+        'Access-Control-Allow-Origin': config.frontendHost,
         'Access-Control-Allow-Credentials': 'true'
       }
     });
@@ -45,11 +45,11 @@ const validateJWT = async () => {
 };
 
 const registerUser = async (userDetails: object) => {
-    const response = await fetch(`http://localhost:${config.port}/user`, {
+    const response = await fetch(`${config.host}:${config.port}/user`, {
       method: 'POST',
       mode: 'cors',
       headers: {
-        'Access-Control-Allow-Origin': 'http://localhost:3000'
+        'Access-Control-Allow-Origin': config.frontendHost
       },
       body: JSON.stringify(userDetails)
     });

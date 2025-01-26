@@ -1,7 +1,7 @@
 import { EplFantasy } from "./openapi/EplFantasy";
 
 const api = new EplFantasy({
-    BASE: import.meta.env.API_URL || 'http://localhost:5001',
+    BASE: import.meta.env.VITE_API_URL || 'http://localhost:5001',
     HEADERS: {
       'Authorization': `Bearer ${document.cookie.split('jwt_token=')[1]}`,
       'Cookie': document.cookie,
