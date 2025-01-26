@@ -6,9 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build-prod": "tsc -b && API_URL=http://fantasy-epl.eu-north-1.elasticbeanstalk.com vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate-api": "npx openapi-typescript-codegen --input http://localhost:5001/openapi.json --output ./src/api/openapi --name EplFantasy"
+    "generate-api": "npx openapi-typescript-codegen --input http://localhost:5001/openapi.json --output ./src/api/openapi --name EplFantasy",
+    "deploy-frontend": "aws s3 sync dist/ s3://fantasy-epl"
   },
   "dependencies": {
     "@capacitor/android": "^6.2.0",

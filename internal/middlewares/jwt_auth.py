@@ -4,7 +4,7 @@ import jwt
 from constants import JWT 
 from http import cookies
 
-EXEMPT_ROUTES = ["/login", "/whoami", "/docs", "/openapi.json"]
+EXEMPT_ROUTES = ["/login", "/whoami", "/docs", "/openapi.json", "/healthcheck"]
 
 def validate_jwt(request: Request):
     jwt_token = request.cookies.get('jwt_token')
