@@ -53,9 +53,9 @@ async def login(response: Response, email: str = Header(None), password: str = H
                 key="jwt_token",
                 value=jwt_token,
                 httponly=True,
-                # secure=True,  # Set to True if using HTTPS
+                secure=True,  # Set to True if using HTTPS
                 samesite=None,
-                domain=BACKEND_URL,
+                # domain=BACKEND_URL,
                 max_age=3600,  # Cookie expiration time in seconds (e.g., 1 hour)
             )
             return user.model_dump(by_alias=True)

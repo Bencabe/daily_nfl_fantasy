@@ -9,7 +9,7 @@ EXEMPT_ROUTES = ["/login", "/whoami", "/docs", "/openapi.json", "/healthcheck"]
 def validate_jwt(request: Request):
     jwt_token = request.cookies.get('jwt_token')
     if not jwt_token:
-        raise HTTPException(status_code=401, detail="JWT token missing")
+        raise HTTPException(status_code=401, detail=f"JWT token missin {request.cookies}")
     
     try:
         payload = jwt.decode(jwt_token, JWT.SECRET, algorithms=[JWT.ALGORITH], verify=True, options={"verify_exp": True})
