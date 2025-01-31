@@ -1,88 +1,81 @@
 .playerCard {
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     background-color: rgba(255, 255, 255, 0.9);
-    padding: 5px;
+    padding: 10px;
     border-radius: 4px;
-    text-align: center;
-    min-width: 0px;
-    position: relative;
-    z-index: 2;
     cursor: pointer;
+    transition: transform 0.2s;
+    text-align: center;
 }
-
-.statLine {
-    margin: 5px 0;
-    font-size: 0.9em;
+  
+.playerCard:hover {
+    transform: scale(1.05);
 }
-
-.totalScore {
-    margin-top: 8px;
-    font-weight: bold;
-}
-
+  
 .modalHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
 }
-
+  
 .toggleContainer {
     display: flex;
     gap: 10px;
 }
-
+  
 .toggleButton {
     padding: 8px 16px;
-    border: 1px solid #ccc;
+    border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.toggleButton.active {
-    background-color: #007bff;
-    color: white;
-    border-color: #007bff;
-}
-
-.toggleButton:hover {
     background-color: #f0f0f0;
 }
-
-.toggleButton.active:hover {
-    background-color: #0056b3;
+  
+.toggleButton.active {
+    background-color: #4CAF50;
+    color: white;
 }
-
+  
 .statsTable {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
-    background-color: white;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
-
+  
 .statsTable th,
 .statsTable td {
-    padding: 12px;
+    padding: 8px;
     text-align: left;
     border-bottom: 1px solid #ddd;
 }
+  
+@media (max-width: 768px) {
+    .modalHeader {
+        flex-direction: column;
+        gap: 10px;
+    }
+  
+    .statsTable {
+        font-size: 0.8rem;
+    }
 
-.statsTable thead th {
-    background-color: #f8f9fa;
-    font-weight: bold;
-    color: #333;
-}
+    .playerCard {
+        max-width: 50px;
+        font-size: 0.7rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
 
-.statsTable tbody tr:hover {
-    background-color: #f5f5f5;
-}
-
-.statsTable tfoot {
-    font-weight: bold;
-    background-color: #f8f9fa;
-}
-
-.statsTable tfoot td {
-    border-top: 2px solid #ddd;
+    .playerCard > * {
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 }

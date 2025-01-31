@@ -110,4 +110,25 @@ cursor: not-allowed;
   .hidden {
     display: none;
   }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 10px;
+    }
+  
+    .tacticOptions {
+      flex-wrap: wrap;
+    }
+  
+    .tacticButton {
+      width: calc(50% - 10px);
+      margin: 5px;
+    }
+  
+    .pitchWrapper {
+      width: 100vw;
+      height: auto;
+      margin: 15px auto;
+    }
+  }
   

@@ -16,7 +16,10 @@ import os
 app = FastAPI()
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "host.docker.internal:3000")
-BACKEND_URL = os.getenv("BACKEND_URL", "localhost")
+BACKEND_URL = os.getenv("BACKEND_URL", None)
+HTTPS_TRAFFIC = True if BACKEND_URL else False
+SAMESITE = 'none' if BACKEND_URL else None
+
 
 # CORS setup
 app.add_middleware(
@@ -53,9 +56,9 @@ async def login(response: Response, email: str = Header(None), password: str = H
                 key="jwt_token",
                 value=jwt_token,
                 httponly=True,
-                secure=True,  # Set to True if using HTTPS
-                samesite=None,
-                domain="cloudfront.net",
+                secure=HTTPS_TRAFFIC,
+                samesite=SAMESITE,
+                domain=BACKEND_URL,
                 max_age=3600,  # Cookie expiration time in seconds (e.g., 1 hour)
             )
             return user.model_dump(by_alias=True)

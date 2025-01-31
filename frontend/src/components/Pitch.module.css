@@ -20,6 +20,8 @@
     width: 100%;
     display: flex;
     justify-content: space-evenly;
+    flex-wrap: nowrap;
+    /* overflow-x: auto; */
 }
 
 .goalkeepers {
@@ -53,10 +55,24 @@
 
 .pitchContainer, .benchContainer {
     cursor: move;
-  }
+}
   
-  .pitchContainer.dragOver,
-  .benchContainer.dragOver {
+.pitchContainer.dragOver,
+.benchContainer.dragOver {
     border: 2px dashed #666;
-  }
-  
+}
+
+@media (max-width: 768px) {
+    .pitchContainer {
+        width: 95vw;
+        height: 70vh;
+    }
+
+    .benchContainer {
+        padding: 10px;
+    }
+
+    .benchPlayers {
+        gap: 5px;
+    }
+}
