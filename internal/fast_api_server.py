@@ -18,7 +18,7 @@ app = FastAPI()
 FRONTEND_URL = os.getenv("FRONTEND_URL", "host.docker.internal:3000")
 BACKEND_URL = os.getenv("BACKEND_URL", None)
 HTTPS_TRAFFIC = True if BACKEND_URL else False
-SAMESITE = 'none' if BACKEND_URL else None
+SAMESITE = 'None' if BACKEND_URL else None
 
 
 # CORS setup

@@ -13,10 +13,10 @@ def validate_jwt(request: Request):
     HTTPS_TRAFFIC = True if BACKEND_URL else False
     SAMESITE = 'none' if BACKEND_URL else None
     vars = {
-        'BACKEND_URL', BACKEND_URL,
-        'HTTPS_TRAFFIC', HTTPS_TRAFFIC,
-        'SAMESITE', SAMESITE,
-        'FRONTEND_URL', FRONTEND_URL
+        'BACKEND_URL': BACKEND_URL,
+        'HTTPS_TRAFFIC': HTTPS_TRAFFIC,
+        'SAMESITE': SAMESITE,
+        'FRONTEND_URL': FRONTEND_URL
     }
     jwt_token = request.cookies.get('jwt_token')
     if not jwt_token:
