@@ -61,7 +61,11 @@ async def login(response: Response, email: str = Header(None), password: str = H
                 domain=BACKEND_URL,
                 max_age=3600,  # Cookie expiration time in seconds (e.g., 1 hour)
             )
-            return user.model_dump(by_alias=True)
+            return {
+                "user": user.model_dump(by_alias=True),
+                # TODO this isn't great, using as a fallback for now because httponly cookie not reliable
+                "token": jwt_token  
+            }
         response.status_code = 401
         return {"response": "Incorrect password"}
     except Exception as e:

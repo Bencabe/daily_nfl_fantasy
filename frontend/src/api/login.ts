@@ -26,8 +26,10 @@ const getUser = async (userEmail: string) => {
     });
     console.log("HELLO") 
     console.log(response.data) 
+    // TODO this isn't great, using as a fallback for now because httponly cookie not reliable
+    localStorage.setItem('jwt_token', response.data.token);
     
-    return response.data;
+    return response.data.user;
   };
 
 const validateJWT = async () => {
@@ -36,7 +38,9 @@ const validateJWT = async () => {
       withCredentials: true,
       headers: {
         'Access-Control-Allow-Origin': config.frontendHost,
-        'Access-Control-Allow-Credentials': 'true'
+        'Access-Control-Allow-Credentials': 'true',
+        // TODO this isn't great, using as a fallback for now because httponly cookie not reliable
+        'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`
       }
     });
     return response.data.user;
