@@ -21,7 +21,6 @@
     display: flex;
     justify-content: space-evenly;
     flex-wrap: nowrap;
-    /* overflow-x: auto; */
 }
 
 .goalkeepers {
@@ -55,11 +54,30 @@
 
 .pitchContainer, .benchContainer {
     cursor: move;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
-  
+
 .pitchContainer.dragOver,
 .benchContainer.dragOver {
     border: 2px dashed #666;
+}
+
+.dragging {
+    transform: scale(0.8);
+    opacity: 0.6;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.draggedElement {
+    position: fixed;
+    z-index: 1000;
+    opacity: 0.8;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 150px;
 }
 
 @media (max-width: 768px) {
@@ -74,5 +92,11 @@
 
     .benchPlayers {
         gap: 5px;
+    }
+}
+
+@media (hover: none) and (pointer: coarse) {
+    .pitchContainer, .benchContainer {
+        cursor: pointer;
     }
 }

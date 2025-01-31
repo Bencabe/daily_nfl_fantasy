@@ -1,134 +1,163 @@
 .container {
-    display: flex;
-    flex-direction: column;
-    /* width: 100vw; */
-    min-height: 100vh;
-    padding: 0;   /* Add this to ensure no padding */
-    margin: 0;    /* Add this to ensure no margin */
-    box-sizing: border-box; /* Add this to include padding in width calculation */
-    overflow-x: hidden;
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;     /* Firefox */
-    overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  overflow-y: auto;
 }
 
 .container::-webkit-scrollbar {
-  display: none;  /* Chrome, Safari and Opera */
+  display: none;
 }
 
 .pitchWrapper {
-    width: 90vw;
-    height: 80vh;
-    margin: 30px auto;
+  width: 90vw;
+  height: 80vh;
+  margin: 30px auto;
 }
 
 .statsSection {
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-
-    width: 100%;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .playerStats {
-    margin: 15px 0;
+  margin: 15px 0;
 }
+
 .gameweekNavigation {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
 .gameweekNavigation button {
-padding: 0.5rem 1rem;
-border: 1px solid #ccc;
-border-radius: 4px;
-cursor: pointer;
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .gameweekNavigation button:disabled {
-opacity: 0.5;
-cursor: not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-  /* Strategy select CSS */
+.tacticsSelector {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.strategyHeader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.arrow {
+  display: none;
+}
+
+.arrow.expanded {
+  transform: rotate(180deg);
+}
+
+.tacticOptions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.tacticButton {
+  padding: 8px 16px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tacticButton:hover {
+  background: #f5f5f5;
+}
+
+.tacticButton.selected {
+  background: #4CAF50;
+  color: white;
+  border-color: #45a049;
+}
+
+.saveButtonContainer {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.saveButton {
+  padding: 12px 24px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.saveButton:hover {
+  background-color: #45a049;
+}
+
+.hidden {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .container {
+      padding: 10px;
+  }
 
   .tacticsSelector {
-    margin: 20px 0;
-    text-align: center;
-  }
-  
-  .tacticOptions {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 10px;
-  }
-  
-  .tacticButton {
-    padding: 8px 16px;
-    border: 2px solid #ddd;
-    border-radius: 4px;
-    background: white;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-  
-  .tacticButton:hover {
-    background: #f5f5f5;
-  }
-  
-  .tacticButton.selected {
-    background: #4CAF50;
-    color: white;
-    border-color: #45a049;
-  }
-
-  /* Save team CSS */
-
-  .saveButtonContainer {
-    margin: 20px 0;
-    text-align: center;
-  }
-  
-  .saveButton {
-    padding: 12px 24px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-  }
-  
-  .saveButton:hover {
-    background-color: #45a049;
-  }
-  .hidden {
-    display: none;
-  }
-
-  @media (max-width: 768px) {
-    .container {
+      position: relative;
+      background: #f0f0f0;
       padding: 10px;
-    }
-  
-    .tacticOptions {
-      flex-wrap: wrap;
-    }
-  
-    .tacticButton {
-      width: calc(50% - 10px);
-      margin: 5px;
-    }
-  
-    .pitchWrapper {
-      width: 100vw;
-      height: auto;
-      margin: 15px auto;
-    }
+      border-radius: 4px;
   }
-  
+
+  .strategyHeader {
+      cursor: pointer;
+  }
+
+  .strategyHeader h3 {
+      margin: 0;
+  }
+
+  .tacticOptions {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      margin-top: 10px;
+  }
+
+  .tacticOptions.expanded {
+      display: flex;
+  }
+
+  .tacticButton {
+      width: 100%;
+  }
+  .arrow {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+}

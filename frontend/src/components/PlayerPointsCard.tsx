@@ -11,7 +11,7 @@ const PlayerPointsCard = ({ player, stats }: { player: Player; stats: PlayerScor
   return (
     <>
       <div className={styles.playerCard} onClick={() => setShowModal(true)}>
-        <div>{player.displayName}</div>
+        <div>{player.displayName.split(' ').slice(1).join(' ')}</div>
         <div>{Object.values(stats.fixtureStats || {})?.at(0)?.playerStats?.totalScore || 0} pts</div>
       </div>
       

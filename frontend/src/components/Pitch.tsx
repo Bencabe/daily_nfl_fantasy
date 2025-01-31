@@ -1,4 +1,4 @@
-import { DragEvent } from 'react';
+import { DragEvent, TouchEvent, useState } from 'react';
 import { GameweekStats } from "../api/openapi/models/GameweekStats";
 import { Player } from "../api/openapi/models/Player";
 import { PlayerScores } from "../api/openapi/models/PlayerScores";
@@ -29,6 +29,11 @@ const PitchVisualization = ({
   handlePlayerMove: (playerId: number, isBenched: boolean) => void 
   teamEditable: boolean
 }) => {
+  const [touchedPlayerId, setTouchedPlayerId] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [touchPosition, setTouchPosition] = useState<{ x: number; y: number } | null>(null);
+  const [draggedElement, setDraggedElement] = useState<HTMLElement | null>(null);
+
   const playersByPosition: PositionGroups = {
     starting: {
       goalkeepers: gameweekStats.playerStats.filter(p => p.player.positionId === 1 && !isOnBench(gameweekStats, p.player)),
@@ -57,6 +62,58 @@ const PitchVisualization = ({
     e.preventDefault();
   };
 
+  const handleTouchStart = (e: TouchEvent<HTMLDivElement>, playerId: number) => {
+    if (!teamEditable) return;
+    const touch = e.touches[0];
+    const element = e.currentTarget.cloneNode(true) as HTMLElement;
+    
+    element.className = styles.draggedElement;
+    element.style.left = `${touch.clientX}px`;
+    element.style.top = `${touch.clientY}px`;
+    
+    document.body.appendChild(element);
+    setDraggedElement(element);
+    setTouchPosition({ x: touch.clientX, y: touch.clientY });
+    setTouchedPlayerId(playerId);
+    setIsDragging(true);
+  };
+
+  const handleTouchMove = (e: TouchEvent<HTMLDivElement>) => {
+    if (!isDragging || !draggedElement) return;
+    const touch = e.touches[0];
+    
+    draggedElement.style.left = `${touch.clientX}px`;
+    draggedElement.style.top = `${touch.clientY}px`;
+    
+    setTouchPosition({ x: touch.clientX, y: touch.clientY });
+    e.preventDefault();
+  };
+
+  const handleTouchEnd = (e: TouchEvent<HTMLDivElement>) => {
+    if (!touchedPlayerId || !isDragging || !touchPosition) return;
+    
+    const touch = e.changedTouches[0];
+    const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+    
+    // Check if dropped on bench or pitch
+    const isBench = dropTarget?.closest(`.${styles.benchContainer}`) !== null;
+    const isPitch = dropTarget?.closest(`.${styles.pitchContainer}`) !== null;
+    
+    if (draggedElement) {
+      document.body.removeChild(draggedElement);
+      setDraggedElement(null);
+    }
+    
+    // Only trigger move if dropped on valid target
+    if (isBench || isPitch) {
+      handlePlayerMove(touchedPlayerId, isBench);
+    }
+    
+    setTouchedPlayerId(null);
+    setIsDragging(false);
+    setTouchPosition(null);
+  };
+
   return (
     <div className={styles.fullTeamView}>
       <div 
@@ -75,6 +132,10 @@ const PitchVisualization = ({
                 key={playerStat.player.id}
                 draggable={teamEditable}
                 onDragStart={(e) => handleDragStart(e, playerStat.player.id)}
+                onTouchStart={(e) => handleTouchStart(e, playerStat.player.id)}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={(e) => handleTouchEnd(e)}
+                className={isDragging && touchedPlayerId === playerStat.player.id ? styles.dragging : ''}
               >
                 <PlayerPointsCard 
                   player={playerStat.player}
@@ -94,8 +155,12 @@ const PitchVisualization = ({
           {playersByPosition.subs.map(playerStat => (
             <div
               key={playerStat.player.id}
-              draggable
+              draggable={teamEditable}
               onDragStart={(e) => handleDragStart(e, playerStat.player.id)}
+              onTouchStart={(e) => handleTouchStart(e, playerStat.player.id)}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={(e) => handleTouchEnd(e)}
+              className={isDragging && touchedPlayerId === playerStat.player.id ? styles.dragging : ''}
             >
               <PlayerPointsCard 
                 player={playerStat.player}

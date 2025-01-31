@@ -23,6 +23,7 @@ function Home() {
   const [searchParams] = useSearchParams();
   const viewUserId = searchParams.get('user') ? Number(searchParams.get('user')) : user.id;
   const viewGameweek = searchParams.get('gameweek') ? Number(searchParams.get('gameweek')) : null;
+  const [isStrategyExpanded, setIsStrategyExpanded] = useState(false);
 
   useEffect(() => {
     const fetchGameweek = async () => {
@@ -171,41 +172,46 @@ function Home() {
           gameweekStats={gameweekStats}
         />
       ) : null }
-      
 
       <div className={styles.tacticsSelector}>
-      <h3>Team Strategy</h3>
-      <div className={styles.tacticOptions}>
-        <button
-          disabled={!teamEditable}
-          className={`${styles.tacticButton} ${selectedTactic === TeamTactics.OFFENSIVE ? styles.selected : ''}`}
-          onClick={() => handleTacticChange(TeamTactics.OFFENSIVE)}
+        <div 
+          className={styles.strategyHeader}
+          onClick={() => setIsStrategyExpanded(!isStrategyExpanded)}
         >
-          Offensive
-        </button>
-        <button 
-          disabled={!teamEditable}
-          className={`${styles.tacticButton} ${selectedTactic === TeamTactics.DEFENSIVE ? styles.selected : ''}`}
-          onClick={() => handleTacticChange(TeamTactics.DEFENSIVE)}
-        >
-          Defensive
-        </button>
-        <button
-          disabled={!teamEditable}
-          className={`${styles.tacticButton} ${selectedTactic === TeamTactics.POSSESION ? styles.selected : ''}`}
-          onClick={() => handleTacticChange(TeamTactics.POSSESION)}
-        >
-          Possession
-        </button>
-        <button
-          disabled={!teamEditable}
-          className={`${styles.tacticButton} ${selectedTactic === TeamTactics.DEFAULT ? styles.selected : ''}`}
-          onClick={() => handleTacticChange(TeamTactics.DEFAULT)}
-        >
-          Default
-        </button>
+          <h3>Team Strategy</h3>
+          <span className={`${styles.arrow} ${isStrategyExpanded ? styles.expanded : ''}`}>▼</span>
+        </div>
+        <div className={`${styles.tacticOptions} ${isStrategyExpanded ? styles.expanded : ''}`}>
+          <button
+            disabled={!teamEditable}
+            className={`${styles.tacticButton} ${selectedTactic === TeamTactics.OFFENSIVE ? styles.selected : ''}`}
+            onClick={() => handleTacticChange(TeamTactics.OFFENSIVE)}
+          >
+            Offensive
+          </button>
+          <button 
+            disabled={!teamEditable}
+            className={`${styles.tacticButton} ${selectedTactic === TeamTactics.DEFENSIVE ? styles.selected : ''}`}
+            onClick={() => handleTacticChange(TeamTactics.DEFENSIVE)}
+          >
+            Defensive
+          </button>
+          <button
+            disabled={!teamEditable}
+            className={`${styles.tacticButton} ${selectedTactic === TeamTactics.POSSESION ? styles.selected : ''}`}
+            onClick={() => handleTacticChange(TeamTactics.POSSESION)}
+          >
+            Possession
+          </button>
+          <button
+            disabled={!teamEditable}
+            className={`${styles.tacticButton} ${selectedTactic === TeamTactics.DEFAULT ? styles.selected : ''}`}
+            onClick={() => handleTacticChange(TeamTactics.DEFAULT)}
+          >
+            Default
+          </button>
+        </div>
       </div>
-    </div>
 
       {gameweekStats && (
         <div className={styles.pitchWrapper}>
