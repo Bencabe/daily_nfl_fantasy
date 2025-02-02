@@ -43,3 +43,9 @@ class FantasyDataClient():
         url = f"{self.base_url}/fixtures/{fixture_id}"
         response = requests.request("GET", url, headers=self.default_headers, params=querystring)
         return response.json()
+    
+    def get_live_fixtures(self):
+        url = f"{self.base_url}/livescores/now"
+        querystring = {"leagues":"8","bookmakers":"2","timezone":"Europe/Amsterdam","market":"1","include":"localTeam,visitorTeam,events"}
+        response = requests.request("GET", url, headers=self.default_headers, params=querystring)
+        return response.json()

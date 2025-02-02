@@ -1,6 +1,8 @@
-# call script from internal directory using python update_gameweek_stats.py <gameweek_id> <season_id>
+# call script from internal directory using python update_gameweek_stats.py <only_live_fixtures: [0|1]> <gameweek_id: int> <season_id: int>
 from clients.ff_data_client import FantasyDataClient
 from database.database_client import DatabaseClient
+from clients.ff_data_client import FantasyDataClient
+import constants
 import sys
 import time
 
@@ -59,19 +61,26 @@ def player_stat_mapping(stats, season_id):
 
 api_client = FantasyDataClient()
 db_client = DatabaseClient()
-gameweek_id = int(sys.argv[1]) if len(sys.argv) > 1 else None
-season_id = int(sys.argv[2]) if len(sys.argv) > 2 else None
+cur_gameweek = db_client.get_current_gameweek_model()[0]
+live = int(sys.argv[1]) if len(sys.argv) > 1 else 0
+gameweek_id = int(sys.argv[2]) if len(sys.argv) > 2 else cur_gameweek.id
+season_id = int(sys.argv[3]) if len(sys.argv) > 3 else constants.Season.ID
 if not gameweek_id or not season_id:
     raise Exception("No gameweek id or season id provided")
-gameweek_fixtures = db_client.get_fixtures_in_gameweek(gameweek_id)
+if live:
+    gameweek_fixtures = api_client.get_live_fixtures()['data']
+    print('live fixtures:', gameweek_fixtures)
+else:
+    gameweek_fixtures = db_client.get_fixtures_in_gameweek(gameweek_id)
 gameweek_player_stats = []
 for fixture in gameweek_fixtures:
-    fixture_stats = api_client.get_player_stats_by_fixture(fixture[0])
+    fixture_id = fixture['id'] if live else fixture[0]
+    fixture_stats = api_client.get_player_stats_by_fixture(fixture_id)
     error_message = fixture_stats.get("message")
     while error_message and "exceeded the rate limit per minute" in error_message:
         print("Rate limit exceeded, sleeping for 60 seconds")
         time.sleep(60)
-        fixture_stats = api_client.get_player_stats_by_fixture(fixture[0])
+        fixture_stats = api_client.get_player_stats_by_fixture(fixture_id)
         error_message = fixture_stats.get("message")
         
     gameweek_player_stats.append(fixture_stats)
