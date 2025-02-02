@@ -12,7 +12,7 @@ RUN touch /var/log/cron.log
 
 # Create crontab file
 RUN echo "* * * * * echo 'Cron is running' >> /var/log/cron.log 2>&1" > /etc/cron.d/crontab
-RUN echo "*/1 12-23 * * * /usr/local/bin/python /app/update_gameweek_stats.py 1 >> /var/log/cron.log 2>&1" >> /etc/cron.d/crontab
+RUN echo "*/20 12-23 * * * /usr/local/bin/python /app/update_gameweek_stats.py 1 >> /var/log/cron.log 2>&1" >> /etc/cron.d/crontab
 RUN echo "0 2 * * * /usr/local/bin/python /app/update_current_gameweek.py >> /var/log/cron.log 2>&1" >> /etc/cron.d/crontab
 RUN echo "0 2 * * * /usr/local/bin/python /app/update_gameweek_stats.py 0 >> /var/log/cron.log 2>&1" >> /etc/cron.d/crontab
 RUN echo "0 1 * * * /usr/local/bin/python /app/update_gameweeks.py >> /var/log/cron.log 2>&1" >> /etc/cron.d/crontab
