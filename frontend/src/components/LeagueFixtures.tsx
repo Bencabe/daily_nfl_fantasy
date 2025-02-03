@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { LeagueFixtureResults, GameweekFixtureResult } from "../api/openapi";
 import { useGlobalContext } from "../utils/customHooks";
-import api from "../api/main";
+import getApi from "../api/main";
 import styles from "./LeagueFixtures.module.css";
 import { useNavigate } from 'react-router-dom';
 
@@ -12,6 +12,7 @@ const LeagueFixtures = () => {
     leagueId: user.activeLeague
   });
   const navigate = useNavigate();
+  const api = getApi();
 
   const groupedFixtures = fixtures.gameweekFixtures.reduce((acc, fixture) => {
     const gameweekNumber = fixture.gameweekNumber;

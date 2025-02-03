@@ -52,13 +52,6 @@
     justify-content: center;
 }
 
-.pitchContainer, .benchContainer {
-    cursor: move;
-    touch-action: none;
-    -webkit-user-select: none;
-    user-select: none;
-}
-
 .pitchContainer.dragOver,
 .benchContainer.dragOver {
     border: 2px dashed #666;

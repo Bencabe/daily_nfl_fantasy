@@ -4,7 +4,8 @@ const getToken = () => {
   return document.cookie.split('jwt_token=')[1] || localStorage.getItem('jwt_token');
 };
 
-const api = new EplFantasy({
+const getApi = () => {
+  return new EplFantasy({
     BASE: import.meta.env.VITE_API_URL || 'http://localhost:5001',
     HEADERS: {
       'Authorization': `Bearer ${getToken()}`,
@@ -15,5 +16,6 @@ const api = new EplFantasy({
     CREDENTIALS: 'include',
     WITH_CREDENTIALS: true
   }).default;
+};
 
-export default api;
+export default getApi;

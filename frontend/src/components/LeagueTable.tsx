@@ -1,8 +1,9 @@
-import api from "../api/main";
+import getApi from "../api/main";
 import { LeagueFixtureResults } from "../api/openapi/models/LeagueFixtureResults";
 import { useGlobalContext } from "../utils/customHooks";
 import { useEffect, useState } from 'react'
 import styles from './LeagueTable.module.css';
+import LoadingSpinner from "./LoadingSpinner";
 
 interface Standing {
   userId: number;
@@ -17,6 +18,8 @@ interface Standing {
 const LeagueTable = () => {
   const { user } = useGlobalContext();
   const [standings, setStandings] = useState<Standing[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const api = getApi();
 
   const calculateStandings = (fixtureResults: LeagueFixtureResults) => {
     const standingsMap = new Map<number, Standing>();
@@ -85,40 +88,46 @@ const LeagueTable = () => {
 
   useEffect(() => {
     const fetchFixtures = async () => {
+      setIsLoading(true);
       const fixtures = await api.getLeagueFixtureResults(user.activeLeague);
       setStandings(calculateStandings(fixtures));
+      setIsLoading(false);
     };
     fetchFixtures();
   }, []);
 
   return (
     <div className={styles.tableContainer}>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Position</th>
-            <th>Name</th>
-            <th>Wins</th>
-            <th>Draws</th>
-            <th>Losses</th>
-            <th>Total Score</th>
-            <th>Points</th>
-          </tr>
-        </thead>
-        <tbody>
-          {standings.map((standing, index) => (
-            <tr key={standing.userId}>
-              <td>{index + 1}</td>
-              <td>{standing.name}</td>
-              <td>{standing.wins}</td>
-              <td>{standing.draws}</td>
-              <td>{standing.losses}</td>
-              <td>{standing.totalScore}</td>
-              <td>{standing.points}</td>
+      {isLoading ? (
+        <LoadingSpinner/>
+      ) : (
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Position</th>
+              <th>Name</th>
+              <th>Wins</th>
+              <th>Draws</th>
+              <th>Losses</th>
+              <th>Total Score</th>
+              <th>Points</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {standings.map((standing, index) => (
+              <tr key={standing.userId}>
+                <td>{index + 1}</td>
+                <td>{standing.name}</td>
+                <td>{standing.wins}</td>
+                <td>{standing.draws}</td>
+                <td>{standing.losses}</td>
+                <td>{standing.totalScore}</td>
+                <td>{standing.points}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };

@@ -37,32 +37,37 @@
 
 .table th:nth-child(1),
 .table td:nth-child(1) {
-  width: 12%;  /* Position */
+  width: 10%;  /* Position */
 }
 
 .table th:nth-child(2),
 .table td:nth-child(2) {
-  width: 28%;  /* Team Name */
+  width: 25%;  /* Team Name */
 }
 
 .table th:nth-child(3),
 .table td:nth-child(3) {
-  width: 15%;  /* Games Played */
+  width: 13%;  /* Wins */
 }
 
 .table th:nth-child(4),
 .table td:nth-child(4) {
-  width: 15%;  /* Wins */
+  width: 13%;  /* Draws */
 }
 
 .table th:nth-child(5),
 .table td:nth-child(5) {
-  width: 15%;  /* Points */
+  width: 13%;  /* Losses */
 }
 
 .table th:nth-child(6),
 .table td:nth-child(6) {
-  width: 15%;  /* Total Points */
+  width: 13%;  /* Total Score */
+}
+
+.table th:nth-child(7),
+.table td:nth-child(7) {
+  width: 13%;  /* Points */
 }
 
 .table th {
@@ -118,3 +123,5 @@
       font-size: 24px;
   }
 }
+
+

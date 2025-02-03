@@ -6,7 +6,7 @@ import PitchVisualization from './Pitch';
 import styles from './Home.module.css';
 import { TeamTactics } from '../api/openapi';
 import { LeagueTeam } from '../api/openapi/models/LeagueTeam';
-import api from '../api/main';
+import getApi from '../api/main';
 import { useSearchParams } from 'react-router-dom';
 import TeamScoreBreakdown from './TeamScoreBreakdown';
 
@@ -24,6 +24,7 @@ function Home() {
   const viewUserId = searchParams.get('user') ? Number(searchParams.get('user')) : user.id;
   const viewGameweek = searchParams.get('gameweek') ? Number(searchParams.get('gameweek')) : null;
   const [isStrategyExpanded, setIsStrategyExpanded] = useState(false);
+  const api = getApi();
 
   useEffect(() => {
     const fetchGameweek = async () => {
@@ -122,15 +123,19 @@ function Home() {
   const handlePlayerMove = async (playerId: number, isBenched: boolean) => {
     if (!gameweekStats || !currentGameweek) return;
 
-    const updatedStats = {
-      ...gameweekStats,
-      subs: isBenched 
-        ? [...gameweekStats.subs, playerId]
-        : gameweekStats.subs.filter(id => id !== playerId)
-    };
+    setGameweekStats(prevStats => {
+        if (!prevStats) return null;
+        
+        const updatedSubs = isBenched
+            ? [...prevStats.subs, playerId]
+            : prevStats.subs.filter(id => id !== playerId);
 
-    setGameweekStats(updatedStats);
-  };
+        return {
+            ...prevStats,
+            subs: updatedSubs
+        };
+    });
+};
 
   const handleGameweekChange = async (direction: 'prev' | 'next') => {
     const newNumber = direction === 'next' ? gameweekNumber + 1 : gameweekNumber - 1;

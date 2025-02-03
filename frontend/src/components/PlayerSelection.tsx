@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useGlobalContext } from '../utils/customHooks'
-import api from '../api/main'
+import getApi from '../api/main'
 import { Player } from '../api/openapi/models/Player'
 import { LeagueTeam } from '../api/openapi/models/LeagueTeam'
 import styles from './PlayerSelection.module.css'
 import { FootballTeam } from '../api/openapi/models/FootballTeam'
 import { SeasonPlayerStats } from '../api/openapi'
 import { convertStatName } from '../utils/helperFunctions'
+import LoadingSpinner from './LoadingSpinner'
 
 const PlayerSelection = () => {
     const { user } = useGlobalContext()
@@ -14,6 +15,7 @@ const PlayerSelection = () => {
     const [userTeam, setUserTeam] = useState<LeagueTeam>()
     const [selectedAvailablePlayer, setSelectedAvailablePlayer] = useState<SeasonPlayerStats | null>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
     const [footballTeams, setFootballTeams] = useState<FootballTeam[]>([])
     const [positionFilter, setPositionFilter] = useState<string>('All')
     const [teamFilter, setTeamFilter] = useState<string>('All')
@@ -24,9 +26,11 @@ const PlayerSelection = () => {
         key: string;
         direction: 'ascending' | 'descending';
     } | null>(null)
+    const api = getApi()
 
     useEffect(() => {
         const fetchData = async () => {
+            setIsLoading(true)
             const allSeasonPlayerStats = await api.getSeasonPlayerStats()
             const teams = await api.getLeagueTeams(user.activeLeague)
             const footballTeams = await api.getFootballTeams()
@@ -34,11 +38,11 @@ const PlayerSelection = () => {
             setFootballTeams(footballTeams)
             setSeasonPlayerStats(allSeasonPlayerStats)
 
-            
             const currentUserTeam = teams.find(team => team.userId === user.id)
             if (currentUserTeam) {
                 setUserTeam(currentUserTeam)
             }
+            setIsLoading(false)
         }
         fetchData()
     }, [user])
@@ -180,129 +184,135 @@ const PlayerSelection = () => {
 
     return (
         <div className={styles.container}>
-            <div className={styles.filters}>
-                <input
-                    type="text"
-                    placeholder="Search by name..."
-                    value={searchName}
-                    onChange={(e) => setSearchName(e.target.value)}
-                    className={styles.searchInput}
-                />
-                
-                <select 
-                    value={positionFilter} 
-                    onChange={(e) => setPositionFilter(e.target.value)}
-                    className={styles.filterSelect}
-                >
-                    <option value="All">All Positions</option>
-                    <option value="Goalkeeper">Goalkeeper</option>
-                    <option value="Defender">Defender</option>
-                    <option value="Midfielder">Midfielder</option>
-                    <option value="Forward">Forward</option>
-                </select>
+            {isLoading ? (
+                <LoadingSpinner/>
+            ) : (
+                <>
+                    <div className={styles.filters}>
+                        <input
+                            type="text"
+                            placeholder="Search by name..."
+                            value={searchName}
+                            onChange={(e) => setSearchName(e.target.value)}
+                            className={styles.searchInput}
+                        />
+                        
+                        <select 
+                            value={positionFilter} 
+                            onChange={(e) => setPositionFilter(e.target.value)}
+                            className={styles.filterSelect}
+                        >
+                            <option value="All">All Positions</option>
+                            <option value="Goalkeeper">Goalkeeper</option>
+                            <option value="Defender">Defender</option>
+                            <option value="Midfielder">Midfielder</option>
+                            <option value="Forward">Forward</option>
+                        </select>
 
-                <select 
-                    value={teamFilter} 
-                    onChange={(e) => setTeamFilter(e.target.value)}
-                    className={styles.filterSelect}
-                >
-                    <option value="All">All Teams</option>
-                    {footballTeams.map(team => (
-                        <option key={team.id} value={team.name}>
-                            {team.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
-                    
-            <div className={styles.playersTable}>
-                <table>
-                    <thead>
-                        <tr>
-                            <th onClick={() => handleSort('name')}>
-                                Name {sortConfig?.key === 'name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                            </th>
-                            <th>Position</th>
-                            <th onClick={() => handleSort('team')}>
-                                Team {sortConfig?.key === 'team' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                            </th>
-                            <th onClick={() => handleSort('gamesPlayed')}>
-                                Games Played {sortConfig?.key === 'gamesPlayed' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                            </th>
-                            <th onClick={() => handleSort(selectedStat)}>
-                                <select
-                                    value={selectedStat}
-                                    onChange={(e) => setSelectedStat(e.target.value)}
-                                    className={styles.filterSelect}
-                                >
-                                    {statKeys.map(statKey => (
-                                        <option key={statKey} value={statKey}>
-                                            {convertStatName(statKey)}
-                                        </option>
-                                    ))}
-                                </select>
-                                {sortConfig?.key === selectedStat && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {sortPlayers(filteredPlayers).map(seasonPlayerStats => (
-                            <tr 
-                                key={seasonPlayerStats.player.id}
-                                className={`
-                                    ${styles.playerRow}
-                                    ${isPlayerTaken(seasonPlayerStats.player.id) ? styles.disabled : styles.available}
-                                    ${selectedAvailablePlayer?.player.id === seasonPlayerStats.player.id ? styles.selected : ''}
-                                `}
-                                onClick={() => handleSwapSelection(seasonPlayerStats)}
-                            >
-                                <td>{seasonPlayerStats.player.displayName}</td>
-                                <td>{seasonPlayerStats.player.positionCategory}</td>
-                                <td>{getFootballTeamName(seasonPlayerStats.player.teamId)}</td>
-                                <td>{seasonPlayerStats.gamesPlayed || 0}</td>
-                                <td>{seasonPlayerStats.stats[selectedStat as keyof typeof seasonPlayerStats.stats] || 0}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-
-            {isModalOpen && selectedAvailablePlayer && (
-                <div className={styles.modalOverlay}>
-                    <div className={styles.modal}>
-                        <div className={styles.modalHeader}>
-                            <h2>Select player to swap with {selectedAvailablePlayer.player.displayName}</h2>
-                            <button 
-                                className={styles.closeButton}
-                                onClick={handleCloseModal}
-                            >
-                                ×
-                            </button>
-                        </div>
-                        <div className={styles.modalContent}>
-                            <table className={styles.modalTable}>
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Position</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {getCurrentTeamPlayers(selectedAvailablePlayer.player.positionCategory).map(player => (
-                                        <tr 
-                                            key={player.id}
-                                            className={styles.modalTableRow}
-                                            onClick={() => handlePlayerSwap(player.id)}
-                                        >
-                                            <td>{player.displayName}</td>
-                                            <td>{player.positionCategory}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                        <select 
+                            value={teamFilter} 
+                            onChange={(e) => setTeamFilter(e.target.value)}
+                            className={styles.filterSelect}
+                        >
+                            <option value="All">All Teams</option>
+                            {footballTeams.map(team => (
+                                <option key={team.id} value={team.name}>
+                                    {team.name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
-                </div>
+                            
+                    <div className={styles.playersTable}>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th onClick={() => handleSort('name')}>
+                                        Name {sortConfig?.key === 'name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                    </th>
+                                    <th>Position</th>
+                                    <th onClick={() => handleSort('team')}>
+                                        Team {sortConfig?.key === 'team' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                    </th>
+                                    <th onClick={() => handleSort('gamesPlayed')}>
+                                        Games Played {sortConfig?.key === 'gamesPlayed' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                    </th>
+                                    <th onClick={() => handleSort(selectedStat)}>
+                                        <select
+                                            value={selectedStat}
+                                            onChange={(e) => setSelectedStat(e.target.value)}
+                                            className={styles.filterSelect}
+                                        >
+                                            {statKeys.map(statKey => (
+                                                <option key={statKey} value={statKey}>
+                                                    {convertStatName(statKey)}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {sortConfig?.key === selectedStat && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {sortPlayers(filteredPlayers).map(seasonPlayerStats => (
+                                    <tr 
+                                        key={seasonPlayerStats.player.id}
+                                        className={`
+                                            ${styles.playerRow}
+                                            ${isPlayerTaken(seasonPlayerStats.player.id) ? styles.disabled : styles.available}
+                                            ${selectedAvailablePlayer?.player.id === seasonPlayerStats.player.id ? styles.selected : ''}
+                                        `}
+                                        onClick={() => handleSwapSelection(seasonPlayerStats)}
+                                    >
+                                        <td>{seasonPlayerStats.player.displayName}</td>
+                                        <td>{seasonPlayerStats.player.positionCategory}</td>
+                                        <td>{getFootballTeamName(seasonPlayerStats.player.teamId)}</td>
+                                        <td>{seasonPlayerStats.gamesPlayed || 0}</td>
+                                        <td>{seasonPlayerStats.stats[selectedStat as keyof typeof seasonPlayerStats.stats] || 0}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {isModalOpen && selectedAvailablePlayer && (
+                        <div className={styles.modalOverlay}>
+                            <div className={styles.modal}>
+                                <div className={styles.modalHeader}>
+                                    <h2>Select player to swap with {selectedAvailablePlayer.player.displayName}</h2>
+                                    <button 
+                                        className={styles.closeButton}
+                                        onClick={handleCloseModal}
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                                <div className={styles.modalContent}>
+                                    <table className={styles.modalTable}>
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Position</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {getCurrentTeamPlayers(selectedAvailablePlayer.player.positionCategory).map(player => (
+                                                <tr 
+                                                    key={player.id}
+                                                    className={styles.modalTableRow}
+                                                    onClick={() => handlePlayerSwap(player.id)}
+                                                >
+                                                    <td>{player.displayName}</td>
+                                                    <td>{player.positionCategory}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </>
             )}
         </div>
     )
