@@ -85,9 +85,9 @@ class PlayerManagementService:
         return BaseStat(value=stat, points=int(stat * modifier))
 
     def _minutes_stat_generator(self, stat: int | float | None) -> BaseStat:
-        if not stat or stat < 45:
+        if not stat or stat < 1:
             return BaseStat(value=0, points=0)
-        return BaseStat(value=stat, points=1 if stat < 60 else 2)
+        return BaseStat(value=stat, points=1 if stat < 45 else 2)
 
     def _calculate_player_score(self, player_stats: PlayerStatTypes):
         total_score = 0
