@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { GameweekStats } from "../api/openapi/models/GameweekStats";
 import { Player } from "../api/openapi/models/Player";
-import { PlayerScores } from "../api/openapi/models/PlayerScores";
 import styles from "./Pitch.module.css";
 import footballPitch from "../assets/football_pitch_2.jpeg";
 import PlayerPointsCard from './PlayerPointsCard';
