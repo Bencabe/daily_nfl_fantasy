@@ -29,48 +29,51 @@ const GameweekFixtures = ({ gameweekFixtures, footballTeams }: GameweekFixturesP
     return team?.logoPath || '';
   };
 
+  const formatDate = (dateString: string) => {
+    const parts = dateString.split('/');
+    const date = new Date(+parts[2], +parts[1] - 1, +parts[0]);
+    return date.toLocaleDateString('en-GB', { 
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  };
+
   const groupedFixtures = groupFixturesByDateTime(gameweekFixtures);
 
   return (
     <div className={styles.fixturesContainer}>
-      <h2 className={styles.fixturesTitle}>Gameweek Fixtures</h2>
       {Object.entries(groupedFixtures).map(([date, timeGroups]) => (
         <div key={date} className={styles.dateGroup}>
-          <h3 className={styles.dateHeader}>{date}</h3>
+          <h3 className={styles.dateHeader}>{formatDate(date)}</h3>
           {Object.entries(timeGroups).map(([time, fixtures]) => (
             <div key={`${date}-${time}`} className={styles.timeGroup}>
               <div className={styles.fixturesList}>
                 {fixtures.map((fixture) => (
                   <div key={fixture.id} className={styles.fixtureCard}>
-                    <div className={styles.teamInfo}>
+                    <div className={`${styles.teamInfo} ${styles.homeTeam}`}>
+                      <span className={styles.teamName}>
+                        {footballTeams.find(team => team.id === fixture.localteamId)?.name}
+                      </span>
                       <img 
                         src={getTeamLogo(fixture.localteamId)} 
                         alt="Home Team"
                         className={styles.teamLogo}
                       />
-                      <span className={styles.teamName}>
-                        {footballTeams.find(team => team.id === fixture.localteamId)?.name}
-                      </span>
                     </div>
                     <div className={styles.scoreTime}>
-  {(() => {
-    const fixtureDate = new Date(fixture.startTime);
-    const now = new Date();
-    console.log('Fixture date:', fixtureDate);
-    console.log('Current date:', now);
-    console.log('Is fixture in past?', fixtureDate < now);
-    return fixtureDate < now ? (
-      <div className={styles.score}>
-        {fixture.localteamScore} - {fixture.visitorteamScore}
-      </div>
-    ) : (
-      <div className={styles.time}>
-        {fixtureDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-      </div>
-    );
-  })()}
-</div>
-                    <div className={styles.teamInfo}>
+                      {new Date(fixture.startTime) < new Date() ? (
+                        <div className={styles.score}>
+                          {fixture.localteamScore} - {fixture.visitorteamScore}
+                        </div>
+                      ) : (
+                        <div className={styles.time}>
+                          {new Date(fixture.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      )}
+                    </div>
+                    <div className={`${styles.teamInfo} ${styles.awayTeam}`}>
                       <img 
                         src={getTeamLogo(fixture.visitorteamId)} 
                         alt="Away Team"
