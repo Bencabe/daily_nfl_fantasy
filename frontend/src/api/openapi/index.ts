@@ -12,6 +12,7 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { BaseStat } from './models/BaseStat';
 export type { DefenderStats } from './models/DefenderStats';
+export type { Fixture } from './models/Fixture';
 export type { FootballTeam } from './models/FootballTeam';
 export type { ForwardStats } from './models/ForwardStats';
 export type { Gameweek } from './models/Gameweek';

@@ -4,11 +4,12 @@ import { Gameweek } from '../api/openapi/models/Gameweek';
 import { GameweekStats } from '../api/openapi/models/GameweekStats';
 import PitchVisualization from './Pitch';
 import styles from './Home.module.css';
-import { TeamTactics } from '../api/openapi';
+import { Fixture, FootballTeam, TeamTactics } from '../api/openapi';
 import { LeagueTeam } from '../api/openapi/models/LeagueTeam';
 import getApi from '../api/main';
 import { useSearchParams } from 'react-router-dom';
 import TeamScoreBreakdown from './TeamScoreBreakdown';
+import GameweekFixtures from './GameweekFixtures';
 
 function Home() {
   const { user } = useGlobalContext();
@@ -24,6 +25,8 @@ function Home() {
   const viewUserId = searchParams.get('user') ? Number(searchParams.get('user')) : user.id;
   const viewGameweek = searchParams.get('gameweek') ? Number(searchParams.get('gameweek')) : null;
   const [isStrategyExpanded, setIsStrategyExpanded] = useState(false);
+  const [gameweekFixtures, setGameweekFixtures] = useState<Fixture[]>([]);
+  const [footballTeams, setFootballTeams] = useState<FootballTeam[]>([]);
   const api = getApi();
 
   useEffect(() => {
@@ -40,9 +43,11 @@ function Home() {
       if (!gameweek) {
         throw new Error("no gameweek found");
       }
+      const gameweekFixtures = await api.getGameweekFixtures(gameweek.id);
       setCurrentGameweek(gameweek);
       setGameweekNumber(gameweek.number);
       setGameweeks(gameweeks);
+      setGameweekFixtures(gameweekFixtures);
     };
     fetchGameweek();
   }, [viewGameweek])
@@ -62,6 +67,14 @@ function Home() {
   useEffect(() => {
     setTeamEditable(canEditTeam());
   }, [gameweekNumber])
+
+  useEffect(() => {
+    const fetchFootballTeams = async () => {
+      const teams = await api.getFootballTeams();
+      setFootballTeams(teams);
+    };
+    fetchFootballTeams();
+  }, []);
 
 
   const canEditTeam = () => {
@@ -148,7 +161,9 @@ function Home() {
     }
     const current = newGameweek.id == currentGameweek!.id;
     const stats = await api.getGameweekStats(user.activeLeague, viewUserId, newGameweek.id, current);
+    const fixtures = await api.getGameweekFixtures(newGameweek.id);
     setGameweekStats(stats);
+    setGameweekFixtures(fixtures);
     setSelectedTactic(stats.teamTactic || TeamTactics.DEFAULT);
   };
 
@@ -235,6 +250,7 @@ function Home() {
           </div>
         </div>
       )}
+      <GameweekFixtures gameweekFixtures={gameweekFixtures} footballTeams={footballTeams} />
     </div>
   );
 }

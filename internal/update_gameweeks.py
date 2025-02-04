@@ -1,11 +1,12 @@
 # call script from internal directory using python update_gameweeks.py <season_id>
 from clients.ff_data_client import FantasyDataClient
 from database.database_client import DatabaseClient
+from constants import Season
 import sys
 
 api_client = FantasyDataClient()
 db_client = DatabaseClient()
-season_id = int(sys.argv[1]) if len(sys.argv) > 1 else None
+season_id = int(sys.argv[1]) if len(sys.argv) > 1 else Season.ID
 gameweeks = api_client.get_gameweeks(season_id)
 
 for gameweek in gameweeks['data']:

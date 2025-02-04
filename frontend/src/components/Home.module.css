@@ -16,9 +16,10 @@
 }
 
 .pitchWrapper {
-  width: 90vw;
   height: 80vh;
   margin: 30px auto;
+  position: relative;
+  padding-bottom: 60px; /* Add space for the save button */
 }
 
 .statsSection {
@@ -99,8 +100,14 @@
 }
 
 .saveButtonContainer {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   margin: 20px 0;
   text-align: center;
+  width: 100%;
+  z-index: 10; /* Ensure button stays above other elements */
 }
 
 .saveButton {

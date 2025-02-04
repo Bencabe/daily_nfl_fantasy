@@ -2,7 +2,7 @@ from constants import DatabaseCreds
 import mysql.connector
 import json
 import pandas as pd
-from models.db_models import FootballTeam, Gameweek, GameweekPlayerStats, GameweekTeam, League, Player, LeagueTeam, LeagueFixture, TeamTactics
+from models.db_models import Fixture, FootballTeam, Gameweek, GameweekPlayerStats, GameweekTeam, League, Player, LeagueTeam, LeagueFixture, TeamTactics
 from models.auth_models import PublicUser, User
 
 class DatabaseClient:
@@ -460,6 +460,15 @@ class DatabaseClient:
         for val in cursor:
             vals.append(val)
         return vals
+    
+    def get_gameweek_fixtures_model(self, gameweek_id) -> list[Fixture]:
+        query = (f"SELECT * FROM fixtures WHERE round_id={gameweek_id}")
+        cursor = self.con.cursor(dictionary=True)
+        cursor.execute(query)
+        fixtures: list[Fixture] = []
+        for val in cursor:
+            fixtures.append(Fixture.model_validate(val))
+        return fixtures
 
     def add_data_mapping_object(self, table: str, data_mapping: dict[str, any]):
         '''

@@ -4,9 +4,10 @@ from database.database_client import DatabaseClient
 import uvicorn
 import jwt
 from constants import JWT, Season
+from services.fixture_management import FixtureManagementService
 from services.player_management import PlayerManagementService, SeasonPlayerStats
 from services.league_management import LeagueFixtureResults, LeagueManagementService
-from models.db_models import FootballTeam, Gameweek, LeagueTeam, Player
+from models.db_models import Fixture, FootballTeam, Gameweek, LeagueTeam, Player
 from services.draft_service import DraftService
 from services.team_management import GameweekStats, TeamManagementService
 from middlewares.jwt_auth import JWTMiddleware, validate_jwt
@@ -144,11 +145,18 @@ async def get_league_teams(
     return db_client.get_football_teams()
 
 @app.get("/league_fixture_results", response_model=LeagueFixtureResults, operation_id="getLeagueFixtureResults")
-async def get_league_teams(
+async def get_league_fixture_results(
         league_id: int,
         league_management: LeagueManagementService = Depends(LeagueManagementService.get_instance)
     ):
     return league_management.get_league_fixture_results(league_id)
+
+@app.get("/gameweek_fixtures", response_model=list[Fixture], operation_id="getGameweekFixtures")
+async def get_gameweek_fixtures(
+        gameweek_id: int,
+        fixture_management: FixtureManagementService = Depends(FixtureManagementService.get_instance)
+    ):
+    return fixture_management.get_gameweek_fixtures(gameweek_id)
 
 
 @app.websocket("/player_draft/{league_id}")

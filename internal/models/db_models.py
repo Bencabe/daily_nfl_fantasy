@@ -247,3 +247,20 @@ class FootballTeam(BaseModel):
 
         return aggregated
 
+class Fixture(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    id: int
+    season_id: int = Field(alias="seasonId")
+    league_id: int = Field(alias="leagueId")
+    stage_id: int = Field(alias="stageId")
+    round_id: int = Field(alias="roundId")
+    venue_id: int = Field(alias="venueId")
+    localteam_id: int = Field(alias="localteamId")
+    visitorteam_id: int = Field(alias="visitorteamId")
+    winner_team_id: int | None = Field(alias="winnerTeamId")
+    localteam_score: int = Field(alias="localteamScore")
+    visitorteam_score: int = Field(alias="visitorteamScore")
+    start_time: datetime = Field(alias="startTime")
+
+    
+

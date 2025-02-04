@@ -78,7 +78,7 @@ const LeagueFixtures = () => {
                         </span>
                         <span
                           className={`${styles.score} ${styles.clickable}`}
-                          onClick={() => handleScoreClick(fixture.user1.id, Number(gameweekNumber))}
+                          onClick={() => handleScoreClick(fixture.user2.id, Number(gameweekNumber))}
                         >{fixture.user2Score}</span>
                         </>
                       )

@@ -1,13 +1,14 @@
 # call script from internal directory using python update_gameweek_stats.py <season_id>
 from clients.ff_data_client import FantasyDataClient
 from database.database_client import DatabaseClient
+from constants import Season
 import sys
 
 api_client = FantasyDataClient()
 db_client = DatabaseClient()
 api_client = FantasyDataClient()
 db_client = DatabaseClient()
-season_id = int(sys.argv[1]) if len(sys.argv) > 1 else None
+season_id = int(sys.argv[1]) if len(sys.argv) > 1 else Season.ID
 if not season_id:
     raise Exception("No season id provided")
 
@@ -27,7 +28,7 @@ for fixture in fixtures['data']['fixtures']['data']:
     fixtures_data_mapping[fixture_id]['visitorteam_id'] = fixture.get('visitorteam_id')
     fixtures_data_mapping[fixture_id]['winner_team_id'] = fixture.get('winner_team_id')
     fixtures_data_mapping[fixture_id]['localteam_score'] = fixture.get('scores').get('localteam_score')
-    fixtures_data_mapping[fixture_id]['visitorteam_score'] =fixture.get('scores').get('visitorteam_score')
+    fixtures_data_mapping[fixture_id]['visitorteam_score'] = fixture.get('scores').get('visitorteam_score')
     fixtures_data_mapping[fixture_id]['start_time'] = fixture.get('time').get('starting_at').get('date_time')
 
 for fixture_id in fixtures_data_mapping:

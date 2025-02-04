@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { Fixture } from '../models/Fixture';
 import type { FootballTeam } from '../models/FootballTeam';
 import type { Gameweek } from '../models/Gameweek';
 import type { GameweekStats } from '../models/GameweekStats';
@@ -13,6 +14,17 @@ import type { CancelablePromise } from '../core/CancelablePromise';
 import type { BaseHttpRequest } from '../core/BaseHttpRequest';
 export class DefaultService {
     constructor(public readonly httpRequest: BaseHttpRequest) {}
+    /**
+     * Health Check
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public healthCheckHealthcheckGet(): CancelablePromise<any> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/healthcheck',
+        });
+    }
     /**
      * Login
      * @param email
@@ -191,7 +203,7 @@ export class DefaultService {
         });
     }
     /**
-     * Get League Teams
+     * Get League Fixture Results
      * @param leagueId
      * @returns LeagueFixtureResults Successful Response
      * @throws ApiError
@@ -204,6 +216,26 @@ export class DefaultService {
             url: '/league_fixture_results',
             query: {
                 'league_id': leagueId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Get Gameweek Fixtures
+     * @param gameweekId
+     * @returns Fixture Successful Response
+     * @throws ApiError
+     */
+    public getGameweekFixtures(
+        gameweekId: number,
+    ): CancelablePromise<Array<Fixture>> {
+        return this.httpRequest.request({
+            method: 'GET',
+            url: '/gameweek_fixtures',
+            query: {
+                'gameweek_id': gameweekId,
             },
             errors: {
                 422: `Validation Error`,
