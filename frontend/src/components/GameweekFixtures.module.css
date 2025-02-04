@@ -93,6 +93,14 @@
   .time {
     color: #666;
   }
+
+  .teamName .fullName {
+    display: block;
+  }
+  
+  .teamName .code {
+    display: none;
+  }
   
   @media (max-width: 768px) {
     .fixturesContainer {
@@ -100,6 +108,14 @@
       width: 90vw;
       padding: 10px;
       margin: 10px auto;
+    }
+
+    .teamName .fullName {
+      display: none;
+    }
+    
+    .teamName .code {
+      display: block;
     }
   
     .teamName {

@@ -53,9 +53,14 @@ const GameweekFixtures = ({ gameweekFixtures, footballTeams }: GameweekFixturesP
                 {fixtures.map((fixture) => (
                   <div key={fixture.id} className={styles.fixtureCard}>
                     <div className={`${styles.teamInfo} ${styles.homeTeam}`}>
-                      <span className={styles.teamName}>
+                    <span className={styles.teamName}>
+                      <span className={styles.fullName}>
                         {footballTeams.find(team => team.id === fixture.localteamId)?.name}
                       </span>
+                      <span className={styles.code}>
+                        {footballTeams.find(team => team.id === fixture.localteamId)?.shortCode}
+                      </span>
+                    </span>
                       <img 
                         src={getTeamLogo(fixture.localteamId)} 
                         alt="Home Team"
@@ -80,7 +85,12 @@ const GameweekFixtures = ({ gameweekFixtures, footballTeams }: GameweekFixturesP
                         className={styles.teamLogo}
                       />
                       <span className={styles.teamName}>
-                        {footballTeams.find(team => team.id === fixture.visitorteamId)?.name}
+                        <span className={styles.fullName}>
+                          {footballTeams.find(team => team.id === fixture.visitorteamId)?.name}
+                        </span>
+                        <span className={styles.code}>
+                          {footballTeams.find(team => team.id === fixture.visitorteamId)?.shortCode}
+                        </span>
                       </span>
                     </div>
                   </div>
