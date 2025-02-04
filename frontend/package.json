@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "generate-api": "npx openapi-typescript-codegen --input http://localhost:5001/openapi.json --output ./src/api/openapi --name EplFantasy",
     "deploy-frontend": "aws s3 sync dist/ s3://fantasy-epl",
-    "clear-cf-cache": " aws cloudfront create-invalidation --distribution-id E3GXAZS63CVTC0 --paths '/index.html'"
+    "clear-cf-cache": " aws cloudfront create-invalidation --distribution-id E3GXAZS63CVTC0 --paths '/*'"
   },
   "dependencies": {
     "@capacitor/android": "^6.2.0",
