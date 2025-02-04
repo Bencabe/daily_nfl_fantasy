@@ -76,7 +76,6 @@ function Home() {
     fetchFootballTeams();
   }, []);
 
-
   const canEditTeam = () => {
     if (!currentGameweek) {
       return false;
@@ -94,12 +93,8 @@ function Home() {
     if (!currentGameweek || !gameweekStats) return;
     
     try {
-      // await api.updateTeamTactics(user.activeLeague, user.id, currentGameweek.id, tactic);
       setSelectedTactic(tactic);
-      
-      // Refresh gameweek stats to show updated tactic
       const stats = await api.getGameweekStats(user.activeLeague, user.id, currentGameweek.id, true);
-      setGameweekStats(stats);
       setGameweekStats(stats);
     } catch (error) {
       console.error('Failed to update team tactics:', error);
@@ -148,7 +143,7 @@ function Home() {
             subs: updatedSubs
         };
     });
-};
+  };
 
   const handleGameweekChange = async (direction: 'prev' | 'next') => {
     const newNumber = direction === 'next' ? gameweekNumber + 1 : gameweekNumber - 1;
@@ -185,72 +180,75 @@ function Home() {
         </button>
       </div>
 
-      {!teamEditable ? (
-        <TeamScoreBreakdown
-          showScoreModal={showScoreModal}
-          setShowScoreModal={setShowScoreModal}
-          gameweekStats={gameweekStats}
-        />
-      ) : null }
-
-      <div className={styles.tacticsSelector}>
-        <div 
-          className={styles.strategyHeader}
-          onClick={() => setIsStrategyExpanded(!isStrategyExpanded)}
-        >
-          <h3>Team Strategy</h3>
-          <span className={`${styles.arrow} ${isStrategyExpanded ? styles.expanded : ''}`}>▼</span>
-        </div>
-        <div className={`${styles.tacticOptions} ${isStrategyExpanded ? styles.expanded : ''}`}>
-          <button
-            disabled={!teamEditable}
-            className={`${styles.tacticButton} ${selectedTactic === TeamTactics.OFFENSIVE ? styles.selected : ''}`}
-            onClick={() => handleTacticChange(TeamTactics.OFFENSIVE)}
-          >
-            Offensive
-          </button>
-          <button 
-            disabled={!teamEditable}
-            className={`${styles.tacticButton} ${selectedTactic === TeamTactics.DEFENSIVE ? styles.selected : ''}`}
-            onClick={() => handleTacticChange(TeamTactics.DEFENSIVE)}
-          >
-            Defensive
-          </button>
-          <button
-            disabled={!teamEditable}
-            className={`${styles.tacticButton} ${selectedTactic === TeamTactics.POSSESION ? styles.selected : ''}`}
-            onClick={() => handleTacticChange(TeamTactics.POSSESION)}
-          >
-            Possession
-          </button>
-          <button
-            disabled={!teamEditable}
-            className={`${styles.tacticButton} ${selectedTactic === TeamTactics.DEFAULT ? styles.selected : ''}`}
-            onClick={() => handleTacticChange(TeamTactics.DEFAULT)}
-          >
-            Default
-          </button>
-        </div>
-      </div>
-
-      {gameweekStats && (
-        <div className={styles.pitchWrapper}>
-          <PitchVisualization 
+      <div className={styles.mainContent}>
+        {!teamEditable ? (
+          <TeamScoreBreakdown
+            showScoreModal={showScoreModal}
+            setShowScoreModal={setShowScoreModal}
             gameweekStats={gameweekStats}
-            handlePlayerMove={handlePlayerMove}
-            teamEditable={teamEditable}
           />
-          <div className={styles.saveButtonContainer}>
+        ) : null }
+
+        <div className={styles.tacticsSelector}>
+          <div 
+            className={styles.strategyHeader}
+            onClick={() => setIsStrategyExpanded(!isStrategyExpanded)}
+          >
+            <h3>Team Strategy</h3>
+            <span className={`${styles.arrow} ${isStrategyExpanded ? styles.expanded : ''}`}>▼</span>
+          </div>
+          <div className={`${styles.tacticOptions} ${isStrategyExpanded ? styles.expanded : ''}`}>
             <button
-              className={`${styles.saveButton} ${teamEditable ? '' : styles.hidden}`}
-              onClick={handleSaveTeamChanges}
+              disabled={!teamEditable}
+              className={`${styles.tacticButton} ${selectedTactic === TeamTactics.OFFENSIVE ? styles.selected : ''}`}
+              onClick={() => handleTacticChange(TeamTactics.OFFENSIVE)}
             >
-              Save Team Changes
+              Offensive
+            </button>
+            <button 
+              disabled={!teamEditable}
+              className={`${styles.tacticButton} ${selectedTactic === TeamTactics.DEFENSIVE ? styles.selected : ''}`}
+              onClick={() => handleTacticChange(TeamTactics.DEFENSIVE)}
+            >
+              Defensive
+            </button>
+            <button
+              disabled={!teamEditable}
+              className={`${styles.tacticButton} ${selectedTactic === TeamTactics.POSSESION ? styles.selected : ''}`}
+              onClick={() => handleTacticChange(TeamTactics.POSSESION)}
+            >
+              Possession
+            </button>
+            <button
+              disabled={!teamEditable}
+              className={`${styles.tacticButton} ${selectedTactic === TeamTactics.DEFAULT ? styles.selected : ''}`}
+              onClick={() => handleTacticChange(TeamTactics.DEFAULT)}
+            >
+              Default
             </button>
           </div>
         </div>
-      )}
-      <GameweekFixtures gameweekFixtures={gameweekFixtures} footballTeams={footballTeams} />
+
+        {gameweekStats && (
+          <div className={styles.pitchWrapper}>
+            <PitchVisualization 
+              gameweekStats={gameweekStats}
+              handlePlayerMove={handlePlayerMove}
+              teamEditable={teamEditable}
+            />
+            <div className={styles.saveButtonContainer}>
+              <button
+                className={`${styles.saveButton} ${teamEditable ? '' : styles.hidden}`}
+                onClick={handleSaveTeamChanges}
+              >
+                Save Team Changes
+              </button>
+            </div>
+          </div>
+        )}
+
+        <GameweekFixtures gameweekFixtures={gameweekFixtures} footballTeams={footballTeams} />
+      </div>
     </div>
   );
 }
