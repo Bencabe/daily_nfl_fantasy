@@ -95,8 +95,9 @@ const PlayerDraft: React.FC = () => {
     setFilteredPlayers(filtered);
   }, [players, nameFilter, teamFilter, positionFilter, currentTurn]);
 
+  const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
   const { sendMessage, lastMessage } = useWebSocket<WebSocketMessage>(
-    `ws://${config.host.split("//")[1]}:${config.port}/player_draft/${user.activeLeague}?user_id=${user.id}`,
+    `${wsProtocol}://${config.host.split("//")[1]}:${config.port}/player_draft/${user.activeLeague}?user_id=${user.id}`,
     {shouldReconnect: () => draftStarted}
   );
 
