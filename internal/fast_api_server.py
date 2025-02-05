@@ -7,7 +7,7 @@ from constants import JWT, Season
 from services.fixture_management import FixtureManagementService
 from services.player_management import PlayerManagementService, SeasonPlayerStats
 from services.league_management import LeagueFixtureResults, LeagueManagementService
-from models.db_models import Fixture, FootballTeam, Gameweek, LeagueTeam, Player
+from models.db_models import Fixture, FootballTeam, Gameweek, League, LeagueTeam, NewLeague, Player
 from services.draft_service import DraftService
 from services.team_management import GameweekStats, TeamManagementService
 from middlewares.jwt_auth import JWTMiddleware, validate_jwt
@@ -73,6 +73,66 @@ async def login(response: Response, email: str = Header(None), password: str = H
         print(e)
         response.status_code = 404
         return {"response": "User not found"}
+    
+
+@app.post("/join_league", operation_id="joinLeague")
+async def join_league(
+        league_id: int,
+        user_id: int,
+        password: str,
+        team_name: str,
+        league_management: LeagueManagementService = Depends(LeagueManagementService.get_instance)
+    ):
+    league_management.join_league(league_id, user_id, password, team_name)
+    return {"response": "League joined"}, 200
+
+@app.post("/create_league", operation_id="createLeague")
+async def create_league(
+        new_league: NewLeague,
+        team_name: str,
+        league_management: LeagueManagementService = Depends(LeagueManagementService.get_instance)
+    ):
+    league_management.create_league(new_league, team_name)
+    return {"response": "League created"}, 200
+
+@app.post("/change_active_league", operation_id="changeActiveLeague")
+async def change_active_league(
+        new_league_id: int,
+        user_id: int,
+        response: Response,
+        league_management: LeagueManagementService = Depends(LeagueManagementService.get_instance),
+        db_client: DatabaseClient = Depends(DatabaseClient)
+    ):
+    league_management.update_active_league(user_id, new_league_id)
+    # Get updated user data
+    user = db_client.get_user_by_id(user_id)
+    # Generate new JWT with updated user data
+    jwt_token = jwt.encode(
+        {
+            'user': user.model_dump(by_alias=True),
+            'exp': datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)
+        },
+        JWT.SECRET,
+        algorithm=JWT.ALGORITH
+    )
+    response.set_cookie(
+        key="jwt_token",
+        value=jwt_token,
+        httponly=True,
+        secure=HTTPS_TRAFFIC,
+        samesite=SAMESITE,
+        domain=BACKEND_URL,
+        max_age=3600
+    )
+    return {"response": "League updated", "token": jwt_token}
+
+@app.post("/user_leagues", operation_id="getUserLeagues", response_model=list[League])
+async def get_user_leagues(
+        user_id: int,
+        league_management: LeagueManagementService = Depends(LeagueManagementService.get_instance)
+    ):
+    return league_management.get_user_leagues(user_id)
+
 
 @app.post("/whoami")
 async def whoami(request: Request, response: Response):

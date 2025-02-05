@@ -1,0 +1,134 @@
+.leagueManagement {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  .leagueManagement h1, .leagueManagement h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 2rem;
+  }
+  
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .tab {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .tab.active {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .formContainer {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .leagueForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .leagueForm input {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+  
+  .leagueForm input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+  }
+  
+  .formGroup {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .formGroup label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .formGroup input[type="checkbox"] {
+    width: auto;
+  }
+  
+  .formGroup input[type="number"] {
+    width: 80px;
+  }
+  
+  .leagueForm button {
+    padding: 0.75rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .leagueForm button:hover {
+    background-color: #0056b3;
+  }
+  
+  .activeLeagueSection {
+    margin: 2rem auto 0;
+    padding: 1.5rem;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .selectWrapper {
+    width: 100%;
+    margin: 0 auto;
+  }
+  
+  .leagueInfo {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+    text-align: center;
+  }
+  
+  .leagueInfo p {
+    margin: 0.5rem 0;
+    color: #666;
+  }
+  
+  .leagueInfo strong {
+    color: #333;
+  }
+  
+  @media (max-width: 600px) {
+    .leagueManagement {
+      padding: 1rem;
+    }
+    
+    .formContainer {
+      padding: 1rem;
+    }
+  }
+  

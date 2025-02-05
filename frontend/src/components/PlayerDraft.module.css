@@ -1,65 +1,214 @@
 .draftContainer {
-    padding: 20px;
-  }
-  
-  .viewToggle {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-  
-  .activeView {
-    background-color: #4CAF50;
-    color: white;
+  padding: 20px;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.viewToggle {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 1rem;
+}
+
+.viewToggle button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.activeView {
+  background-color: #4CAF50 !important;
+  color: white;
+  border-color: #4CAF50 !important;
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 1rem;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.filters input,
+.filters select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.filters input:focus,
+.filters select:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.playerTable {
+  width: 100%;
+  border-collapse: collapse;
+  overflow-x: auto;
+  display: block;
+}
+
+.playerTable th,
+.playerTable td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.selectButton {
+  padding: 5px 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.selectButton:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.completionMessage {
+  text-align: center;
+  padding: 2rem;
+  background: #f0f8ff;
+  border-radius: 8px;
+  margin: 2rem auto;
+  max-width: 800px;
+}
+
+.completionMessage h2 {
+  color: #2c5282;
+  margin-bottom: 1rem;
+}
+
+.completionMessage p {
+  color: #4a5568;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.startDraftContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  background: #f8fafc;
+}
+
+.startDraftCard {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+
+.startDraftCard h2 {
+  color: #2d3748;
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+}
+
+.startDraftCard p {
+  color: #718096;
+  margin-bottom: 2rem;
+}
+
+.draftInfo {
+  background: #f7fafc;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.infoItem {
+  margin: 0.5rem 0;
+  color: #4a5568;
+}
+
+.infoItem span {
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.startDraftButton {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.startDraftButton:hover {
+  background: #45a049;
+}
+
+.teamsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.teamItem {
+  padding: 0.5rem;
+  background: #edf2f7;
+  border-radius: 4px;
+  color: #2d3748;
+}
+
+
+@media screen and (max-width: 768px) {
+  .draftContainer {
+      padding: 10px;
   }
   
   .filters {
-    margin-bottom: 20px;
-  }
-  
-  .playerTable {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .playerTable th,
-  .playerTable td {
-    padding: 8px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-  }
-  
-  .selectButton {
-    padding: 5px 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .selectButton:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-  }
-  .filters {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 20px;
-    align-items: center;
+      gap: 0.5rem;
   }
   
   .filters input,
   .filters select {
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    min-width: 200px;
+      width: 100%;
+      min-width: unset;
+      flex-basis: 100%;
   }
   
-  .filters input:focus,
-  .filters select:focus {
-    outline: none;
-    border-color: #4CAF50;
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
-  }  
+  .playerTable th,
+  .playerTable td {
+      padding: 4px;
+      font-size: 14px;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .draftContainer {
+      padding: 40px;
+      max-width: 1400px;
+      margin: 0 auto;
+  }
+  
+  .playerTable {
+      display: table;
+  }
+}

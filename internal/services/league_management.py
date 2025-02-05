@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from database.database_client import DatabaseClient
 from models.auth_models import PublicUser, User
 from services.team_management import TeamManagementService
-from models.db_models import  LeagueFixture
+from models.db_models import  League, LeagueFixture, NewLeague
 from constants import Season
 
 
@@ -27,6 +27,35 @@ class LeagueManagementService:
     def __init__(self, db_client: DatabaseClient, team_management: TeamManagementService):
         self.db_client = db_client
         self.team_management = team_management
+
+    def join_league(self, league_id: int, user_id: int, password: int, team_name: str):
+        league = self.db_client.get_league_model(league_id)
+        if league.draft_completed or league.password != password:
+            return False
+        self.db_client.join_league(league_id, user_id, team_name)
+        return True
+
+    def create_league(self, new_league: NewLeague, team_name: str):
+        league_id = self.db_client.create_league(
+            new_league.name,
+            new_league.password,
+            new_league.admin,
+            new_league.player_limit,
+            new_league.type,
+            new_league.private,
+        )
+        self.join_league(league_id, new_league.admin, new_league.password, team_name)
+    
+    def update_active_league(self, user_id: int, new_league_id: int):
+        self.db_client.update_active_league(user_id, new_league_id)
+    
+    def get_user_leagues(self, user_id: int) -> list[League]:
+        user_teams = self.db_client.get_user_teams(user_id)
+        leagues: list[League] = []
+        for team in user_teams:
+            league = self.db_client.get_league_model(team.league_id)
+            leagues.append(league)
+        return leagues
     
     def get_league_teams(self, league_id: int):
         return self.db_client.get_league_team_modals(league_id)

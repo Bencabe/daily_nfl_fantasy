@@ -11,6 +11,7 @@ import { useSearchParams } from 'react-router-dom';
 import TeamScoreBreakdown from './TeamScoreBreakdown';
 import GameweekFixtures from './GameweekFixtures';
 
+
 function Home() {
   const { user } = useGlobalContext();
   
@@ -27,6 +28,9 @@ function Home() {
   const [isStrategyExpanded, setIsStrategyExpanded] = useState(false);
   const [gameweekFixtures, setGameweekFixtures] = useState<Fixture[]>([]);
   const [footballTeams, setFootballTeams] = useState<FootballTeam[]>([]);
+  const [validationMessage, setValidationMessage] = useState("");
+  const [teamValid, setTeamValid] = useState(true);
+  const [saveSuccessMessage, setSaveSuccessMessage] = useState<string>("");
   const api = getApi();
 
   useEffect(() => {
@@ -76,6 +80,10 @@ function Home() {
     fetchFootballTeams();
   }, []);
 
+  useEffect(() => {
+    isTeamValid();
+  },[gameweekStats])
+
   const canEditTeam = () => {
     if (!currentGameweek) {
       return false;
@@ -88,6 +96,36 @@ function Home() {
           && !currentGameweekActive
           && gameweekNumber === currentGameweek.number;
   }
+
+  const isTeamValid = () => {
+    if (!gameweekStats) return { valid: false, message: "No team data available" };
+    
+    const goalkeepers = getPositionPlayerIds('Goalkeeper').filter(id => !gameweekStats.subs.includes(id));
+    const defenders = getPositionPlayerIds('Defender').filter(id => !gameweekStats.subs.includes(id));
+    const midfielders = getPositionPlayerIds('Midfielder').filter(id => !gameweekStats.subs.includes(id));
+    const forwards = getPositionPlayerIds('Forward').filter(id => !gameweekStats.subs.includes(id));
+  
+    if (goalkeepers.length !== 1) {
+      setValidationMessage("Must have exactly 1 goalkeeper");
+      setTeamValid(false);
+    }
+    else if (defenders.length < 3) {
+      setValidationMessage("Must have at least 3 defenders");
+      setTeamValid(false);
+    }
+    else if (midfielders.length < 3) {
+      setValidationMessage("Must have at least 3 midfielders");
+      setTeamValid(false);
+    }
+    else if (forwards.length < 1) {
+      setValidationMessage("Must have at least 1 forward");
+      setTeamValid(false);
+    }
+    else {
+      setValidationMessage("");
+      setTeamValid(true);
+    }
+  };
 
   const handleTacticChange = async (tactic: TeamTactics) => {
     if (!currentGameweek || !gameweekStats) return;
@@ -122,7 +160,9 @@ function Home() {
         userId: user.id,
         teamName: gameweekStats.teamName
       }
-      await api.updateTeam(leagueTeam)
+      await api.updateTeam(leagueTeam);
+      setSaveSuccessMessage("Team saved successfully!");
+      setTimeout(() => setSaveSuccessMessage(""), 3000);
     } catch (error) {
       console.error('Failed to save team changes:', error);
     }
@@ -237,9 +277,16 @@ function Home() {
               teamEditable={teamEditable}
             />
             <div className={styles.saveButtonContainer}>
+              {validationMessage && (
+                <div className={styles.validationMessage}>{validationMessage}</div>
+              )}
+              {saveSuccessMessage && (
+                <div className={styles.successMessage}>{saveSuccessMessage}</div>
+              )}
               <button
                 className={`${styles.saveButton} ${teamEditable ? '' : styles.hidden}`}
                 onClick={handleSaveTeamChanges}
+                disabled={!teamValid}
               >
                 Save Team Changes
               </button>

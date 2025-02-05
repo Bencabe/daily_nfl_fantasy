@@ -34,6 +34,7 @@ const NavBar = () => {
           <div onClick={() => handleNavigation(`/player_select`)}>Player Select</div>
           <div onClick={() => handleNavigation(`/league_fixtures`)}>League Fixtures</div>
           <div onClick={() => handleNavigation(`/league_table`)}>League Table</div>
+          <div onClick={() => handleNavigation(`/league_management`)}>League Management</div>
         </div>
       </div>
     </nav>

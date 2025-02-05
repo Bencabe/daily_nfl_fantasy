@@ -17,18 +17,24 @@ class TeamTactics(StrEnum):
     Possesion = "Possesion"
     Defensive = "Defensive"
     Offensive = "Offensive"
-class League(BaseModel):
-    id: int
+
+class LeagueTypes(StrEnum):
+    Modern = "modern"
+
+class NewLeague(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
     name: str
     password: str
-    admin: str
-    private: bool
-    type: str
-    player_limit: int | None = Field(default=None)
-    draft_started: bool 
-    draft_completed: bool
-    draft_turn: int | None
-    draft_order: list[int] | None
+    admin: int| str | None = Field(default=None)
+    private: bool = Field(default=True)
+    type: LeagueTypes = Field(default=LeagueTypes.Modern)
+    player_limit: int | None = Field(default=None, alias="playerLimit")
+    draft_started: bool = Field(alias="draftStarted")
+    draft_completed: bool = Field(alias="draftCompleted")
+    draft_turn: int | None = Field(alias="draftTurn")
+    draft_order: list[int] | None = Field(alias="draftOrder")
+class League(NewLeague):
+    id: int
 
 class Player(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
@@ -169,8 +175,6 @@ class GameweekPlayerStats(PlayerStats):
     league_id: int = Field(alias="leagueId") 
     season_id: int = Field(alias="seasonId")
 
-    
-
 class FootballTeam(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
     id: int
@@ -261,6 +265,7 @@ class Fixture(BaseModel):
     localteam_score: int = Field(alias="localteamScore")
     visitorteam_score: int = Field(alias="visitorteamScore")
     start_time: datetime = Field(alias="startTime")
+
 
     
 

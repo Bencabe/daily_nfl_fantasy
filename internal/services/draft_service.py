@@ -5,9 +5,9 @@ from fastapi import Depends, WebSocket
 from database.database_client import DatabaseClient
 from services.league_management import LeagueManagementService
 from models.db_models import League, LeagueTeam, Player
-from models.draft_models import DraftMessage, DraftStatus, PlayerSelected, StartDraft, TimeExpired, TurnChange, PlayerConnect, Positions
+from models.draft_models import DraftCompleted, DraftMessage, DraftStatus, PlayerSelected, StartDraft, TimeExpired, TurnChange, PlayerConnect, Positions
 
-TURN_TIME_LIMIT = 62
+TURN_TIME_LIMIT = 122
 class DraftService:
     # TODO: maintining connections in this class this will not work in a distributed environment. Could potentially use redis to solve this
     connections: dict[int, dict[int, WebSocket]] = {}
@@ -51,6 +51,24 @@ class DraftService:
 
         self.league_timers[league_id] = asyncio.create_task(timer_expired())
     
+    def _check_draft_complete(self, league_teams: dict[int, LeagueTeam], league: League):
+        all_teams_full = True
+        for team in league_teams.values():
+            if (len(team.goalkeepers) < 2 or 
+                len(team.defenders) < 5 or 
+                len(team.midfielders) < 5 or 
+                len(team.forwards) < 3):
+                all_teams_full = False
+                break
+        
+        if all_teams_full:
+            league.draft_completed = True
+            self.db_client.update_league(league.model_dump())
+            return DraftCompleted(
+                message_type="draftCompleted",
+                league_teams=league_teams
+            )
+    
     def _update_turn(
             self, 
             league: League,
@@ -68,26 +86,8 @@ class DraftService:
                 league_teams=league_teams,
             )
         league.draft_turn = next_player
-        self.db_client.update_league(league.model_dump(by_alias=True))
+        self.db_client.update_league(league.model_dump())
         asyncio.create_task(self._start_timer(league.id))
-
-        # FINISH THIS LOGIC TO COMPLETE THE DRAFT
-        # all_teams_full = True
-        # for team in league_teams.values():
-        #     if (len(team.goalkeepers) < 2 or 
-        #         len(team.defenders) < 5 or 
-        #         len(team.midfielders) < 5 or 
-        #         len(team.forwards) < 3):
-        #         all_teams_full = False
-        #         break
-        
-        # if all_teams_full:
-        #     league.draft_completed = True
-        #     self.db_client.update_league(league.model_dump(by_alias=True))
-        #     return DraftCompleted(
-        #         message_type="draftCompleted",
-        #         league_teams=league_teams
-        #     )
         
         return turn_update
 
@@ -152,6 +152,12 @@ class DraftService:
         for user in league_users:
             league_teams[user.id] = self.db_client.get_league_team(user.id, league_id)
         
+        if self._check_draft_complete(league_teams, league):
+            return DraftCompleted(
+                message_type="draftCompleted",
+                league_teams=league_teams
+            )
+        
         if isinstance(message, TimeExpired):
             updated_team = self._select_random_player(league_teams, league, players)
             league_teams[league.draft_turn] = updated_team
@@ -164,6 +170,11 @@ class DraftService:
                 updated_team.forwards,
                 updated_team.subs
             )
+            if self._check_draft_complete(league_teams, league):
+                return DraftCompleted(
+                    message_type="draftCompleted",
+                    league_teams=league_teams
+                )
             turn_update = self._update_turn(league, league_teams)
             return turn_update
         if isinstance(message, PlayerConnect):
@@ -227,6 +238,11 @@ class DraftService:
                 team.forwards,
                 team.subs
             )
+            if self._check_draft_complete(league_teams, league):
+                return DraftCompleted(
+                    message_type="draftCompleted",
+                    league_teams=league_teams
+                )
             return turn_update
         
     @classmethod

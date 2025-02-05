@@ -5,8 +5,12 @@ import { User } from './Login.tsx';
 import { useGlobalContext } from '../utils/customHooks.ts';
 import SelectedPlayersView from './SelectedPlayerView';
 import { Player, LeagueTeams, WebSocketMessage } from '../types/draft';
+import config from '../../config'
+import { FootballTeam } from '../api/openapi/index.ts';
+import getApi from '../api/main';
 
 const PlayerDraft: React.FC = () => {
+  const TURN_TIME = 120;
   const [players, setPlayers] = useState<Player[]>([]);
   const [filteredPlayers, setFilteredPlayers] = useState<Player[]>([]);
   const [nameFilter, setNameFilter] = useState('');
@@ -14,12 +18,15 @@ const PlayerDraft: React.FC = () => {
   const [positionFilter, setPositionFilter] = useState('');
   const [leagueUsers, setLeagueUsers] = useState<User[]>([]);
   const [currentTurn, setCurrentTurn] = useState<number>();
-  const [timeLeft, setTimeLeft] = useState<number>(60);
+  const [timeLeft, setTimeLeft] = useState<number>(TURN_TIME);
   const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
   const [draftStarted, setDraftStarted] = useState(false);
+  const [isDraftComplete, setIsDraftComplete] = useState<boolean>(false);
   const [leagueTeams, setLeagueTeams] = useState<LeagueTeams>({});
   const [viewMode, setViewMode] = useState<'players' | 'selected'>('players');
+  const [footballTeams, setFootballTeams] = useState<FootballTeam[]>([]);
   const { user } = useGlobalContext();
+  const api = getApi();
 
   const updateSelectedPlayers = () => {
     const allSelectedPlayers: Player[] = [];
@@ -41,6 +48,14 @@ const PlayerDraft: React.FC = () => {
     });
     setSelectedPlayers(allSelectedPlayers);
   };
+
+  useEffect(() => {
+    const fetchTeams = async () => {
+      const teams = await api.getFootballTeams();
+      setFootballTeams(teams);
+    };
+    fetchTeams()
+  },[])
 
   const canPickPlayer = (player: Player) => {
     if (selectedPlayers.some(selectedPlayer => selectedPlayer.id === player.id)) {
@@ -81,7 +96,7 @@ const PlayerDraft: React.FC = () => {
   }, [players, nameFilter, teamFilter, positionFilter, currentTurn]);
 
   const { sendMessage, lastMessage } = useWebSocket<WebSocketMessage>(
-    `ws://0.0.0.0:5001/player_draft/${user.activeLeague}?user_id=${user.id}`,
+    `ws://${config.host.split("//")[1]}:${config.port}/player_draft/${user.activeLeague}?user_id=${user.id}`,
     {shouldReconnect: () => draftStarted}
   );
 
@@ -109,10 +124,14 @@ const PlayerDraft: React.FC = () => {
           break;
         case 'turnChange':
           setCurrentTurn(data.nextUserId);
-          setTimeLeft(60);
+          setTimeLeft(TURN_TIME);
           setLeagueTeams(data.leagueTeams || {});
           updateSelectedPlayers()
           break;
+        case 'draftCompleted':
+          console.log('Draft completed!');
+          setLeagueTeams(data.leagueTeams || {});
+          setIsDraftComplete(true);
       }
     }
   }, [lastMessage, draftStarted]);
@@ -144,91 +163,131 @@ const PlayerDraft: React.FC = () => {
   }, [sendMessage]);
 
   return (
-    draftStarted ? (
-      <div className={styles.draftContainer}>
-        <h2>Player Draft</h2>
-        <p>Current Turn: {getUserFromId(currentTurn)?.firstName}</p>
-        <p>Time Left: {timeLeft} seconds</p>
-        
-        <div className={styles.viewToggle}>
-          <button 
-            onClick={() => setViewMode('players')}
-            className={viewMode === 'players' ? styles.activeView : ''}
-          >
-            Available Players
-          </button>
-          <button 
-            onClick={() => setViewMode('selected')}
-            className={viewMode === 'selected' ? styles.activeView : ''}
-          >
-            Selected Players
-          </button>
-        </div>
-
-        {viewMode === 'players' ? (
-          <div>
-            <div className={styles.filters}>
-              <input
-                type="text"
-                placeholder="Filter by name..."
-                value={nameFilter}
-                onChange={(e) => setNameFilter(e.target.value)}
-              />
-              <select value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)}>
-                <option value="">All Teams</option>
-              </select>
-              <select value={positionFilter} onChange={(e) => setPositionFilter(e.target.value)}>
-                <option value="">All Positions</option>
-                <option value="Goalkeeper">Goalkeeper</option>
-                <option value="Defender">Defender</option>
-                <option value="Midfielder">Midfielder</option>
-                <option value="Forward">Forward</option>
-              </select>
-            </div>
-
-            <table className={styles.playerTable}>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Position</th>
-                  <th>Team</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredPlayers.map(player => (
-                  <tr key={player.id}>
-                    <td>{player.displayName}</td>
-                    <td>{player.positionCategory}</td>
-                    <td>{player.teamId}</td>
-                    <td>
-                      <button
-                        onClick={() => selectPlayer(player)}
-                        className={styles.selectButton}
-                        disabled={!canPickPlayer(player)}
-                      >
-                        Select
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
+    <div className={styles.draftContainer}>
+      {isDraftComplete ? (
+        <div className={styles.completionMessage}>
+          <h2>Draft Complete! 🎉</h2>
+          <p>Congratulations! Your team is ready for the season.</p>
           <SelectedPlayersView 
             leagueUsers={leagueUsers}
             leagueTeams={leagueTeams}
             players={players}
           />
-        )}
-      </div>
-    ) : (
-      <div className={styles.draftContainer}>
-        <h2>Begin Draft</h2>
-        <button onClick={() => startDraft()}>Start Draft</button>
-      </div>
-    )
+        </div>
+      ) : draftStarted ? (
+        <>
+          <h2>Player Draft</h2>
+          <p>Current Turn: {getUserFromId(currentTurn)?.firstName}</p>
+          <p>Time Left: {timeLeft} seconds</p>
+          
+          <div className={styles.viewToggle}>
+            <button 
+              onClick={() => setViewMode('players')}
+              className={viewMode === 'players' ? styles.activeView : ''}
+            >
+              Available Players
+            </button>
+            <button 
+              onClick={() => setViewMode('selected')}
+              className={viewMode === 'selected' ? styles.activeView : ''}
+            >
+              Selected Players
+            </button>
+          </div>
+
+          {viewMode === 'players' ? (
+            <div>
+              <div className={styles.filters}>
+                <input
+                  type="text"
+                  placeholder="Filter by name..."
+                  value={nameFilter}
+                  onChange={(e) => setNameFilter(e.target.value)}
+                />
+                <select value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)}>
+                  <option value="">All Teams</option>
+                  {footballTeams.map(team => (
+                    <option key={team.id} value={team.id.toString()}>
+                      {team.name}
+                    </option>
+                  ))}
+                </select>
+                <select value={positionFilter} onChange={(e) => setPositionFilter(e.target.value)}>
+                  <option value="">All Positions</option>
+                  <option value="Goalkeeper">Goalkeeper</option>
+                  <option value="Defender">Defender</option>
+                  <option value="Midfielder">Midfielder</option>
+                  <option value="Forward">Forward</option>
+                </select>
+              </div>
+
+              <table className={styles.playerTable}>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Position</th>
+                    <th>Team</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredPlayers.map(player => (
+                    <tr key={player.id}>
+                      <td>{player.displayName}</td>
+                      <td>{player.positionCategory}</td>
+                      <td>
+                        {footballTeams.find(team => team.id === player.teamId)?.name || player.teamId}
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => selectPlayer(player)}
+                          className={styles.selectButton}
+                          disabled={!canPickPlayer(player)}
+                        >
+                          Select
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <SelectedPlayersView 
+              leagueUsers={leagueUsers}
+              leagueTeams={leagueTeams}
+              players={players}
+            />
+          )}
+        </>
+      ) : (
+        <div className={styles.startDraftContainer}>
+          <div className={styles.startDraftCard}>
+            <h2>Welcome to the Draft Zone</h2>
+            <p>Get ready to build your dream team!</p>
+            {/* <div className={styles.draftInfo}>
+              <h3>Participating Teams</h3>
+              <div className={styles.teamsList}>
+                {Object.entries(leagueTeams).map(([userId, team]) => {
+                  // const teamUser = leagueUsers.find(user => user.id === Number(userId));
+                  return (
+                    <div key={userId} className={styles.teamItem}>
+                      {team.teamName}
+                    </div>
+                  );
+                })}
+              </div>
+            </div> */}
+            <button 
+              className={styles.startDraftButton} 
+              onClick={() => startDraft()}
+            >
+              Start Draft
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

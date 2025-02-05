@@ -26,6 +26,8 @@ const PlayerSelection = () => {
         key: string;
         direction: 'ascending' | 'descending';
     } | null>(null)
+    const [confirmationStep, setConfirmationStep] = useState<'select' | 'confirm'>('select')
+    const [playerToSwap, setPlayerToSwap] = useState<Player | null>(null)
     const api = getApi()
 
     useEffect(() => {
@@ -147,6 +149,18 @@ const PlayerSelection = () => {
         });
     }
 
+    const handleInitialPlayerSelect = (player: Player) => {
+        setPlayerToSwap(player)
+        setConfirmationStep('confirm')
+    }
+
+    const handleConfirmSwap = async () => {
+        if (!playerToSwap || !selectedAvailablePlayer) return
+        await handlePlayerSwap(playerToSwap.id)
+        setConfirmationStep('select')
+        setPlayerToSwap(null)
+    }
+
     const sortPlayers = (players: SeasonPlayerStats[]) => {
         if (!sortConfig) return players;
         
@@ -225,34 +239,41 @@ const PlayerSelection = () => {
                             
                     <div className={styles.playersTable}>
                         <table>
-                            <thead>
-                                <tr>
-                                    <th onClick={() => handleSort('name')}>
-                                        Name {sortConfig?.key === 'name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                                    </th>
-                                    <th>Position</th>
-                                    <th onClick={() => handleSort('team')}>
-                                        Team {sortConfig?.key === 'team' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                                    </th>
-                                    <th onClick={() => handleSort('gamesPlayed')}>
-                                        Games Played {sortConfig?.key === 'gamesPlayed' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                                    </th>
-                                    <th onClick={() => handleSort(selectedStat)}>
-                                        <select
-                                            value={selectedStat}
-                                            onChange={(e) => setSelectedStat(e.target.value)}
-                                            className={styles.filterSelect}
-                                        >
-                                            {statKeys.map(statKey => (
-                                                <option key={statKey} value={statKey}>
-                                                    {convertStatName(statKey)}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        {sortConfig?.key === selectedStat && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
-                                    </th>
-                                </tr>
-                            </thead>
+                        <thead>
+                            <tr>
+                                <th onClick={() => handleSort('name')}>
+                                    Name {sortConfig?.key === 'name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                </th>
+                                <th>Position</th>
+                                <th onClick={() => handleSort('team')}>
+                                    Team {sortConfig?.key === 'team' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                </th>
+                                <th onClick={() => handleSort('gamesPlayed')}>
+                                    Games {sortConfig?.key === 'gamesPlayed' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
+                                </th>
+                                <th className={styles.statHeader}>
+                                    <select
+                                        value={selectedStat}
+                                        onChange={(e) => setSelectedStat(e.target.value)}
+                                        className={styles.statSelect}
+                                    >
+                                        {statKeys.map(statKey => (
+                                            <option key={statKey} value={statKey}>
+                                                {convertStatName(statKey)}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <button 
+                                        className={styles.sortButton}
+                                        onClick={() => handleSort(selectedStat)}
+                                    >
+                                        {sortConfig?.key === selectedStat 
+                                            ? (sortConfig.direction === 'ascending' ? '↑' : '↓')
+                                            : '↕'}
+                                    </button>
+                                </th>
+                            </tr>
+                        </thead>
                             <tbody>
                                 {sortPlayers(filteredPlayers).map(seasonPlayerStats => (
                                     <tr 
@@ -279,35 +300,57 @@ const PlayerSelection = () => {
                         <div className={styles.modalOverlay}>
                             <div className={styles.modal}>
                                 <div className={styles.modalHeader}>
-                                    <h2>Select player to swap with {selectedAvailablePlayer.player.displayName}</h2>
-                                    <button 
-                                        className={styles.closeButton}
-                                        onClick={handleCloseModal}
-                                    >
-                                        ×
-                                    </button>
+                                    <h2>
+                                        {confirmationStep === 'select' 
+                                            ? `Select player to swap with ${selectedAvailablePlayer.player.displayName}`
+                                            : 'Confirm Player Swap'}
+                                    </h2>
+                                    <button className={styles.closeButton} onClick={handleCloseModal}>×</button>
                                 </div>
                                 <div className={styles.modalContent}>
-                                    <table className={styles.modalTable}>
-                                        <thead>
-                                            <tr>
-                                                <th>Name</th>
-                                                <th>Position</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {getCurrentTeamPlayers(selectedAvailablePlayer.player.positionCategory).map(player => (
-                                                <tr 
-                                                    key={player.id}
-                                                    className={styles.modalTableRow}
-                                                    onClick={() => handlePlayerSwap(player.id)}
-                                                >
-                                                    <td>{player.displayName}</td>
-                                                    <td>{player.positionCategory}</td>
+                                    {confirmationStep === 'select' ? (
+                                        <table className={styles.modalTable}>
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Position</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                {getCurrentTeamPlayers(selectedAvailablePlayer.player.positionCategory)
+                                                    .map(player => (
+                                                        <tr 
+                                                            key={player.id}
+                                                            className={styles.modalTableRow}
+                                                            onClick={() => handleInitialPlayerSelect(player)}
+                                                        >
+                                                            <td>{player.displayName}</td>
+                                                            <td>{player.positionCategory}</td>
+                                                        </tr>
+                                                    ))}
+                                            </tbody>
+                                        </table>
+                                    ) : (
+                                        <div className={styles.confirmationStep}>
+                                            <p className={styles.swapDetails}>
+                                                {playerToSwap?.displayName} ↔ {selectedAvailablePlayer.player.displayName}
+                                            </p>
+                                            <div className={styles.confirmButtons}>
+                                                <button 
+                                                    className={styles.confirmButton}
+                                                    onClick={handleConfirmSwap}
+                                                >
+                                                    Confirm Transfer
+                                                </button>
+                                                <button 
+                                                    className={styles.cancelButton}
+                                                    onClick={() => setConfirmationStep('select')}
+                                                >
+                                                    Back
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

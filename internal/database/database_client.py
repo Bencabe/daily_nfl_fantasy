@@ -11,6 +11,21 @@ class DatabaseClient:
                                         password=DatabaseCreds.PASSWORD,
                                         host=DatabaseCreds.HOST,
                                         database=DatabaseCreds.DB_NAME)
+    
+    def _create_league_team(self, league_team: dict[str, any]):
+        return LeagueTeam(
+            team_id=league_team['team_id'],
+            league_id=league_team['league_id'],
+            user_id=league_team['user_id'],
+            team_name=league_team['team_name'],
+            goalkeepers=json.loads(league_team['goalkeepers']),
+            defenders=json.loads(league_team['defenders']),
+            midfielders=json.loads(league_team['midfielders']),
+            forwards=json.loads(league_team['forwards']),
+            subs=json.loads(league_team['subs']),
+            tactic=league_team['tactic']
+        )
+
         
 
     def get_user(self,email):
@@ -51,17 +66,7 @@ class DatabaseClient:
         cursor.execute(query, values)
         self.con.commit()
         cursor.close()
-        
-
-    def get_user_leagues(self,user_id):
-        query = ("SELECT * FROM user_league WHERE user_id = '{}'".format(user_id))
-        cursor = self.con.cursor()
-        cursor.execute(query)
-        vals = []
-        for val in cursor:
-            vals.append(val)
-        cursor.close()
-        return vals
+    
 
     def get_user_league(self,user_id, league_id):
         query = ("SELECT * FROM user_league WHERE user_id = %s AND league_id = %s")
@@ -102,7 +107,7 @@ class DatabaseClient:
         return League(
             id=league['id'],
             name=league['name'],
-            password=league['name'],
+            password=league['password'],
             admin=league['admin'],
             private=league['private'],
             type=league['type'],
@@ -148,21 +153,24 @@ class DatabaseClient:
     
 
 
-    def create_league(self, league_name, league_password, league_admin, player_limit, league_type, private_league):
-        # create the league
+    def create_league(self, league_name, league_password, league_admin, player_limit, league_type, private_league) -> int:
+        # creates a new league and returns the id of the league
         query = ("INSERT INTO leagues"
-               "(name, password, admin, player_limit, type, private) "
-               "VALUES (%s, %s, %s, %s, %s, %s)")
+            "(name, password, admin, player_limit, type, private) "
+            "VALUES (%s, %s, %s, %s, %s, %s)")
         values = (league_name, league_password, league_admin, player_limit, league_type, private_league)
         if not player_limit:
             query = ("INSERT INTO leagues"
-               "(name, password, admin, type, private) "
-               "VALUES (%s, %s, %s, %s, %s)")
+            "(name, password, admin, type, private) "
+            "VALUES (%s, %s, %s, %s, %s)")
             values = (league_name, league_password, league_admin, league_type, private_league)
         cursor = self.con.cursor()
         cursor.execute(query, values)
+        # Get the ID of the newly inserted row
+        league_id = cursor.lastrowid 
         self.con.commit()
         cursor.close()
+        return league_id
 
     def get_players_per_position(self, position):
         query = ("SELECT * FROM players WHERE position_category = '{}'".format(position))
@@ -254,20 +262,17 @@ class DatabaseClient:
         cursor.execute(query)
         vals: list[LeagueTeam] = []
         for val in cursor:
-            vals.append(
-                LeagueTeam(
-                    team_id=val['team_id'],
-                    league_id=val['league_id'],
-                    user_id=val['user_id'],
-                    goalkeepers=json.loads(val['goalkeepers']),
-                    defenders=json.loads(val['defenders']),
-                    midfielders=json.loads(val['midfielders']),
-                    forwards=json.loads(val['forwards']),
-                    subs=json.loads(val['subs']),
-                    team_name=val['team_name'],
-                    tactic=val['tactic']
-                )
-            )
+            vals.append(self._create_league_team(val))
+        cursor.close()
+        return vals
+    
+    def get_user_teams(self, user_id: int) -> list[LeagueTeam]:
+        query = ("SELECT * FROM user_league WHERE user_id = '{}'".format(user_id))
+        cursor = self.con.cursor(dictionary=True)
+        cursor.execute(query)
+        vals: list[LeagueTeam] = []
+        for val in cursor:
+            vals.append(self._create_league_team(val))
         cursor.close()
         return vals
 
@@ -602,8 +607,13 @@ class DatabaseClient:
             vals.append(FootballTeam.model_validate(val))
         return vals
 
-
-
+    def update_active_league(self, user_id: int, league_id: int) -> None:
+        query = "UPDATE users SET active_league = %s WHERE id = %s"
+        values = (league_id, user_id)
+        cursor = self.con.cursor()
+        cursor.execute(query, values)
+        self.con.commit()
+        cursor.close()
 
 
     def close(self):

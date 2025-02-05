@@ -3,6 +3,7 @@ import styles from './PlayerPointsCard.module.css';
 import { BaseStat, Player, PlayerScores } from '../api/openapi';
 import FantasyEPLModal from './FantasyEPLModal';
 import { IoSwapHorizontal } from "react-icons/io5";
+import { convertStatName } from '../utils/helperFunctions';
 
 const PlayerPointsCard = ({ 
   player, 
@@ -111,7 +112,7 @@ const PlayerPointsCard = ({
                   )
                   .map(([statName, stat]) => (
                     <tr key={`${fixtureId}-${statName}`}>
-                      <td>{statName}</td>
+                      <td>{convertStatName(statName)}</td>
                       <td>{(stat as BaseStat).value}</td>
                       <td>{(stat as BaseStat).points}</td>
                     </tr>
@@ -121,7 +122,7 @@ const PlayerPointsCard = ({
                   .filter(([_, value]) => value !== 0)
                   .map(([statName, value]) => (
                     <tr key={`${fixtureId}-${statName}`}>
-                      <td>{statName}</td>
+                      <td>{convertStatName(statName)}</td>
                       <td>{value}</td>
                     </tr>
                   ));

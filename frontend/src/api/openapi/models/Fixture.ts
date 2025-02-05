@@ -11,7 +11,7 @@ export type Fixture = {
     venueId: number;
     localteamId: number;
     visitorteamId: number;
-    winnerTeamId: number;
+    winnerTeamId: (number | null);
     localteamScore: number;
     visitorteamScore: number;
     startTime: string;

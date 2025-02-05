@@ -31,7 +31,7 @@ export interface Player {
   }
   
   export interface WebSocketMessage {
-    messageType: 'playerList' | 'turnChange' | 'playerSelected' | 'playerConnect' | 'startDraft' | 'draftStatus';
+    messageType: 'playerList' | 'turnChange' | 'playerSelected' | 'playerConnect' | 'startDraft' | 'draftStatus' | 'draftCompleted';
     playerList?: Player[];
     selectedPlayers?: Player[];
     user?: string;

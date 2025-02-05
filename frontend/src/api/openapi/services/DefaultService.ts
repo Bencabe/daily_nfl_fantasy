@@ -6,8 +6,10 @@ import type { Fixture } from '../models/Fixture';
 import type { FootballTeam } from '../models/FootballTeam';
 import type { Gameweek } from '../models/Gameweek';
 import type { GameweekStats } from '../models/GameweekStats';
+import type { League } from '../models/League';
 import type { LeagueFixtureResults } from '../models/LeagueFixtureResults';
 import type { LeagueTeam } from '../models/LeagueTeam';
+import type { NewLeague } from '../models/NewLeague';
 import type { Player } from '../models/Player';
 import type { SeasonPlayerStats } from '../models/SeasonPlayerStats';
 import type { CancelablePromise } from '../core/CancelablePromise';
@@ -42,6 +44,102 @@ export class DefaultService {
             headers: {
                 'email': email,
                 'password': password,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Join League
+     * @param leagueId
+     * @param userId
+     * @param password
+     * @param teamName
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public joinLeague(
+        leagueId: number,
+        userId: number,
+        password: string,
+        teamName: string,
+    ): CancelablePromise<any> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/join_league',
+            query: {
+                'league_id': leagueId,
+                'user_id': userId,
+                'password': password,
+                'team_name': teamName,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Create League
+     * @param teamName
+     * @param requestBody
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public createLeague(
+        teamName: string,
+        requestBody: NewLeague,
+    ): CancelablePromise<any> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/create_league',
+            query: {
+                'team_name': teamName,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Change Active League
+     * @param newLeagueId
+     * @param userId
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public changeActiveLeague(
+        newLeagueId: number,
+        userId: number,
+    ): CancelablePromise<any> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/change_active_league',
+            query: {
+                'new_league_id': newLeagueId,
+                'user_id': userId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Get User Leagues
+     * @param userId
+     * @returns League Successful Response
+     * @throws ApiError
+     */
+    public getUserLeagues(
+        userId: number,
+    ): CancelablePromise<Array<League>> {
+        return this.httpRequest.request({
+            method: 'POST',
+            url: '/user_leagues',
+            query: {
+                'user_id': userId,
             },
             errors: {
                 422: `Validation Error`,

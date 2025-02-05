@@ -11,6 +11,7 @@ import Home from './components/Home.tsx'
 import PlayerSelection from './components/PlayerSelection.tsx';
 import LeagueFixtures from './components/LeagueFixtures.tsx';
 import LeagueTable from './components/LeagueTable.tsx'
+import LeagueManagement from './components/LeagueManagement.tsx'
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -25,6 +26,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
 export type GlobalContextType = {
   user: User,
+  setUser: (user: User) => void
 }
 
 export const GlobalContext = React.createContext<GlobalContextType | null>(null);
@@ -60,9 +62,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/login" replace />;
   }
   else {
-    return <GlobalContext.Provider value={{ user }}>
-                  {children}
-            </GlobalContext.Provider>;
+    return <GlobalContext.Provider value={{ user, setUser }}>
+            {children}
+          </GlobalContext.Provider>;
 
   }
 };
@@ -95,6 +97,11 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/league_table" element={
           <ProtectedRoute>
             <Layout><LeagueTable /></Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="/league_management" element={
+          <ProtectedRoute>
+            <Layout><LeagueManagement /></Layout>
           </ProtectedRoute>
         } />
       </Routes>

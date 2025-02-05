@@ -53,13 +53,18 @@ class PlayerSelected(BasicDraftMessage):
     user_id: int = Field(alias="userId")
     player_position: str = Field(alias="playerPosition")
 
+class DraftCompleted(BasicDraftMessage):
+    message_type: Literal["draftCompleted"]
+    league_teams: dict[int, LeagueTeam] = Field(default={}, alias="leagueTeams")
+
 message_types = (
     BasicDraftMessage | 
     TurnChange | 
     TimeExpired | 
     PlayerConnect | 
     StartDraft |
-    PlayerSelected
+    PlayerSelected |
+    DraftCompleted
 )
 
 class DraftMessage(RootModel):
