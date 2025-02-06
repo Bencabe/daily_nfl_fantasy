@@ -36,7 +36,10 @@ class DraftService:
     
     async def broadcast(cls, message: DraftMessage, league_id: int):
         for user in cls.connections[league_id].keys():
-            await cls.connections[league_id][user].send_json(message.model_dump(by_alias=True))
+            try:
+                await cls.connections[league_id][user].send_json(message.model_dump(by_alias=True))
+            except:
+                pass
     
     async def _start_timer(self, league_id: int):
         if league_id in self.league_timers:

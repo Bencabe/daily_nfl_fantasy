@@ -144,8 +144,6 @@ const PlayerDraft: React.FC = () => {
     const timer = setInterval(() => {
       if (timeLeft > 0) {
         setTimeLeft(prev => prev - 1);
-      } else {
-        console.log('Time expired!');
       }
     }, 1000);
 

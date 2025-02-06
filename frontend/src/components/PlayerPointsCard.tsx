@@ -51,6 +51,11 @@ const PlayerPointsCard = ({
     }
   };
 
+  const getPlayerName = (displayName: string) => {
+    const nameParts = displayName.split(' ');
+    return nameParts.length == 1 ?  nameParts[0] : nameParts.slice(1).join(' ')
+  }
+
   const isSwapTarget = swapMode && isOnBench
 
   return (
@@ -59,7 +64,7 @@ const PlayerPointsCard = ({
         className={`${styles.playerCard} ${isSwapTarget ? styles.swapTarget : ''}`} 
         onClick={handleCardClick}
       >
-        <div>{player.displayName.split(' ').slice(1).join(' ')}</div>
+        <div>{getPlayerName(player.displayName)}</div>
         <div>{Object.values(stats.fixtureStats || {})?.at(0)?.playerStats?.totalScore || 0} pts</div>
       </div>
       
