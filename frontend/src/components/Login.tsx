@@ -24,12 +24,14 @@ const LoginPage = () => {
 
   const onLogin = async (username: string, password: string) => {
     // Perform login logic here
-    const user = await login(username, password)
-    if (isUser(user)) {
-      navigate('/', {state: {user: user}})
-      setError('')
+    try {
+      const user = await login(username, password)
+      if (isUser(user)) {
+        navigate('/', {state: {user: user}})
+        setError('')
+      }
     }
-    else {
+    catch (error) {
       setError('Incorrect username or password')
     }
   };
