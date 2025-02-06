@@ -6,7 +6,7 @@ import { useGlobalContext } from '../utils/customHooks.ts';
 import SelectedPlayersView from './SelectedPlayerView';
 import { Player, LeagueTeams, WebSocketMessage } from '../types/draft';
 import config from '../../config'
-import { FootballTeam } from '../api/openapi/index.ts';
+import { FootballTeam, LeagueTeam } from '../api/openapi/index.ts';
 import getApi from '../api/main';
 
 const PlayerDraft: React.FC = () => {
@@ -23,6 +23,7 @@ const PlayerDraft: React.FC = () => {
   const [draftStarted, setDraftStarted] = useState(false);
   const [isDraftComplete, setIsDraftComplete] = useState<boolean>(false);
   const [leagueTeams, setLeagueTeams] = useState<LeagueTeams>({});
+  const [leagueArray, setLeagueArray] = useState<LeagueTeam[]>([]);
   const [viewMode, setViewMode] = useState<'players' | 'selected'>('players');
   const [footballTeams, setFootballTeams] = useState<FootballTeam[]>([]);
   const { user } = useGlobalContext();
@@ -50,11 +51,13 @@ const PlayerDraft: React.FC = () => {
   };
 
   useEffect(() => {
-    const fetchTeams = async () => {
+    const fetchInitialData = async () => {
       const teams = await api.getFootballTeams();
+      const leagueArray = await api.getLeagueTeams(user.activeLeague);
       setFootballTeams(teams);
+      setLeagueArray(leagueArray);
     };
-    fetchTeams()
+    fetchInitialData()
   },[])
 
   const canPickPlayer = (player: Player) => {
@@ -266,10 +269,10 @@ const PlayerDraft: React.FC = () => {
           <div className={styles.startDraftCard}>
             <h2>Welcome to the Draft Zone</h2>
             <p>Get ready to build your dream team!</p>
-            {/* <div className={styles.draftInfo}>
+            <div className={styles.draftInfo}>
               <h3>Participating Teams</h3>
               <div className={styles.teamsList}>
-                {Object.entries(leagueTeams).map(([userId, team]) => {
+                {Object.entries(leagueArray).map(([userId, team]) => {
                   // const teamUser = leagueUsers.find(user => user.id === Number(userId));
                   return (
                     <div key={userId} className={styles.teamItem}>
@@ -278,7 +281,7 @@ const PlayerDraft: React.FC = () => {
                   );
                 })}
               </div>
-            </div> */}
+            </div>
             <button 
               className={styles.startDraftButton} 
               onClick={() => startDraft()}

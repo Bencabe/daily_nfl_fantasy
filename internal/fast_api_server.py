@@ -199,7 +199,7 @@ async def get_league_teams(
     return league_management.get_league_teams(league_id)
 
 @app.get("/football_teams", response_model=list[FootballTeam], operation_id="getFootballTeams")
-async def get_league_teams(
+async def get_football_teams(
         db_client: DatabaseClient = Depends(DatabaseClient)
     ):
     return db_client.get_football_teams()

@@ -9,6 +9,7 @@ const LeagueManagement = () => {
   const { user, setUser } = useGlobalContext();
   const [activeTab, setActiveTab] = useState<'join' | 'create'>('join');
   const [userLeagues, setUserLeagues] = useState<League[]>([]);
+  const [successMessage, setSuccessMessage] = useState<string>('');
   const api = getApi();
   
   // Join League Form State
@@ -37,6 +38,17 @@ const LeagueManagement = () => {
     fetchUserLeagues();
   }, []);
 
+  // Add this effect after your other useEffect
+  useEffect(() => {
+    if (successMessage) {
+        const timer = setTimeout(() => {
+            setSuccessMessage('');
+        }, 3000);
+        
+        return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+
   const fetchUserLeagues = async () => {
     try {
       const leagues = await api.getUserLeagues(user.id);
@@ -49,27 +61,45 @@ const LeagueManagement = () => {
   const handleJoinLeague = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.joinLeague(
-        Number(joinFormData.leagueId),
-        user?.id || 0,
-        joinFormData.password,
-        joinFormData.teamName
-      );
-      fetchUserLeagues();
-    } catch (error) {
-      console.error('Error joining league:', error);
-    }
-  };
-
-  const handleCreateLeague = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-        const { teamName, ...leagueData } = createFormData;
-        await api.createLeague(teamName, leagueData);
+        await api.joinLeague(
+            Number(joinFormData.leagueId),
+            user?.id || 0,
+            joinFormData.password,
+            joinFormData.teamName
+        );
+        setSuccessMessage('Successfully joined league!');
         fetchUserLeagues();
+        // Clear form
+        setJoinFormData({ leagueId: '', password: '', teamName: '' });
     } catch (error) {
-        console.error('Error creating league:', error);
+        console.error('Error joining league:', error);
     }
+};
+
+const handleCreateLeague = async (e: React.FormEvent) => {
+  e.preventDefault();
+  try {
+      const { teamName, ...leagueData } = createFormData;
+      await api.createLeague(teamName, leagueData);
+      setSuccessMessage('Successfully created league!');
+      fetchUserLeagues();
+      // Clear form
+      setCreateFormData({
+          name: '',
+          password: '',
+          admin: user?.id,
+          private: true,
+          type: LeagueTypes.MODERN,
+          playerLimit: 8,
+          draftStarted: false,
+          draftCompleted: false,
+          draftTurn: null,
+          draftOrder: null,
+          teamName: ''
+      });
+  } catch (error) {
+      console.error('Error creating league:', error);
+  }
 };
 
 const handleActiveLeagueChange = async (option: League | null) => {
@@ -175,6 +205,11 @@ const handleActiveLeagueChange = async (option: League | null) => {
           </form>
         )}
       </div>
+      {successMessage && (
+          <div className={styles.successMessage}>
+              {successMessage}
+          </div>
+      )}
 
       {userLeagues.length > 0 && (
         <div className={styles.activeLeagueSection}>

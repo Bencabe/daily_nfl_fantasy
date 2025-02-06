@@ -592,8 +592,8 @@ class DatabaseClient:
     def create_league_fixtures(self, user_fixtures: list[LeagueFixture]):
         for fixture in user_fixtures:
             self.create_league_fixture(
-                fixture.user_id_1, 
-                fixture.user_id_2, 
+                fixture.user_1, 
+                fixture.user_2, 
                 fixture.gameweek_id, 
                 fixture.league_id
             )

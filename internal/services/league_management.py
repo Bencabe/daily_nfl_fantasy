@@ -134,8 +134,8 @@ class LeagueManagementService:
                 player_2 = pair[0] if len(pair) < 2 else pair[1]
                 fixture = LeagueFixture(
                     id=0,
-                    user_id_1=pair[0],
-                    user_id_2=player_2,
+                    user_1=pair[0],
+                    user_2=player_2,
                     gameweek_id=gameweek.id,
                     league_id=league_id
                 )
