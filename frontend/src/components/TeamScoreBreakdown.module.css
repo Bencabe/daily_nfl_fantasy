@@ -99,3 +99,29 @@
     display: flex;
     justify-content: space-between;
   }
+
+  .scoreTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.scoreTable th,
+.scoreTable td {
+    padding: 12px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.scoreTable th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+.scoreTable tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.scoreTable tr:hover {
+    background-color: #f0f0f0;
+}

@@ -9,19 +9,27 @@ interface GameweekFixturesProps {
 const GameweekFixtures = ({ gameweekFixtures, footballTeams }: GameweekFixturesProps) => {
   const groupFixturesByDateTime = (fixtures: Fixture[]) => {
     const grouped = fixtures.reduce((acc: { [key: string]: { [key: string]: Fixture[] } }, fixture) => {
-      const date = new Date(fixture.startTime).toLocaleDateString();
-      const time = new Date(fixture.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const date = new Date(fixture.startTime);
+      const dateKey = date.toLocaleDateString('en-GB'); // DD/MM/YYYY format
+      const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       
-      if (!acc[date]) {
-        acc[date] = {};
+      if (!acc[dateKey]) {
+        acc[dateKey] = {};
       }
-      if (!acc[date][time]) {
-        acc[date][time] = [];
+      if (!acc[dateKey][time]) {
+        acc[dateKey][time] = [];
       }
-      acc[date][time].push(fixture);
+      acc[dateKey][time].push(fixture);
       return acc;
     }, {});
-    return grouped;
+  
+    const sortedEntries = Object.entries(grouped).sort(([dateA], [dateB]) => {
+      const [dayA, monthA, yearA] = dateA.split('/');
+      const [dayB, monthB, yearB] = dateB.split('/');
+      return new Date(+yearA, +monthA - 1, +dayA).getTime() - new Date(+yearB, +monthB - 1, +dayB).getTime();
+    });
+  
+    return Object.fromEntries(sortedEntries);
   };
 
   const getTeamLogo = (teamId: number) => {

@@ -73,19 +73,19 @@ class TeamStats(BaseModel):
     dispossesed: int = Field(alias="dispossesed")
     def get_team_points(self, team_tactic: TeamTactics):
         if team_tactic == TeamTactics.Possesion:
-            pass_acc_score = 15 if self.pass_accuracy > 80 else -10
-            pass_score = 15 if self.total_passes > 350 else -10
-            lost_ball_score = 15 if self.dispossesed < 7 else -10
+            pass_acc_score = 5 if self.pass_accuracy > 80 else 0
+            pass_score = 5 if self.total_passes > 350 else -5
+            lost_ball_score = 5 if self.dispossesed < 7 else 0
             return pass_acc_score + pass_score + lost_ball_score
         elif team_tactic == TeamTactics.Defensive:
-            tackles = 15 if self.tackles > 20 else -10
-            interceptions = 15 if self.interceptions > 10 else -10
-            goals_conceded = 20 if self.goals_conceded < 10 else -10
+            tackles = 5 if self.tackles > 20 else 0
+            interceptions = 5 if self.interceptions > 10 else 0
+            goals_conceded = 5 if self.goals_conceded < 10 else -5
             return tackles + interceptions + goals_conceded
         elif team_tactic == TeamTactics.Offensive:
-            goals_points = 15 if  self.goals + self.assists > 6 else -10
-            key_passes = 15 if self.key_passes > 10 else -10
-            goals_diff_points = 15 if self.goals_conceded < (self.goals + self.assists) else -5
+            goals_points = 5 if  self.goals + self.assists > 6 else 0
+            key_passes = 5 if self.key_passes > 10 else 0
+            goals_diff_points = 5 if self.goals_conceded < (self.goals + self.assists) else -5
             return goals_points + goals_diff_points + key_passes
         else:
             return 0
