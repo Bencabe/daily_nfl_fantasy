@@ -70,6 +70,7 @@ const PitchVisualization = ({
                 onSwapComplete={handleSwapComplete}
                 cancelSwap={cancelSwap}
                 teamEditable={teamEditable}
+                gameweekStats={gameweekStats}
               />
             ))}
           </div>
@@ -87,6 +88,7 @@ const PitchVisualization = ({
               onSwapComplete={handleSwapComplete}
               cancelSwap={cancelSwap}
               teamEditable={teamEditable}
+              gameweekStats={gameweekStats}
             />
           ))}
         </div>

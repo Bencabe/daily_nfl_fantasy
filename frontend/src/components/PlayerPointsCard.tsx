@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import styles from './PlayerPointsCard.module.css';
-import { BaseStat, Player, PlayerScores } from '../api/openapi';
+import { BaseStat, GameweekStats, Player, PlayerScores, TeamTactics } from '../api/openapi';
 import FantasyEPLModal from './FantasyEPLModal';
 import { IoSwapHorizontal } from "react-icons/io5";
 import { convertStatName } from '../utils/helperFunctions';
@@ -13,7 +13,8 @@ const PlayerPointsCard = ({
   swapMode, 
   onSwapComplete,
   cancelSwap,
-  teamEditable 
+  teamEditable,
+  gameweekStats
 }: { 
   player: Player; 
   stats: PlayerScores;
@@ -23,6 +24,7 @@ const PlayerPointsCard = ({
   onSwapComplete?: (player: Player) => void;
   cancelSwap: () => void;
   teamEditable: boolean;
+  gameweekStats: GameweekStats;
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [showPlayerStats, setShowPlayerStats] = useState(true);
@@ -55,6 +57,20 @@ const PlayerPointsCard = ({
     const nameParts = displayName.split(' ');
     return nameParts.length == 1 ?  nameParts[0] : nameParts.slice(1).join(' ')
   }
+
+  const getTacticRelevantStats = (tactic: string): string[] => {
+    switch (tactic) {
+      case TeamTactics.POSSESION:
+        return ['passAccuracy', 'totalPasses', 'dispossesed'];
+      case TeamTactics.DEFENSIVE:
+        return ['tackles', 'interceptions', 'goalsConceded'];
+      case TeamTactics.OFFENSIVE:
+        return ['goals', 'assists', 'keyPasses', 'goalsConceded'];
+      default:
+        return [];
+    }
+  };
+  
 
   const isSwapTarget = swapMode && isOnBench
 
@@ -123,10 +139,11 @@ const PlayerPointsCard = ({
                     </tr>
                   ));
               } else {
+                const relevantStats = getTacticRelevantStats(gameweekStats.teamTactic || TeamTactics.DEFAULT);
                 return Object.entries(fixture.teamStats)
-                  .filter(([_, value]) => value !== 0)
                   .map(([statName, value]) => (
-                    <tr key={`${fixtureId}-${statName}`}>
+                    <tr key={`${fixtureId}-${statName}`} 
+                        className={relevantStats.includes(statName) ? styles.highlightedStat : ''}>
                       <td>{convertStatName(statName)}</td>
                       <td>{value}</td>
                     </tr>
