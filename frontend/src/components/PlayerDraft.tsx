@@ -8,6 +8,7 @@ import { Player, LeagueTeams, WebSocketMessage } from '../types/draft';
 import config from '../../config'
 import { FootballTeam, LeagueTeam } from '../api/openapi/index.ts';
 import getApi from '../api/main';
+import { PlayerLimits } from '../types/team.ts';
 
 const PlayerDraft: React.FC = () => {
   const TURN_TIME = 120;
@@ -76,13 +77,13 @@ const PlayerDraft: React.FC = () => {
   
     switch (player.positionCategory) {
       case 'Goalkeeper':
-        return userTeam.goalkeepers.length < 2;
+        return userTeam.goalkeepers.length < PlayerLimits.TOTAL_GOALKEEPERS;
       case 'Defender':
-        return userTeam.defenders.length < 5;
+        return userTeam.defenders.length < PlayerLimits.TOTAL_DEFENDERS;
       case 'Midfielder':
-        return userTeam.midfielders.length < 5;
+        return userTeam.midfielders.length < PlayerLimits.TOTAL_MIDFIELDERS;
       case 'Forward':
-        return userTeam.forwards.length < 3;
+        return userTeam.forwards.length < PlayerLimits.TOTAL_FORWARDS;
       default:
         return false;
     }

@@ -1,6 +1,20 @@
+from dataclasses import dataclass
 from enum import StrEnum
 from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime
+
+class PositionLimit(BaseModel):
+    max: int
+    min: int
+    total: int
+
+class PositionLimits:
+    Goalkeeper = PositionLimit(min=1, max=1, total=2)
+    Defender = PositionLimit(min=3, max=5, total=5)
+    Midfielder = PositionLimit(min=2, max=5, total=5)
+    Forward = PositionLimit(min=1, max=4, total=4)
+    Substitues = PositionLimit(min=5, max=5, total=5)
+
 
 class IncompleteTeam(Exception):
     def __init__(self, message="Team is incomplete"):
@@ -49,6 +63,15 @@ class Player(BaseModel):
     display_name: str = Field(alias="displayName")
     image_path: str = Field(alias="imagePath")
     nationality: str
+
+def validate_position_numbers(players: list[int], subs: list[int], limit: PositionLimit) -> bool:
+    starting_players = [p for p in players if p not in subs]
+    if len(players) != limit.total:
+        return False
+    if len(starting_players) < limit.min or len(starting_players) > limit.max:
+        return False
+    return True
+
 class Team(BaseModel):
     goalkeepers: list[int]
     defenders: list[int]
@@ -57,22 +80,24 @@ class Team(BaseModel):
     subs: list[int]
     tactic: TeamTactics = Field(default=TeamTactics.Default)
     def validate(self):
-        if len(self.goalkeepers) != 2:
+        if len(self.subs) != PositionLimits.Substitues.total:
+            raise InvalidSubstitues("Invalid number of subs")  
+        if not validate_position_numbers(self.goalkeepers, self.subs, PositionLimits.Goalkeeper):
             raise IncompleteTeam("Invalid number of goalkeepers")
-        if len(self.defenders) != 5:
+        if not validate_position_numbers(self.defenders, self.subs, PositionLimits.Defender):
             raise IncompleteTeam("Invalid number of defenders")
-        if len(self.midfielders) != 5:
+        if not validate_position_numbers(self.midfielders, self.subs, PositionLimits.Midfielder):
             raise IncompleteTeam("Invalid number of midfielders")
-        if len(self.forwards) != 3:
+        if not validate_position_numbers(self.forwards, self.subs, PositionLimits.Forward):
             raise IncompleteTeam("Invalid number of forwards")
-        if len(self.subs) != 4:
-            raise InvalidSubstitues("Invalid number of subs")       
-        gk_in_subs = sum(1 for player_id in self.subs if player_id in self.goalkeepers)
-        if gk_in_subs != 1:
-            raise InvalidSubstitues("Must have exactly 1 goalkeeper in subs")
-        def_in_subs = sum(1 for player_id in self.subs if player_id in self.defenders)
-        if def_in_subs > 2:
-            raise InvalidSubstitues("Cannot have more than 2 defenders in subs")
+        if (
+            len(self.goalkeepers) +
+            len(self.defenders) +
+            len(self.midfielders) +
+            len(self.forwards) -
+            len(self.subs) != 11
+        ):
+            raise IncompleteTeam("Invalid number of starting players")     
 
 
 class LeagueTeam(Team):

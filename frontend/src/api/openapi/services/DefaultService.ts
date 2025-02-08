@@ -290,7 +290,7 @@ export class DefaultService {
         });
     }
     /**
-     * Get League Teams
+     * Get Football Teams
      * @returns FootballTeam Successful Response
      * @throws ApiError
      */

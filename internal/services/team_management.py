@@ -36,6 +36,7 @@ class TeamManagementService:
                 team.defenders[0],
                 team.midfielders[0],
                 team.forwards[0],
+                team.forwards[1],
             ]
             self.db_client.update_team(
                 league_id,

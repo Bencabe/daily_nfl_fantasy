@@ -10,6 +10,7 @@ import getApi from '../api/main';
 import { useSearchParams } from 'react-router-dom';
 import TeamScoreBreakdown from './TeamScoreBreakdown';
 import GameweekFixtures from './GameweekFixtures';
+import { PlayerLimits } from '../types/team';
 
 
 function Home() {
@@ -31,6 +32,7 @@ function Home() {
   const [validationMessage, setValidationMessage] = useState("");
   const [teamValid, setTeamValid] = useState(true);
   const [saveSuccessMessage, setSaveSuccessMessage] = useState<string>("");
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const api = getApi();
 
   useEffect(() => {
@@ -104,27 +106,29 @@ function Home() {
     const defenders = getPositionPlayerIds('Defender').filter(id => !gameweekStats.subs.includes(id));
     const midfielders = getPositionPlayerIds('Midfielder').filter(id => !gameweekStats.subs.includes(id));
     const forwards = getPositionPlayerIds('Forward').filter(id => !gameweekStats.subs.includes(id));
+    let teamValid = false
+    const total_starting = goalkeepers.length + defenders.length + midfielders.length + forwards.length;
   
-    if (goalkeepers.length !== 1) {
+    if (goalkeepers.length !== PlayerLimits.MAX_GOALKEEPERS) {
       setValidationMessage("Must have exactly 1 goalkeeper");
-      setTeamValid(false);
     }
-    else if (defenders.length < 3) {
+    else if (defenders.length < PlayerLimits.MIN_DEFENDERS) {
       setValidationMessage("Must have at least 3 defenders");
-      setTeamValid(false);
     }
-    else if (midfielders.length < 3) {
-      setValidationMessage("Must have at least 3 midfielders");
-      setTeamValid(false);
+    else if (midfielders.length < PlayerLimits.MIN_MIDFIELDERS) {
+      setValidationMessage("Must have at least 2 midfielders");
     }
-    else if (forwards.length < 1) {
+    else if (forwards.length < PlayerLimits.MIN_FORWARDS) {
       setValidationMessage("Must have at least 1 forward");
-      setTeamValid(false);
     }
-    else {
+  else if (total_starting != PlayerLimits.TOTAL_STARTERS ) {
+      setValidationMessage("Must have 11 starting players");
+    }
+  else {
       setValidationMessage("");
-      setTeamValid(true);
+      teamValid = true;
     }
+    setTeamValid(teamValid);
   };
 
   const handleTacticChange = async (tactic: TeamTactics) => {
@@ -165,6 +169,7 @@ function Home() {
       setTimeout(() => setSaveSuccessMessage(""), 3000);
     } catch (error) {
       console.error('Failed to save team changes:', error);
+      setErrorMessage("Team saved failed. This shouldn't happen, tell Ben about it if you see this please.");
     }
   };
 
@@ -282,6 +287,9 @@ function Home() {
               )}
               {saveSuccessMessage && (
                 <div className={styles.successMessage}>{saveSuccessMessage}</div>
+              )}
+              {errorMessage && (
+                <div className={styles.validationMessage}>{errorMessage}</div>
               )}
               <button
                 className={`${styles.saveButton} ${teamEditable ? '' : styles.hidden}`}

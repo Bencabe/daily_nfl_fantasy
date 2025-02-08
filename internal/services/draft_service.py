@@ -4,7 +4,7 @@ from random import shuffle
 from fastapi import Depends, WebSocket
 from database.database_client import DatabaseClient
 from services.league_management import LeagueManagementService
-from models.db_models import League, LeagueTeam, Player
+from models.db_models import League, LeagueTeam, Player, PositionLimits
 from models.draft_models import DraftCompleted, DraftMessage, DraftStatus, PlayerSelected, StartDraft, TimeExpired, TurnChange, PlayerConnect, Positions
 
 TURN_TIME_LIMIT = 122
@@ -57,10 +57,10 @@ class DraftService:
     def _check_draft_complete(self, league_teams: dict[int, LeagueTeam], league: League):
         all_teams_full = True
         for team in league_teams.values():
-            if (len(team.goalkeepers) < 2 or 
-                len(team.defenders) < 5 or 
-                len(team.midfielders) < 5 or 
-                len(team.forwards) < 3):
+            if (len(team.goalkeepers) < PositionLimits.Goalkeeper.total or 
+                len(team.defenders) < PositionLimits.Defender.total or 
+                len(team.midfielders) < PositionLimits.Midfielder.total or 
+                len(team.forwards) < PositionLimits.Forward.total):
                 all_teams_full = False
                 break
         
@@ -110,13 +110,13 @@ class DraftService:
         
         # Filter available players based on position limits and not already selected
         available_players: list[Player] = []
-        if len(current_team.goalkeepers) < 2:
+        if len(current_team.goalkeepers) < PositionLimits.Goalkeeper.total:
             available_players.extend([p for p in players if p.position_category == Positions.Goalkeeper and p.id not in selected_players])
-        if len(current_team.defenders) < 5:
+        if len(current_team.defenders) < PositionLimits.Defender.total:
             available_players.extend([p for p in players if p.position_category == Positions.Defender and p.id not in selected_players])
-        if len(current_team.midfielders) < 5:
+        if len(current_team.midfielders) < PositionLimits.Midfielder.total:
             available_players.extend([p for p in players if p.position_category == Positions.Midfielder and p.id not in selected_players]) 
-        if len(current_team.forwards) < 3:
+        if len(current_team.forwards) < PositionLimits.Forward.total:
             available_players.extend([p for p in players if p.position_category == Positions.Forward and p.id not in selected_players])
 
         if len(available_players) == 0:

@@ -218,7 +218,6 @@ async def get_gameweek_fixtures(
     ):
     return fixture_management.get_gameweek_fixtures(gameweek_id)
 
-
 @app.websocket("/player_draft/{league_id}")
 async def player_draft(
     websocket: WebSocket,

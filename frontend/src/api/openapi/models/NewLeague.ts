@@ -6,7 +6,7 @@ import type { LeagueTypes } from './LeagueTypes';
 export type NewLeague = {
     name: string;
     password: string;
-    admin: number;
+    admin?: (number | string | null);
     private?: boolean;
     type?: LeagueTypes;
     playerLimit?: (number | null);
