@@ -128,7 +128,7 @@ const TeamScoreBreakdown = ({showScoreModal, setShowScoreModal, gameweekStats}: 
                                     <td>{gameweekStats.teamStats.keyPasses > 10 ? '+5' : '0'}</td>
                                 </tr>
                                 <tr>
-                                    <td>Goals Difference</td>
+                                    <td>Offensive Success</td>
                                     <td>GC: {gameweekStats.teamStats.goalsConceded} vs G+A: {gameweekStats.teamStats.goals + gameweekStats.teamStats.assists}</td>
                                     <td>GC &lt; G+A</td>
                                     <td>{gameweekStats.teamStats.goalsConceded < (gameweekStats.teamStats.goals + gameweekStats.teamStats.assists) ? '+5' : '-5'}</td>

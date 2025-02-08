@@ -98,15 +98,6 @@
   font-weight: 600;
 }
 
-.table tbody tr:nth-child(2) {
-  background-color: #f3f3f3;
-  font-weight: 500;
-}
-
-.table tbody tr:nth-child(3) {
-  background-color: #fff3e0;
-  font-weight: 500;
-}
 
 @media (min-width: 768px) {
   .table {
