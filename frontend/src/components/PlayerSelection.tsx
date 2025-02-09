@@ -5,13 +5,13 @@ import { Player } from '../api/openapi/models/Player'
 import { LeagueTeam } from '../api/openapi/models/LeagueTeam'
 import styles from './PlayerSelection.module.css'
 import { FootballTeam } from '../api/openapi/models/FootballTeam'
-import { SeasonPlayerStats } from '../api/openapi'
+import { LeagueTeamExtended, SeasonPlayerStats } from '../api/openapi'
 import { convertStatName } from '../utils/helperFunctions'
 import LoadingSpinner from './LoadingSpinner'
 
 const PlayerSelection = () => {
     const { user } = useGlobalContext()
-    const [leagueTeams, setLeagueTeams] = useState<LeagueTeam[]>([])
+    const [leagueTeams, setLeagueTeams] = useState<LeagueTeamExtended[]>([])
     const [userTeam, setUserTeam] = useState<LeagueTeam>()
     const [selectedAvailablePlayer, setSelectedAvailablePlayer] = useState<SeasonPlayerStats | null>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -193,6 +193,14 @@ const PlayerSelection = () => {
         return matchesPosition && matchesTeam && matchesSearch
     })
 
+    const getPlayerOwner = (playerId: number): string => {
+        const owningTeam = leagueTeams.find(team => 
+            [...team.goalkeepers, ...team.defenders, ...team.midfielders, ...team.forwards, ...team.subs]
+            .includes(playerId)
+        )
+        return owningTeam ? owningTeam.userFirstName[0].toUpperCase() + owningTeam.userLastName[0].toUpperCase() : ''
+    }
+
     const sampleStats = seasonPlayerStats[0]?.stats || {}
     const statKeys = Object.keys(sampleStats)
 
@@ -245,7 +253,7 @@ const PlayerSelection = () => {
                                     Name {sortConfig?.key === 'name' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                                 </th>
                                 <th>Position</th>
-                                <th onClick={() => handleSort('team')}>
+                                <th className={styles.teamColumn} onClick={() => handleSort('team')}>
                                     Team {sortConfig?.key === 'team' && (sortConfig.direction === 'ascending' ? '↑' : '↓')}
                                 </th>
                                 <th onClick={() => handleSort('gamesPlayed')}>
@@ -272,6 +280,7 @@ const PlayerSelection = () => {
                                             : '↕'}
                                     </button>
                                 </th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                             <tbody>
@@ -287,9 +296,21 @@ const PlayerSelection = () => {
                                     >
                                         <td>{seasonPlayerStats.player.displayName}</td>
                                         <td>{seasonPlayerStats.player.positionCategory}</td>
-                                        <td>{getFootballTeamName(seasonPlayerStats.player.teamId)}</td>
+                                        <td className={styles.teamColumn}>{getFootballTeamName(seasonPlayerStats.player.teamId)}</td>
                                         <td>{seasonPlayerStats.gamesPlayed || 0}</td>
                                         <td>{seasonPlayerStats.stats[selectedStat as keyof typeof seasonPlayerStats.stats] || 0}</td>
+                                        <td>
+                                            <button 
+                                                onClick={() => handleSwapSelection(seasonPlayerStats)}
+                                                disabled={isPlayerTaken(seasonPlayerStats.player.id)}
+                                                className={styles.selectButton}
+                                            >
+                                                {isPlayerTaken(seasonPlayerStats.player.id) 
+                                                    ? `Owned ${getPlayerOwner(seasonPlayerStats.player.id)}`
+                                                    : 'Select'
+                                                }
+                                            </button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>

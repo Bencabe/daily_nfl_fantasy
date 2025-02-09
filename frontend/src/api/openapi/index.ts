@@ -23,6 +23,7 @@ export type { HTTPValidationError } from './models/HTTPValidationError';
 export type { League } from './models/League';
 export type { LeagueFixtureResults } from './models/LeagueFixtureResults';
 export type { LeagueTeam } from './models/LeagueTeam';
+export type { LeagueTeamExtended } from './models/LeagueTeamExtended';
 export { LeagueTypes } from './models/LeagueTypes';
 export type { MidfielderStats } from './models/MidfielderStats';
 export type { NewLeague } from './models/NewLeague';

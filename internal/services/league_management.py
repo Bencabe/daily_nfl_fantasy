@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from database.database_client import DatabaseClient
 from models.auth_models import PublicUser, User
 from services.team_management import TeamManagementService
-from models.db_models import  League, LeagueFixture, NewLeague
+from models.db_models import  League, LeagueFixture, LeagueTeamExtended, NewLeague
 from constants import Season
 
 
@@ -57,8 +57,8 @@ class LeagueManagementService:
             leagues.append(league)
         return leagues
     
-    def get_league_teams(self, league_id: int):
-        return self.db_client.get_league_team_modals(league_id)
+    def get_league_teams(self, league_id: int) -> LeagueTeamExtended:
+        return self.db_client.get_extended_league_team(league_id)
     
     def get_fixtures(self, league_id: int) -> list[LeagueFixture]:
         return self.db_client.get_league_fixtures(league_id)

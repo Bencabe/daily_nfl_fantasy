@@ -9,6 +9,7 @@ import type { GameweekStats } from '../models/GameweekStats';
 import type { League } from '../models/League';
 import type { LeagueFixtureResults } from '../models/LeagueFixtureResults';
 import type { LeagueTeam } from '../models/LeagueTeam';
+import type { LeagueTeamExtended } from '../models/LeagueTeamExtended';
 import type { NewLeague } from '../models/NewLeague';
 import type { Player } from '../models/Player';
 import type { SeasonPlayerStats } from '../models/SeasonPlayerStats';
@@ -272,12 +273,12 @@ export class DefaultService {
     /**
      * Get League Teams
      * @param leagueId
-     * @returns LeagueTeam Successful Response
+     * @returns LeagueTeamExtended Successful Response
      * @throws ApiError
      */
     public getLeagueTeams(
         leagueId: number,
-    ): CancelablePromise<Array<LeagueTeam>> {
+    ): CancelablePromise<Array<LeagueTeamExtended>> {
         return this.httpRequest.request({
             method: 'GET',
             url: '/league_teams',

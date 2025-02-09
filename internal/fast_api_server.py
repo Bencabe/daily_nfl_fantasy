@@ -7,7 +7,7 @@ from constants import JWT, Season
 from services.fixture_management import FixtureManagementService
 from services.player_management import PlayerManagementService, SeasonPlayerStats
 from services.league_management import LeagueFixtureResults, LeagueManagementService
-from models.db_models import Fixture, FootballTeam, Gameweek, League, LeagueTeam, NewLeague, Player
+from models.db_models import Fixture, FootballTeam, Gameweek, League, LeagueTeam, LeagueTeamExtended, NewLeague, Player
 from services.draft_service import DraftService
 from services.team_management import GameweekStats, TeamManagementService
 from middlewares.jwt_auth import JWTMiddleware, validate_jwt
@@ -195,7 +195,7 @@ async def get_season_player_stats(
 async def get_league_teams(
         league_id: int,
         league_management: LeagueManagementService = Depends(LeagueManagementService.get_instance)
-    ) -> list[LeagueTeam]:
+    ) -> list[LeagueTeamExtended]:
     return league_management.get_league_teams(league_id)
 
 @app.get("/football_teams", response_model=list[FootballTeam], operation_id="getFootballTeams")

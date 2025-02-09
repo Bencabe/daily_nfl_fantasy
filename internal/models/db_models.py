@@ -107,6 +107,11 @@ class LeagueTeam(Team):
     user_id: int = Field(alias="userId")
     team_name: str = Field(alias="teamName")
 
+class LeagueTeamExtended(LeagueTeam):
+    model_config = ConfigDict(populate_by_name=True)
+    user_first_name: str = Field(alias="userFirstName")
+    user_last_name: str = Field(alias="userLastName")
+
 class GameweekTeam(Team):
     model_config = ConfigDict(populate_by_name=True)
     team_id: int = Field(alias="teamId")
