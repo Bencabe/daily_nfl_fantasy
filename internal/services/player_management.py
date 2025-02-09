@@ -110,7 +110,7 @@ class PlayerManagementService:
             red_cards=self._stat_generator(stats.redcards, -3),
             yellow_cards=self._stat_generator(stats.yellowcards, -1),
             clean_sheet=self._stat_generator(clean_sheet, 4),
-            goals_conceded=self._stat_generator(stats.goals_conceded, -1),
+            goals_conceded=self._stat_generator(stats.goals_conceded, -0.5),
             saves=self._stat_generator(stats.saves, 0.5),
             penalties_saved=self._stat_generator(stats.penalties_saved, 5),
             penalties_committed=self._stat_generator(stats.penalties_committed, -2),

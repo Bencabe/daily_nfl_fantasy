@@ -1,0 +1,115 @@
+.infoContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    color: #333;
+  }
+  
+  .mainTitle {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 2rem;
+  }
+  
+  .basicPoints {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .positionContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .positionCard {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .positionCard h2 {
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .positionCard ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .positionCard li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .teamTactics {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 2rem;
+  }
+  
+  .tacticsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+  
+  .tacticsGrid h3 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+  }
+  
+  .tacticsGrid ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .tacticsGrid li {
+    padding: 0.5rem 0;
+    color: #666;
+  }
+
+  .tacticsInfo {
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  .tacticsInfo ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .tacticsFooter {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+  }
+  
+  @media (max-width: 768px) {
+    .infoContainer {
+      padding: 1rem;
+    }
+    
+    .positionContainer {
+      grid-template-columns: 1fr;
+    }
+    
+    .tacticsGrid {
+      grid-template-columns: 1fr;
+    }
+  }
+  

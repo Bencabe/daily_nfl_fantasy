@@ -12,6 +12,7 @@ import PlayerSelection from './components/PlayerSelection.tsx';
 import LeagueFixtures from './components/LeagueFixtures.tsx';
 import LeagueTable from './components/LeagueTable.tsx'
 import LeagueManagement from './components/LeagueManagement.tsx'
+import InfoPage from './components/InfoPage.tsx'
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -79,11 +80,6 @@ createRoot(document.getElementById('root')!).render(
             <Layout><Home /></Layout>
           </ProtectedRoute>
         } />
-        <Route path="/draft/:leagueId" element={
-          <ProtectedRoute>
-            <Layout><PlayerDraft /></Layout>
-          </ProtectedRoute>
-        } />
         <Route path="/player_select" element={
           <ProtectedRoute>
             <Layout><PlayerSelection /></Layout>
@@ -102,6 +98,16 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/league_management" element={
           <ProtectedRoute>
             <Layout><LeagueManagement /></Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="/draft/:leagueId" element={
+          <ProtectedRoute>
+            <Layout><PlayerDraft /></Layout>
+          </ProtectedRoute>
+        } />
+        <Route path="/info" element={
+          <ProtectedRoute>
+            <Layout><InfoPage /></Layout>
           </ProtectedRoute>
         } />
       </Routes>
