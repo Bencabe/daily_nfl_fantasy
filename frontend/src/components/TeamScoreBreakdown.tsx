@@ -45,24 +45,24 @@ const TeamScoreBreakdown = ({showScoreModal, setShowScoreModal, gameweekStats}: 
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>Pass Accuracy</td>
-                                    <td>{Math.round(gameweekStats.teamStats.passAccuracy)}%</td>
-                                    <td>&gt; 80%</td>
-                                    <td>{gameweekStats.teamStats.passAccuracy > 80 ? '+5' : '0'}</td>
-                                </tr>
-                                <tr>
-                                    <td>Total Passes</td>
-                                    <td>{gameweekStats.teamStats.totalPasses}</td>
-                                    <td>&gt; 350</td>
-                                    <td>{gameweekStats.teamStats.totalPasses > 350 ? '+5' : '-5'}</td>
-                                </tr>
-                                <tr>
-                                    <td>Times Dispossessed</td>
-                                    <td>{gameweekStats.teamStats.dispossesed}</td>
-                                    <td>&lt; 7</td>
-                                    <td>{gameweekStats.teamStats.dispossesed < 7 ? '+5' : '0'}</td>
-                                </tr>
+                            <tr>
+                                <td>Pass Accuracy</td>
+                                <td>{Math.round(gameweekStats.teamStats.passAccuracy)}%</td>
+                                <td>&gt; 80%</td>
+                                <td>{gameweekStats.teamStats.passAccuracy > 80 ? '+10' : '-5'}</td>
+                            </tr>
+                            <tr>
+                                <td>Total Passes</td>
+                                <td>{gameweekStats.teamStats.totalPasses}</td>
+                                <td>&gt; 350</td>
+                                <td>{gameweekStats.teamStats.totalPasses > 350 ? '+10' : '-5'}</td>
+                            </tr>
+                            <tr>
+                                <td>Times Dispossessed</td>
+                                <td>{gameweekStats.teamStats.dispossesed}</td>
+                                <td>&lt; 7</td>
+                                <td>{gameweekStats.teamStats.dispossesed < 7 ? '+10' : '-5'}</td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
@@ -80,24 +80,24 @@ const TeamScoreBreakdown = ({showScoreModal, setShowScoreModal, gameweekStats}: 
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>Tackles</td>
-                                    <td>{gameweekStats.teamStats.tackles}</td>
-                                    <td>&gt; 20</td>
-                                    <td>{gameweekStats.teamStats.tackles > 20 ? '+5' : '0'}</td>
-                                </tr>
-                                <tr>
-                                    <td>Interceptions</td>
-                                    <td>{gameweekStats.teamStats.interceptions}</td>
-                                    <td>&gt; 10</td>
-                                    <td>{gameweekStats.teamStats.interceptions > 10 ? '+5' : '0'}</td>
-                                </tr>
-                                <tr>
-                                    <td>Goals Conceded</td>
-                                    <td>{gameweekStats.teamStats.goalsConceded}</td>
-                                    <td>&lt; 10</td>
-                                    <td>{gameweekStats.teamStats.goalsConceded < 10 ? '+5' : '-5'}</td>
-                                </tr>
+                            <tr>
+                                <td>Tackles</td>
+                                <td>{gameweekStats.teamStats.tackles}</td>
+                                <td>&gt; 20</td>
+                                <td>{gameweekStats.teamStats.tackles > 20 ? '+10' : '-5'}</td>
+                            </tr>
+                            <tr>
+                                <td>Interceptions</td>
+                                <td>{gameweekStats.teamStats.interceptions}</td>
+                                <td>&gt; 10</td>
+                                <td>{gameweekStats.teamStats.interceptions > 10 ? '+10' : '-5'}</td>
+                            </tr>
+                            <tr>
+                                <td>Goals Conceded</td>
+                                <td>{gameweekStats.teamStats.goalsConceded}</td>
+                                <td>&lt; 10</td>
+                                <td>{gameweekStats.teamStats.goalsConceded < 10 ? '+10' : '-5'}</td>
+                            </tr>                   
                             </tbody>
                         </table>
                     </div>
@@ -115,25 +115,25 @@ const TeamScoreBreakdown = ({showScoreModal, setShowScoreModal, gameweekStats}: 
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>Goals + Assists</td>
-                                    <td>{gameweekStats.teamStats.goals + gameweekStats.teamStats.assists}</td>
-                                    <td>&gt; 6</td>
-                                    <td>{(gameweekStats.teamStats.goals + gameweekStats.teamStats.assists) > 6 ? '+5' : '0'}</td>
-                                </tr>
-                                <tr>
-                                    <td>Key Passes</td>
-                                    <td>{gameweekStats.teamStats.keyPasses}</td>
-                                    <td>&gt; 10</td>
-                                    <td>{gameweekStats.teamStats.keyPasses > 10 ? '+5' : '0'}</td>
-                                </tr>
-                                <tr>
-                                    <td>Offensive Success</td>
-                                    <td>GC: {gameweekStats.teamStats.goalsConceded} vs G+A: {gameweekStats.teamStats.goals + gameweekStats.teamStats.assists}</td>
-                                    <td>GC &lt; G+A</td>
-                                    <td>{gameweekStats.teamStats.goalsConceded < (gameweekStats.teamStats.goals + gameweekStats.teamStats.assists) ? '+5' : '-5'}</td>
-                                </tr>
-                            </tbody>
+                            <tr>
+                                <td>Goals + Assists</td>
+                                <td>{gameweekStats.teamStats.goals + gameweekStats.teamStats.assists}</td>
+                                <td>&gt; 6</td>
+                                <td>{(gameweekStats.teamStats.goals + gameweekStats.teamStats.assists) > 6 ? '+10' : '-5'}</td>
+                            </tr>
+                            <tr>
+                                <td>Key Passes</td>
+                                <td>{gameweekStats.teamStats.keyPasses}</td>
+                                <td>&gt; 10</td>
+                                <td>{gameweekStats.teamStats.keyPasses > 10 ? '+10' : '-5'}</td>
+                            </tr>
+                            <tr>
+                                <td>Offensive Success</td>
+                                <td>GC: {gameweekStats.teamStats.goalsConceded} vs G+A: {gameweekStats.teamStats.goals + gameweekStats.teamStats.assists}</td>
+                                <td>GC &lt; G+A</td>
+                                <td>{gameweekStats.teamStats.goalsConceded < (gameweekStats.teamStats.goals + gameweekStats.teamStats.assists) ? '+10' : '-5'}</td>
+                            </tr>
+                        </tbody>
                         </table>
                     </div>
                 )}
