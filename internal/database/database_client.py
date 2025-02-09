@@ -2,7 +2,7 @@ from constants import DatabaseCreds
 import mysql.connector
 import json
 import pandas as pd
-from models.db_models import Fixture, FootballTeam, Gameweek, GameweekPlayerStats, GameweekTeam, League, Player, LeagueTeam, LeagueFixture, TeamTactics
+from models.db_models import Fixture, FootballTeam, Gameweek, GameweekPlayerStats, GameweekTeam, League, LeagueTeamExtended, Player, LeagueTeam, LeagueFixture, TeamTactics
 from models.auth_models import PublicUser, User
 
 class DatabaseClient:
@@ -11,6 +11,7 @@ class DatabaseClient:
                                         password=DatabaseCreds.PASSWORD,
                                         host=DatabaseCreds.HOST,
                                         database=DatabaseCreds.DB_NAME)
+        self.con.autocommit = True
     
     def _create_league_team(self, league_team: dict[str, any]):
         return LeagueTeam(
@@ -206,18 +207,7 @@ class DatabaseClient:
         cursor.execute(query)
         league_team = cursor.fetchone()
         cursor.close()
-        return LeagueTeam(
-            team_id=league_team['team_id'],
-            league_id=league_team['league_id'],
-            user_id=league_team['user_id'],
-            team_name=league_team['team_name'],
-            goalkeepers=json.loads(league_team['goalkeepers']),
-            defenders=json.loads(league_team['defenders']),
-            midfielders=json.loads(league_team['midfielders']),
-            forwards=json.loads(league_team['forwards']),
-            subs=json.loads(league_team['subs']),
-            tactic=league_team['tactic']
-        )
+        return self._create_league_team(league_team)
 
     def update_team(
             self, 
@@ -265,6 +255,36 @@ class DatabaseClient:
             vals.append(self._create_league_team(val))
         cursor.close()
         return vals
+    
+    def get_extended_league_team(self, league_id: int) -> list[LeagueTeamExtended]:
+        query = """
+            SELECT user_league.*, users.first_name, users.last_name 
+            FROM user_league 
+            INNER JOIN users ON users.id = user_league.user_id
+            WHERE user_league.league_id = %s
+        """
+        cursor = self.con.cursor(dictionary=True)
+        cursor.execute(query, (league_id,))
+        teams: list[LeagueTeamExtended] = []
+        for team in cursor:
+            teams.append(
+                LeagueTeamExtended(
+                    team_id=team['team_id'],
+                    league_id=team['league_id'],
+                    user_id=team['user_id'],
+                    goalkeepers=json.loads(team['goalkeepers']),
+                    defenders=json.loads(team['defenders']),
+                    midfielders=json.loads(team['midfielders']),
+                    forwards=json.loads(team['forwards']),
+                    subs=json.loads(team['subs']),
+                    team_name=team['team_name'],
+                    tactic=team['tactic'],
+                    user_first_name=team['first_name'],
+                    user_last_name=team['last_name']
+                )
+            )
+        cursor.close()
+        return teams
     
     def get_user_teams(self, user_id: int) -> list[LeagueTeam]:
         query = ("SELECT * FROM user_league WHERE user_id = '{}'".format(user_id))

@@ -20,7 +20,6 @@ const PlayerDraft: React.FC = () => {
   const [leagueUsers, setLeagueUsers] = useState<User[]>([]);
   const [currentTurn, setCurrentTurn] = useState<number>();
   const [timeLeft, setTimeLeft] = useState<number>(TURN_TIME);
-  const [selectedPlayers, setSelectedPlayers] = useState<Player[]>([]);
   const [draftStarted, setDraftStarted] = useState(false);
   const [isDraftComplete, setIsDraftComplete] = useState<boolean>(false);
   const [leagueTeams, setLeagueTeams] = useState<LeagueTeams>({});
@@ -30,26 +29,6 @@ const PlayerDraft: React.FC = () => {
   const { user } = useGlobalContext();
   const api = getApi();
 
-  const updateSelectedPlayers = () => {
-    const allSelectedPlayers: Player[] = [];
-    Object.values(leagueTeams).forEach(team => {
-      const positionArrays = [
-        team.goalkeepers,
-        team.defenders,
-        team.midfielders,
-        team.forwards,
-        team.subs
-      ];
-      
-      positionArrays.forEach(positionArray => {
-        const playersInPosition = players.filter(player => 
-          positionArray.includes(player.id)
-        );
-        allSelectedPlayers.push(...playersInPosition);
-      });
-    });
-    setSelectedPlayers(allSelectedPlayers);
-  };
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -62,11 +41,11 @@ const PlayerDraft: React.FC = () => {
   },[])
 
   const canPickPlayer = (player: Player) => {
-    if (selectedPlayers.some(selectedPlayer => selectedPlayer.id === player.id)) {
-      return false;
-    }
-  
-    if (currentTurn !== user.id) {
+    const isPlayerSelected = Object.values(leagueTeams).some(team => {
+      return [...team.goalkeepers, ...team.defenders, ...team.midfielders, ...team.forwards, ...team.subs].includes(player.id)
+    });
+    
+    if (isPlayerSelected || currentTurn !== user.id) {
       return false;
     }
   
@@ -125,13 +104,11 @@ const PlayerDraft: React.FC = () => {
             setCurrentTurn(data.userTurn.id);
           }
           setLeagueTeams(data.leagueTeams || {});
-          updateSelectedPlayers()
           break;
         case 'turnChange':
           setCurrentTurn(data.nextUserId);
           setTimeLeft(TURN_TIME);
           setLeagueTeams(data.leagueTeams || {});
-          updateSelectedPlayers()
           break;
         case 'draftCompleted':
           setLeagueTeams(data.leagueTeams || {});
