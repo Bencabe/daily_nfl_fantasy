@@ -280,6 +280,7 @@ function Home() {
               gameweekStats={gameweekStats}
               handlePlayerMove={handlePlayerMove}
               teamEditable={teamEditable}
+              footballTeams={footballTeams}
             />
             <div className={styles.saveButtonContainer}>
               {validationMessage && (

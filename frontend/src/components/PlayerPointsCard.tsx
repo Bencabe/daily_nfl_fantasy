@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import styles from './PlayerPointsCard.module.css';
-import { BaseStat, GameweekStats, Player, PlayerScores, TeamTactics } from '../api/openapi';
+import { BaseStat, FootballTeam, GameweekStats, Player, PlayerScores, TeamTactics } from '../api/openapi';
 import FantasyEPLModal from './FantasyEPLModal';
 import { IoSwapHorizontal } from "react-icons/io5";
 import { convertStatName } from '../utils/helperFunctions';
+import { jerseyImages, glkJerseyImages } from '../utils/helperFunctions';
+
+
 
 const PlayerPointsCard = ({ 
   player, 
@@ -14,7 +17,8 @@ const PlayerPointsCard = ({
   onSwapComplete,
   cancelSwap,
   teamEditable,
-  gameweekStats
+  gameweekStats,
+  footballTeams
 }: { 
   player: Player; 
   stats: PlayerScores;
@@ -25,6 +29,7 @@ const PlayerPointsCard = ({
   cancelSwap: () => void;
   teamEditable: boolean;
   gameweekStats: GameweekStats;
+  footballTeams: FootballTeam[];
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [showPlayerStats, setShowPlayerStats] = useState(true);
@@ -35,6 +40,11 @@ const PlayerPointsCard = ({
       setShowModal(false);
     }
   };
+
+
+  const playerTeam = footballTeams.find(team => team.id === player.teamId);
+  const teamCode = playerTeam?.shortCode.substring(0, 3).toUpperCase() || 'AVA';
+  const jerseyImage = player.positionId == 1 ?  glkJerseyImages[teamCode] : jerseyImages[teamCode];
 
   const isBaseStat = (stat: number | BaseStat): stat is BaseStat => {
     return typeof stat === 'object' && 'points' in stat;
@@ -80,8 +90,15 @@ const PlayerPointsCard = ({
         className={`${styles.playerCard} ${isSwapTarget ? styles.swapTarget : ''}`} 
         onClick={handleCardClick}
       >
-        <div>{getPlayerName(player.displayName)}</div>
-        <div>{Object.values(stats.fixtureStats || {})?.at(0)?.playerStats?.totalScore || 0} pts</div>
+        <img 
+          src={jerseyImage} 
+          alt="Team Jersey" 
+          className={styles.jerseyImage} 
+        />
+        <div className={styles.playerInfo}>
+          <div>{getPlayerName(player.displayName)}</div>
+          <div>{Object.values(stats.fixtureStats || {})?.at(0)?.playerStats?.totalScore || 0} pts</div>
+        </div>
       </div>
       
       <FantasyEPLModal isOpen={showModal} onClose={() => setShowModal(false)}>

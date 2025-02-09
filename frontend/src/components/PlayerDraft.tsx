@@ -134,7 +134,6 @@ const PlayerDraft: React.FC = () => {
           updateSelectedPlayers()
           break;
         case 'draftCompleted':
-          console.log('Draft completed!');
           setLeagueTeams(data.leagueTeams || {});
           setIsDraftComplete(true);
       }

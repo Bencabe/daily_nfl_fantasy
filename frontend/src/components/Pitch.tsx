@@ -1,18 +1,20 @@
 import { useState } from 'react';
 import { GameweekStats } from "../api/openapi/models/GameweekStats";
-import { Player } from "../api/openapi/models/Player";
 import styles from "./Pitch.module.css";
 import footballPitch from "../assets/football_pitch_2.jpeg";
 import PlayerPointsCard from './PlayerPointsCard';
+import { FootballTeam, Player } from '../api/openapi';
 
 const PitchVisualization = ({ 
   gameweekStats, 
   handlePlayerMove,
-  teamEditable
+  teamEditable,
+  footballTeams
 }: { 
   gameweekStats: GameweekStats,
   handlePlayerMove: (playerId: number, isBenched: boolean) => void 
-  teamEditable: boolean
+  teamEditable: boolean,
+  footballTeams: FootballTeam[]
 }) => {
   const [swapMode, setSwapMode] = useState<Player | undefined>(undefined);
 
@@ -71,6 +73,7 @@ const PitchVisualization = ({
                 cancelSwap={cancelSwap}
                 teamEditable={teamEditable}
                 gameweekStats={gameweekStats}
+                footballTeams={footballTeams}
               />
             ))}
           </div>
@@ -89,6 +92,7 @@ const PitchVisualization = ({
               cancelSwap={cancelSwap}
               teamEditable={teamEditable}
               gameweekStats={gameweekStats}
+              footballTeams={footballTeams}
             />
           ))}
         </div>
